@@ -405,7 +405,16 @@ let S = {
 /* ══════════════════════════════
    DATE & WEEK HELPERS
 ══════════════════════════════ */
-const WW = 64, TLW = 204;
+let WW = 64;
+const TLW = 204, WW_DEFAULT = 64, WW_MIN = 50, WW_FILL_THRESHOLD = 12;
+
+function calcWW() {
+  const tw = totalWeeks();
+  if (tw > WW_FILL_THRESHOLD) return WW_DEFAULT;
+  const sbW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sb')) || 288;
+  const available = window.innerWidth - sbW - TLW - 4;
+  return Math.max(WW_MIN, Math.floor(available / tw));
+}
 const BAR_H = 34, LANE_PAD = 10, LANE_GAP = 6;
 
 function parseDate(s) {
@@ -481,6 +490,9 @@ function svgIcon(key, size=14, cls='') {
    RENDER
 ══════════════════════════════ */
 function render(noSave = false) {
+  WW = calcWW();
+  document.documentElement.style.setProperty('--ww', WW + 'px');
+
   const ta = document.querySelector('.tl-area');
   const sl = ta ? ta.scrollLeft : 0;
   const st = ta ? ta.scrollTop  : 0;
@@ -1795,6 +1807,15 @@ function loadState() {
 loadTheme();
 if (!loadFromHash()) loadState();
 render();
+
+/* Re-calc WW when window resizes (only matters for fill-mode ≤12 weeks) */
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    if (totalWeeks() <= WW_FILL_THRESHOLD) render(true);
+  }, 150);
+});
 </script>
 </body>
 </html>
