@@ -63,6 +63,30 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .btn{padding:6px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-gold{background:var(--gold);color:#080808}.btn-gold:hover{background:var(--goldL)}
 .btn-ghost{background:transparent;border:1px solid var(--bd2);color:var(--txt2)}.btn-ghost:hover{color:var(--txt);border-color:var(--bd3)}
+/* Add-new dropdown */
+.btn-dd{position:relative}
+.add-dd-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:5px;min-width:164px;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;animation:fdin .1s ease}
+.add-dd-menu.open{display:block}
+.add-dd-item{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;font-size:13px;font-weight:500;color:var(--txt2);background:none;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;transition:all .1s;text-align:left;white-space:nowrap}
+.add-dd-item:hover{background:var(--s2);color:var(--txt)}
+/* Title edit pencil */
+.hdr-title-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0}
+.hdr-title-wrap:hover .hdr-title{color:var(--gold)}
+.hdr-title-wrap:hover .edit-pen{opacity:1}
+.edit-pen{opacity:0;transition:opacity .15s;flex-shrink:0;color:var(--txt3)}
+/* Form validation shake */
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.fi.err{border-color:var(--red)!important;animation:shake .35s ease}
+/* Phase stub sticky */
+.ph-stub{position:sticky;left:0;z-index:14}
+/* Phase add button with text */
+.ph-add-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r);font-size:12px;font-weight:500;color:var(--txt2);background:transparent;border:1px dashed var(--bd2);cursor:pointer;font-family:inherit;transition:all .15s}
+.ph-add-btn:hover{color:var(--gold);border-color:var(--gold);background:var(--goldB)}
+/* Team row label clickable */
+.trl{cursor:pointer!important}
+.trl:hover{background:var(--s2)!important}
+/* Week stub sticky */
+.wk-stub{position:sticky;left:0;z-index:14;background:var(--s2)}
 
 /* ── LAYOUT ── */
 .body{height:calc(100vh - var(--hdr));display:flex;overflow:hidden}
@@ -118,13 +142,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .tl-hdrs{position:sticky;top:0;z-index:15;background:var(--bg)}
 
 /* Phase row */
-.ph-row{display:flex;height:52px;border-bottom:1px solid var(--bd)}
+.ph-row{display:flex;height:72px;border-bottom:1px solid var(--bd)}
 .ph-stub{width:var(--tlw);flex-shrink:0;border-right:1px solid var(--bd);background:var(--s1);display:flex;align-items:center;padding:0 12px;gap:6px}
 .ph-stub-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt2)}
 .ico-btn{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:16px;padding:0;line-height:1;transition:color .15s;display:inline-flex;align-items:center}
 .ico-btn:hover{color:var(--gold)}
 .ph-cells{display:flex}
-.ph-cell{height:52px;position:relative;display:flex;align-items:stretch;border-right:2px solid var(--bg);overflow:hidden;user-select:none;transition:filter .15s}
+.ph-cell{height:72px;position:relative;display:flex;align-items:stretch;border-right:2px solid var(--bg);overflow:hidden;user-select:none;transition:filter .15s}
 .ph-cell:not(.ph-gap):hover{filter:brightness(1.12)}
 .ph-gap{background:var(--s1);border-right:1px solid var(--bd);cursor:default}
 .ph-gap:hover{filter:none}
@@ -271,8 +295,18 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .share-copy:hover{background:var(--goldL)}
 .share-copy.copied{background:var(--grn);color:#fff}
 /* ── WEEK PICKER ── */
-.wkp{user-select:none;margin-top:2px}
-.wkp-hint{font-size:12px;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:5px;min-height:18px}
+.wkp{user-select:none;margin-top:4px}
+/* Dual date fields */
+.wkp-date-row{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:end;margin-bottom:14px}
+.wkp-date-field{padding:9px 11px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--s2);cursor:pointer;transition:all .15s}
+.wkp-date-field:hover{border-color:var(--bd3)}
+.wkp-date-field.active{border-color:var(--gold);background:var(--goldB)}
+.wkp-date-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--txt3);display:block;margin-bottom:5px}
+.wkp-date-field.active .wkp-date-lbl{color:var(--gold)}
+.wkp-date-inp{background:transparent;border:none;outline:none;font-size:14px;font-weight:500;color:var(--txt);font-family:inherit;width:100%;cursor:pointer}
+.wkp-date-inp::placeholder{color:var(--txt3);font-weight:400;font-size:13px}
+.wkp-date-arrow{color:var(--txt3);font-size:18px;display:flex;align-items:center;padding-bottom:10px}
+/* Month nav */
 .wkp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .wkp-nav-btn{background:none;border:1px solid var(--bd2);border-radius:var(--r);color:var(--txt2);cursor:pointer;padding:4px 12px;font-size:15px;font-family:inherit;transition:all .15s;line-height:1}
 .wkp-nav-btn:hover{color:var(--txt);border-color:var(--bd3)}
@@ -285,32 +319,24 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .wkp-mo-cell.cur{background:var(--goldD);color:var(--gold);border-color:var(--gold)}
 .wkp-yr-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .wkp-yr-lbl{font-size:15px;font-weight:700;color:var(--txt)}
-/* Manual date input */
-.wkp-manual{margin-top:10px;display:flex;gap:6px;align-items:center}
-.wkp-manual-inp{flex:1;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 10px;font-size:12px;color:var(--txt2);font-family:inherit;outline:none;transition:border-color .15s}
-.wkp-manual-inp:focus{border-color:var(--gold);color:var(--txt)}
-.wkp-manual-inp::placeholder{color:var(--txt3)}
-.wkp-manual-lbl{font-size:11px;color:var(--txt3);white-space:nowrap}
+/* Calendar grid */
 .wkp-head{display:grid;grid-template-columns:32px repeat(7,1fr);margin-bottom:2px}
 .wkp-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);text-align:center;padding:2px 0}
 .wkp-row{display:grid;grid-template-columns:32px repeat(7,1fr);border-radius:5px;cursor:pointer;transition:background .1s;margin:1px 0}
 .wkp-row:hover{background:var(--s3)}
-.wkp-wn{font-size:10px;font-weight:600;color:var(--txt3);display:flex;align-items:center;justify-content:flex-start;padding-left:2px;transition:color .1s}
+.wkp-wn{font-size:10px;font-weight:600;color:var(--txt3);display:flex;align-items:center;padding-left:2px;transition:color .1s}
 .wkp-day{font-size:13px;color:var(--txt2);text-align:center;padding:7px 0;line-height:1;transition:all .1s}
 .wkp-day.out{opacity:.3}
 .wkp-day.today{color:var(--gold);font-weight:700}
-/* Selected range */
 .wkp-row.w-start,.wkp-row.w-end{background:var(--goldD)}
 .wkp-row.w-start .wkp-wn,.wkp-row.w-end .wkp-wn{color:var(--gold);font-weight:700}
 .wkp-row.w-start .wkp-day,.wkp-row.w-end .wkp-day{color:var(--txt);font-weight:500}
 .wkp-row.w-start{border-left:3px solid var(--gold)}
 .wkp-row.w-end{border-right:3px solid var(--gold)}
 .wkp-row.in-range{background:var(--goldB)}
-.wkp-row.in-range .wkp-day{color:var(--txt2)}
-/* Hover preview */
 .wkp-row.hov-range{background:rgba(208,160,82,.05)}
 .wkp-row.hov-end{background:var(--goldB);border-right:2px dashed var(--gold)}
-/* Footer */
+/* Summary strip */
 .wkp-footer{margin-top:12px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r)}
 .wkp-f1{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
 .wkp-f2{font-size:12px;color:var(--txt2)}
@@ -452,13 +478,18 @@ function fmtWkpDate(date) {
   return `${String(date.getDate()).padStart(2,'0')} ${mo[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+function fmtInput(date) {
+  if (!date) return '';
+  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+}
+
 function buildWkPicker() {
   const { yr, mo, startMon, endMon, step } = wkp;
   const today = new Date(); today.setHours(0,0,0,0);
   const startTs = startMon ? startMon.getTime() : null;
   const endTs   = endMon   ? endMon.getTime()   : null;
 
-  // Weeks to render: from Monday of week containing 1st, until we've covered all days of month
+  // Calendar rows
   let cursor = wkpMonday(new Date(yr, mo, 1));
   const lastDay = new Date(yr, mo + 1, 0);
   const weeks = [];
@@ -467,41 +498,37 @@ function buildWkPicker() {
     const days = Array.from({length:7}, () => { const d = new Date(cursor); cursor.setDate(cursor.getDate()+1); return d; });
     weeks.push({mon, days});
   }
-
   const rows = weeks.map(({mon, days}) => {
     const monTs = mon.getTime();
     let cls = 'wkp-row';
     if (startTs && monTs === startTs) cls += ' w-start';
     if (endTs   && monTs === endTs)   cls += ' w-end';
     if (startTs && endTs && monTs > startTs && monTs < endTs) cls += ' in-range';
-    const wn = isoWeek(mon);
     const dayCells = days.map(d => {
       let dc = 'wkp-day';
       if (d.getMonth() !== mo) dc += ' out';
       if (d.getTime() === today.getTime()) dc += ' today';
       return `<span class="${dc}">${d.getDate()}</span>`;
     }).join('');
-    return `<div class="${cls}" data-wmon="${dateStrYMD(mon)}"><span class="wkp-wn">W${wn}</span>${dayCells}</div>`;
+    return `<div class="${cls}" data-wmon="${dateStrYMD(mon)}"><span class="wkp-wn">W${isoWeek(mon)}</span>${dayCells}</div>`;
   }).join('');
 
-  // Footer
+  // Summary footer
   let footer = '';
   if (startTs && endTs) {
     const totalWks = Math.round((endTs - startTs) / (7*86400000)) + 1;
-    const endSun = new Date(endTs + 6*86400000);
     footer = `<div class="wkp-footer">
       <div class="wkp-f1">W${isoWeek(startMon)} → W${isoWeek(endMon)} · ${totalWks} tuần</div>
-      <div class="wkp-f2">${fmtWkpDate(startMon)} – ${fmtWkpDate(endSun)}</div>
+      <div class="wkp-f2">${fmtWkpDate(startMon)} – ${fmtWkpDate(new Date(endTs + 6*86400000))}</div>
     </div>`;
-  } else if (startTs) {
-    footer = `<div class="wkp-footer"><div class="wkp-f1" style="color:var(--txt2)">W${isoWeek(startMon)} chọn xong · Tiếp theo: chọn tuần kết thúc</div></div>`;
   }
 
-  const hint = step === 'start' ? 'Chọn tuần bắt đầu' : 'Chọn tuần kết thúc';
-  const MO_ABBR = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  // Start/end value to show in date fields
+  const startVal = startMon ? fmtInput(startMon) : '';
+  const endVal   = endMon   ? fmtInput(new Date(endTs + 6*86400000)) : '';
 
-  // Month/year selector view
-  const monthSelBody = wkp.showMonthSel ? `
+  const MO_ABBR = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const calBody = wkp.showMonthSel ? `
     <div class="wkp-yr-nav">
       <button class="wkp-nav-btn" id="wkp-yr-prev">‹</button>
       <span class="wkp-yr-lbl">${yr}</span>
@@ -512,20 +539,26 @@ function buildWkPicker() {
     </div>` : `
     <div class="wkp-head"><span></span>${WKP_DAYS.map(d=>`<span>${d}</span>`).join('')}</div>
     <div id="wkp-rows">${rows}</div>
-    ${footer}
-    <div class="wkp-manual">
-      <span class="wkp-manual-lbl">Nhập ngày:</span>
-      <input class="wkp-manual-inp" id="wkp-manual" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off"/>
-    </div>`;
+    ${footer}`;
 
   return `<div class="wkp">
-    <div class="wkp-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>${hint}</div>
+    <div class="wkp-date-row">
+      <div class="wkp-date-field${step==='start'?' active':''}" id="wkp-field-start">
+        <span class="wkp-date-lbl">Bắt đầu</span>
+        <input class="wkp-date-inp" id="wkp-inp-start" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" value="${startVal}"/>
+      </div>
+      <div class="wkp-date-arrow">→</div>
+      <div class="wkp-date-field${step==='end'?' active':''}" id="wkp-field-end">
+        <span class="wkp-date-lbl">Kết thúc</span>
+        <input class="wkp-date-inp" id="wkp-inp-end" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" value="${endVal}"/>
+      </div>
+    </div>
     <div class="wkp-nav">
       ${wkp.showMonthSel ? '<span></span>' : `<button class="wkp-nav-btn" id="wkp-prev">‹</button>`}
       <span class="wkp-nav-lbl" id="wkp-mo-lbl">${WKP_MONTHS[mo]} ${yr}</span>
       ${wkp.showMonthSel ? '<span></span>' : `<button class="wkp-nav-btn" id="wkp-next">›</button>`}
     </div>
-    ${monthSelBody}
+    ${calBody}
   </div>`;
 }
 
@@ -540,10 +573,10 @@ function wkpClick(monStr) {
   const mon = parseDate(monStr);
   if (wkp.step === 'start') {
     wkp.startMon = mon;
-    wkp.endMon = null;
+    if (!wkp.endMon || mon.getTime() >= wkp.endMon.getTime()) wkp.endMon = null;
     wkp.step = 'end';
   } else {
-    if (mon.getTime() < wkp.startMon.getTime()) {
+    if (wkp.startMon && mon.getTime() < wkp.startMon.getTime()) {
       wkp.endMon = new Date(wkp.startMon); wkp.startMon = mon;
     } else {
       wkp.endMon = mon;
@@ -563,25 +596,51 @@ function wkpRefresh() {
 }
 
 function bindWkPickerEvents() {
-  // Month/year label → toggle month selector
-  q('#wkp-mo-lbl')?.addEventListener('click', () => {
-    wkp.showMonthSel = !wkp.showMonthSel;
-    wkpRefresh();
-  });
-  // Month selector cells
+  // Month label → toggle month selector
+  q('#wkp-mo-lbl')?.addEventListener('click', () => { wkp.showMonthSel = !wkp.showMonthSel; wkpRefresh(); });
+  // Month cells + year nav
   qAll('.wkp-mo-cell').forEach(cell => {
-    cell.addEventListener('click', () => {
-      wkp.mo = +cell.dataset.wmo;
-      wkp.showMonthSel = false;
+    cell.addEventListener('click', () => { wkp.mo = +cell.dataset.wmo; wkp.showMonthSel = false; wkpRefresh(); });
+  });
+  q('#wkp-yr-prev')?.addEventListener('click', () => { wkp.yr--; wkpRefresh(); });
+  q('#wkp-yr-next')?.addEventListener('click', () => { wkp.yr++; wkpRefresh(); });
+  // Prev/next month
+  q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
+  q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
+
+  // Date field clicks → activate that field
+  q('#wkp-field-start')?.addEventListener('click', () => { wkp.step = 'start'; wkpRefresh(); q('#wkp-inp-start')?.focus(); });
+  q('#wkp-field-end')?.addEventListener('click',   () => { wkp.step = 'end';   wkpRefresh(); q('#wkp-inp-end')?.focus(); });
+
+  // Manual date inputs
+  ['start','end'].forEach(side => {
+    const inp = q(`#wkp-inp-${side}`);
+    if (!inp) return;
+    inp.addEventListener('focus', () => { wkp.step = side; wkpRefresh(); q(`#wkp-inp-${side}`)?.focus(); });
+    inp.addEventListener('input', () => {
+      let v = inp.value.replace(/\D/g,'');
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+      inp.value = v;
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== 'Tab') return;
+      const parts = inp.value.trim().split('/');
+      if (parts.length !== 3) return;
+      const [d, m, y] = parts.map(Number);
+      if (!d || !m || !y || y < 2000 || y > 2099) return;
+      const date = new Date(y, m - 1, d);
+      if (isNaN(date.getTime())) return;
+      const mon = wkpMonday(date);
+      wkp.yr = mon.getFullYear();
+      wkp.mo = mon.getMonth();
+      if (side === 'start') { wkp.startMon = mon; wkp.step = 'end'; }
+      else                  { wkp.endMon   = mon; wkp.step = 'start'; }
+      e.preventDefault();
       wkpRefresh();
     });
   });
-  // Year nav inside month selector
-  q('#wkp-yr-prev')?.addEventListener('click', () => { wkp.yr--; wkpRefresh(); });
-  q('#wkp-yr-next')?.addEventListener('click', () => { wkp.yr++; wkpRefresh(); });
-  // Month prev/next arrows
-  q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
-  q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
+
   // Week row click + hover preview
   qAll('.wkp-row').forEach(row => {
     row.addEventListener('click', () => wkpClick(row.dataset.wmon));
@@ -599,33 +658,6 @@ function bindWkPickerEvents() {
   q('#wkp-rows')?.addEventListener('mouseleave', () => {
     qAll('.wkp-row').forEach(r => r.classList.remove('hov-range','hov-end'));
   });
-  // Manual date input — DD/MM/YYYY → navigate + select week
-  const manualInp = q('#wkp-manual');
-  if (manualInp) {
-    manualInp.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return;
-      const val = manualInp.value.trim();
-      const parts = val.split('/');
-      if (parts.length !== 3) return;
-      const [d, m, y] = parts.map(Number);
-      if (!d || !m || !y || y < 2000 || y > 2099) return;
-      const date = new Date(y, m - 1, d);
-      if (isNaN(date.getTime())) return;
-      const mon = wkpMonday(date);
-      wkp.yr = mon.getFullYear();
-      wkp.mo = mon.getMonth();
-      manualInp.value = '';
-      // Auto-select as start or end
-      wkpClick(dateStrYMD(mon));
-    });
-    // Auto-format: insert / after DD and MM
-    manualInp.addEventListener('input', () => {
-      let v = manualInp.value.replace(/\D/g,'');
-      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
-      if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
-      manualInp.value = v;
-    });
-  }
 }
 
 /* ══════════════════════════════
@@ -782,7 +814,10 @@ ${ro ? `<div class="ro-banner">
   <div class="logo">${LOGO_IMG}</div>
   <div class="vsep"></div>
   <div class="hdr-info">
-    <div class="hdr-title" ${ro?'':'id="hdr-title-click"'}>${esc(S.cfg.title)}</div>
+    <div class="${ro?'':'hdr-title-wrap'}" ${ro?'':'id="hdr-title-click"'}>
+      <div class="hdr-title">${esc(S.cfg.title)}</div>
+      ${ro?'':` <svg class="edit-pen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`}
+    </div>
     <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
   </div>
   <div class="hdr-stats">
@@ -794,9 +829,18 @@ ${ro ? `<div class="ro-banner">
   <div class="hdr-btns">
     ${ro ? '' : `
     <button class="btn btn-ghost" id="btn-cfg">${svgIcon('settings',13)} Cài đặt</button>
-    <button class="btn btn-ghost" id="btn-add-task">${svgIcon('edit',13)} Task</button>
-    <button class="btn btn-ghost" id="btn-add-team">${svgIcon('users',13)} Nhóm</button>
-    <button class="btn btn-ghost" id="btn-add-phase">${svgIcon('map',13)} Phase</button>
+    <div class="btn-dd">
+      <button class="btn btn-ghost" id="btn-add-new">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Thêm mới
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="add-dd-menu" id="add-new-menu">
+        <button class="add-dd-item" data-add="phase">${svgIcon('map',13)} Phase</button>
+        <button class="add-dd-item" data-add="add-task">${svgIcon('edit',13)} Task</button>
+        <button class="add-dd-item" data-add="add-team">${svgIcon('users',13)} Nhóm</button>
+      </div>
+    </div>
     <button class="btn btn-gold" id="btn-export">${svgIcon('package',13)} Export PDF</button>
     <button class="btn btn-ghost" id="btn-share" style="border-color:var(--gold);color:var(--gold)">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -1009,8 +1053,10 @@ function buildTimeline() {
     <div class="tl-hdrs">
       <div class="ph-row">
         <div class="ph-stub">
-          <span class="ph-stub-lbl">Phases</span>
-          <button class="ico-btn" id="btn-add-phase2" title="Thêm phase" aria-label="Thêm phase mới">＋</button>
+          <button class="ph-add-btn" id="btn-add-phase2" aria-label="Thêm phase mới">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Thêm Phase
+          </button>
         </div>
         <div class="ph-cells">${phCells}</div>
       </div>
@@ -1132,7 +1178,7 @@ function buildTeamRow(tm, tw, twFrac) {
 
   return `
 <div class="tm-row" data-team-id="${tm.id}" style="min-height:${rowH}px">
-  <div class="trl" data-team-ctx="${tm.id}" style="min-height:${rowH}px">
+  <div class="trl" data-team-id="${tm.id}" data-team-ctx="${tm.id}" style="min-height:${rowH}px">
     <div class="tm-ico" style="color:${tm.color||'var(--gold)'}">${svgIcon(tm.icon||'layers',15)}</div>
     <span class="tm-nm">${esc(tm.name)}</span>
   </div>
@@ -1316,13 +1362,34 @@ function bind() {
   q('#hdr-title-click')?.addEventListener('click', () => openModal('cfg'));
   q('#btn-cfg')?.addEventListener('click', () => openModal('cfg'));
   q('#btn-share')?.addEventListener('click', () => openModal('share'));
-  q('#btn-add-task')?.addEventListener('click', () => openModal('add-task'));
-  q('#btn-add-team')?.addEventListener('click', () => openModal('add-team'));
-  q('#btn-add-phase')?.addEventListener('click', () => openModal('add-phase'));
   q('#btn-add-phase2')?.addEventListener('click', () => openModal('add-phase'));
   q('#add-tc-btn')?.addEventListener('click', () => openModal('add-task'));
   q('#add-tm-btn2')?.addEventListener('click', () => openModal('add-team'));
   q('#btn-export')?.addEventListener('click', exportPDF);
+
+  /* Add-new dropdown */
+  q('#btn-add-new')?.addEventListener('click', e => {
+    e.stopPropagation();
+    q('#add-new-menu')?.classList.toggle('open');
+  });
+  qAll('.add-dd-item').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      q('#add-new-menu')?.classList.remove('open');
+      const type = btn.dataset.add === 'phase' ? 'add-phase' : btn.dataset.add;
+      openModal(type);
+    });
+  });
+  document.addEventListener('click', () => q('#add-new-menu')?.classList.remove('open'));
+
+  /* Team label click → edit */
+  qAll('.trl[data-team-id]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-action]')) return; // let ctx menu handle
+      const tm = S.teams.find(t => t.id === +el.dataset.teamId);
+      if (tm) openModal('edit-team', tm);
+    });
+  });
 
   /* Tag filter pills click */
   qAll('.tf[data-tag]').forEach(el => {
@@ -1761,13 +1828,21 @@ function saveCfg() {
   closeModal();
 }
 
+function shakeErr(el) {
+  if (!el) return;
+  el.classList.remove('err');
+  void el.offsetWidth; // reflow to restart animation
+  el.classList.add('err');
+  el.focus();
+}
+
 function saveTask() {
   const name   = q('#m-name')?.value.trim();
   const teamId = +q('#m-team')?.value || null;
   const dur    = Math.max(1, +q('#m-dur')?.value || 2);
   const phaseId= +q('#m-phase')?.value || null;
   const tags   = [...qAll('.to.sel')].map(el => el.dataset.tag);
-  if (!name) return;
+  if (!name) { shakeErr(q('#m-name')); return; }
 
   if (S.ui.modal.type === 'edit-task') {
     const t = taskById(S.ui.modal.data.id);
@@ -1782,7 +1857,7 @@ function saveTeam() {
   const name  = q('#m-tm-name')?.value.trim();
   const icon  = q('.ig.sel')?.dataset.icon || 'layers';
   const color = q('.co.sel')?.dataset.color || '#D0A052';
-  if (!name) return;
+  if (!name) { shakeErr(q('#m-tm-name')); return; }
 
   if (S.ui.modal.type === 'edit-team') {
     const tm = S.teams.find(t => t.id === S.ui.modal.data.id);
@@ -1798,7 +1873,8 @@ function savePhase() {
   const sw   = +q('#m-ph-s')?.value;
   const ew   = +q('#m-ph-e')?.value;
   const color= q('.co.sel')?.dataset.color || PHASE_COLORS[0];
-  if (!name || sw < 1 || ew < sw) return;
+  if (!name) { shakeErr(q('#m-ph-name')); return; }
+  if (sw < 1 || ew < sw) return;
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);
