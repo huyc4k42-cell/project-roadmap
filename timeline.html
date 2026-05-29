@@ -252,6 +252,24 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .ci svg{width:13px;height:13px;flex-shrink:0}
 .ci-sep{height:1px;background:var(--bd);margin:3px 5px}
 
+/* Readonly banner */
+.ro-banner{height:36px;background:var(--goldD);border-bottom:1px solid rgba(208,160,82,.3);display:flex;align-items:center;padding:0 18px;gap:10px;flex-shrink:0;font-size:12px;color:var(--gold)}
+.ro-banner svg{flex-shrink:0;opacity:.8}
+.ro-banner span{flex:1}
+.ro-link{font-size:12px;font-weight:500;padding:5px 12px;border-radius:var(--r);border:1px solid var(--gold);color:var(--gold);background:transparent;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;flex-shrink:0}
+.ro-link:hover{background:var(--goldD)}
+/* Readonly — disable interactive cursors */
+.readonly .tc{cursor:default!important}
+.readonly .tc:active{cursor:default!important}
+.readonly .tb{cursor:default!important}
+.readonly .ph-body{cursor:default!important}
+.readonly .tb-lh,.readonly .tb-rh,.readonly .ph-lh,.readonly .ph-rh{display:none!important}
+/* Share modal URL box */
+.share-url-wrap{display:flex;gap:6px;margin-top:6px}
+.share-url{flex:1;background:var(--s3);border:1px solid var(--bd2);border-radius:var(--r);padding:9px 11px;font-size:12px;color:var(--txt2);font-family:inherit;outline:none;cursor:text;word-break:break-all}
+.share-copy{padding:9px 14px;border-radius:var(--r);background:var(--gold);color:#080808;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.share-copy:hover{background:var(--goldL)}
+.share-copy.copied{background:var(--grn);color:#fff}
 /* export overlay */
 .exp-ol{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:10px;color:var(--txt2);font-size:12px}
 .exp-spin{width:26px;height:26px;border:2px solid var(--bd2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
@@ -262,6 +280,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 <div id="app"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <script>
 /* ══════════════════════════════
    LOGO (embedded SVG)
@@ -325,6 +344,38 @@ function loadTheme() {
 }
 
 /* ══════════════════════════════
+   SHARE (URL-encoded state)
+══════════════════════════════ */
+const SHARE_PREFIX = '#v1=';
+
+function buildShareURL() {
+  const data = {
+    cfg: S.cfg, phases: S.phases, teams: S.teams,
+    tasks: S.tasks, tags: S.tags, _nextId: S._nextId,
+  };
+  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+  return location.origin + location.pathname + SHARE_PREFIX + compressed;
+}
+
+function loadFromHash() {
+  const hash = location.hash;
+  if (!hash.startsWith(SHARE_PREFIX)) return false;
+  try {
+    const json = LZString.decompressFromEncodedURIComponent(hash.slice(SHARE_PREFIX.length));
+    if (!json) return false;
+    const d = JSON.parse(json);
+    if (d.cfg)     S.cfg     = {...S.cfg, ...d.cfg};
+    if (d.phases)  S.phases  = d.phases;
+    if (d.teams)   S.teams   = d.teams;
+    if (d.tasks)   S.tasks   = d.tasks;
+    if (d.tags)    S.tags    = d.tags;
+    if (d._nextId) S._nextId = d._nextId;
+    S.ui.readonly = true;
+    return true;
+  } catch(e) { return false; }
+}
+
+/* ══════════════════════════════
    STATE
 ══════════════════════════════ */
 let S = {
@@ -344,8 +395,9 @@ let S = {
     ctx:        null,
     dragData:   null,
     resizeData: null,
-    phaseResize: null, // { phaseId, side:'left'|'right', startX, origStart, origEnd, origAll }
+    phaseResize: null,
     phaseDragId: null,
+    readonly:   false,
   },
   _nextId: 1,
 };
@@ -452,12 +504,21 @@ function buildApp() {
   const unsched = total - sched;
   const tw = totalWeeks();
 
+  const ro = S.ui.readonly;
   return `
+${ro ? `<div class="ro-banner">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+  <span>Bản xem — chỉ đọc, không thể chỉnh sửa</span>
+  <a class="ro-link" href="${location.origin + location.pathname}" target="_blank">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+    Tạo roadmap của bạn
+  </a>
+</div>` : ''}
 <div class="hdr">
   <div class="logo">${LOGO_IMG}</div>
   <div class="vsep"></div>
   <div class="hdr-info">
-    <div class="hdr-title" id="hdr-title-click">${esc(S.cfg.title)}</div>
+    <div class="hdr-title" ${ro?'':'id="hdr-title-click"'}>${esc(S.cfg.title)}</div>
     <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
   </div>
   <div class="hdr-stats">
@@ -467,14 +528,19 @@ function buildApp() {
     <div class="stat"><div class="stat-n" style="color:var(--txt2)">${tw}</div><div class="stat-l">Tuần</div></div>
   </div>
   <div class="hdr-btns">
-    <button class="btn btn-ghost" id="btn-cfg" title="Cài đặt ngày">${svgIcon('settings',13)} Cài đặt</button>
+    ${ro ? '' : `
+    <button class="btn btn-ghost" id="btn-cfg">${svgIcon('settings',13)} Cài đặt</button>
     <button class="btn btn-ghost" id="btn-add-task">${svgIcon('edit',13)} Task</button>
     <button class="btn btn-ghost" id="btn-add-team">${svgIcon('users',13)} Nhóm</button>
     <button class="btn btn-ghost" id="btn-add-phase">${svgIcon('map',13)} Phase</button>
     <button class="btn btn-gold" id="btn-export">${svgIcon('package',13)} Export PDF</button>
+    <button class="btn btn-ghost" id="btn-share" style="border-color:var(--gold);color:var(--gold)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share
+    </button>`}
   </div>
 </div>
-<div class="body">
+<div class="body ${ro ? 'readonly' : ''}">
   ${buildSidebar()}
   ${buildTimeline()}
 </div>
@@ -816,6 +882,25 @@ function buildTeamRow(tm, tw, twFrac) {
 function buildModal() {
   const {type, data} = S.ui.modal;
 
+  if (type === 'share') {
+    const url = buildShareURL();
+    return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="Chia sẻ Roadmap">
+      <h3><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Chia sẻ Roadmap</h3>
+      <p class="hlp" style="margin-bottom:10px">Người nhận xem được toàn bộ roadmap — chỉ đọc, không thể chỉnh sửa hay thấy dữ liệu cá nhân của bạn.</p>
+      <div class="fg"><label>Link chia sẻ</label>
+        <div class="share-url-wrap">
+          <input class="share-url" id="share-url-inp" readonly value="${url}"/>
+          <button class="share-copy" id="share-copy-btn">Sao chép</button>
+        </div>
+      </div>
+      <p class="hlp" style="margin-top:8px;font-size:11px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Data được mã hoá trực tiếp trong link — không lưu server. Link thay đổi mỗi lần bạn chỉnh sửa roadmap.
+      </p>
+      <div class="mdl-btns"><button class="bsm b-sec" id="m-cancel">Đóng</button></div>
+    </div></div>`;
+  }
+
   if (type === 'cfg') {
     const tw = totalWeeks();
     return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="Cài đặt Roadmap">
@@ -973,6 +1058,7 @@ function bind() {
   /* Header */
   q('#hdr-title-click')?.addEventListener('click', () => openModal('cfg'));
   q('#btn-cfg')?.addEventListener('click', () => openModal('cfg'));
+  q('#btn-share')?.addEventListener('click', () => openModal('share'));
   q('#btn-add-task')?.addEventListener('click', () => openModal('add-task'));
   q('#btn-add-team')?.addEventListener('click', () => openModal('add-team'));
   q('#btn-add-phase')?.addEventListener('click', () => openModal('add-phase'));
@@ -1347,6 +1433,20 @@ function bindModal() {
     closeModal();
   });
 
+  /* Share modal — copy link */
+  const copyBtn = q('#share-copy-btn');
+  const urlInp  = q('#share-url-inp');
+  if (copyBtn && urlInp) {
+    urlInp.addEventListener('click', () => urlInp.select());
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(urlInp.value).then(() => {
+        copyBtn.textContent = '✓ Đã sao chép';
+        copyBtn.classList.add('copied');
+        setTimeout(() => { copyBtn.textContent = 'Sao chép'; copyBtn.classList.remove('copied'); }, 2200);
+      }).catch(() => { urlInp.select(); document.execCommand('copy'); });
+    });
+  }
+
   /* Theme toggle buttons */
   qAll('[data-theme-set]').forEach(btn => {
     btn.addEventListener('click', () => setTheme(btn.dataset.themeSet));
@@ -1693,7 +1793,7 @@ function loadState() {
 })();
 
 loadTheme();
-loadState();
+if (!loadFromHash()) loadState();
 render();
 </script>
 </body>
