@@ -270,6 +270,37 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .share-copy{padding:9px 14px;border-radius:var(--r);background:var(--gold);color:#080808;border:none;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .share-copy:hover{background:var(--goldL)}
 .share-copy.copied{background:var(--grn);color:#fff}
+/* ── WEEK PICKER ── */
+.wkp{user-select:none;margin-top:2px}
+.wkp-hint{font-size:12px;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:5px;min-height:18px}
+.wkp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.wkp-nav-btn{background:none;border:1px solid var(--bd2);border-radius:var(--r);color:var(--txt2);cursor:pointer;padding:4px 12px;font-size:15px;font-family:inherit;transition:all .15s;line-height:1}
+.wkp-nav-btn:hover{color:var(--txt);border-color:var(--bd3)}
+.wkp-nav-lbl{font-size:14px;font-weight:600;color:var(--txt)}
+.wkp-head{display:grid;grid-template-columns:32px repeat(7,1fr);margin-bottom:2px}
+.wkp-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);text-align:center;padding:2px 0}
+.wkp-row{display:grid;grid-template-columns:32px repeat(7,1fr);border-radius:5px;cursor:pointer;transition:background .1s;margin:1px 0}
+.wkp-row:hover{background:var(--s3)}
+.wkp-wn{font-size:10px;font-weight:600;color:var(--txt3);display:flex;align-items:center;justify-content:flex-start;padding-left:2px;transition:color .1s}
+.wkp-day{font-size:13px;color:var(--txt2);text-align:center;padding:7px 0;line-height:1;transition:all .1s}
+.wkp-day.out{opacity:.3}
+.wkp-day.today{color:var(--gold);font-weight:700}
+/* Selected range */
+.wkp-row.w-start,.wkp-row.w-end{background:var(--goldD)}
+.wkp-row.w-start .wkp-wn,.wkp-row.w-end .wkp-wn{color:var(--gold);font-weight:700}
+.wkp-row.w-start .wkp-day,.wkp-row.w-end .wkp-day{color:var(--txt);font-weight:500}
+.wkp-row.w-start{border-left:3px solid var(--gold)}
+.wkp-row.w-end{border-right:3px solid var(--gold)}
+.wkp-row.in-range{background:var(--goldB)}
+.wkp-row.in-range .wkp-day{color:var(--txt2)}
+/* Hover preview */
+.wkp-row.hov-range{background:rgba(208,160,82,.05)}
+.wkp-row.hov-end{background:var(--goldB);border-right:2px dashed var(--gold)}
+/* Footer */
+.wkp-footer{margin-top:12px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r)}
+.wkp-f1{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
+.wkp-f2{font-size:12px;color:var(--txt2)}
+
 /* export overlay */
 .exp-ol{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:10px;color:var(--txt2);font-size:12px}
 .exp-spin{width:26px;height:26px;border:2px solid var(--bd2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
@@ -373,6 +404,122 @@ function loadFromHash() {
     S.ui.readonly = true;
     return true;
   } catch(e) { return false; }
+}
+
+/* ══════════════════════════════
+   WEEK PICKER
+══════════════════════════════ */
+let wkp = { yr:2025, mo:0, startMon:null, endMon:null, step:'start' };
+
+const WKP_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const WKP_DAYS = ['T2','T3','T4','T5','T6','T7','CN'];
+
+function wkpMonday(date) {
+  const d = new Date(date); d.setHours(0,0,0,0);
+  const dow = d.getDay();
+  d.setDate(d.getDate() + (dow === 0 ? -6 : 1 - dow));
+  return d;
+}
+
+function isoWeek(date) {
+  const d = new Date(date); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+  const jan4 = new Date(d.getFullYear(), 0, 4);
+  return 1 + Math.round(((d - jan4) / 86400000 - 3 + (jan4.getDay() + 6) % 7) / 7);
+}
+
+function dateStrYMD(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function fmtWkpDate(date) {
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${String(date.getDate()).padStart(2,'0')} ${mo[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function buildWkPicker() {
+  const { yr, mo, startMon, endMon, step } = wkp;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const startTs = startMon ? startMon.getTime() : null;
+  const endTs   = endMon   ? endMon.getTime()   : null;
+
+  // Weeks to render: from Monday of week containing 1st, until we've covered all days of month
+  let cursor = wkpMonday(new Date(yr, mo, 1));
+  const lastDay = new Date(yr, mo + 1, 0);
+  const weeks = [];
+  while (cursor <= lastDay) {
+    const mon = new Date(cursor);
+    const days = Array.from({length:7}, () => { const d = new Date(cursor); cursor.setDate(cursor.getDate()+1); return d; });
+    weeks.push({mon, days});
+  }
+
+  const rows = weeks.map(({mon, days}) => {
+    const monTs = mon.getTime();
+    let cls = 'wkp-row';
+    if (startTs && monTs === startTs) cls += ' w-start';
+    if (endTs   && monTs === endTs)   cls += ' w-end';
+    if (startTs && endTs && monTs > startTs && monTs < endTs) cls += ' in-range';
+    const wn = isoWeek(mon);
+    const dayCells = days.map(d => {
+      let dc = 'wkp-day';
+      if (d.getMonth() !== mo) dc += ' out';
+      if (d.getTime() === today.getTime()) dc += ' today';
+      return `<span class="${dc}">${d.getDate()}</span>`;
+    }).join('');
+    return `<div class="${cls}" data-wmon="${dateStrYMD(mon)}"><span class="wkp-wn">W${wn}</span>${dayCells}</div>`;
+  }).join('');
+
+  // Footer
+  let footer = '';
+  if (startTs && endTs) {
+    const totalWks = Math.round((endTs - startTs) / (7*86400000)) + 1;
+    const endSun = new Date(endTs + 6*86400000);
+    footer = `<div class="wkp-footer">
+      <div class="wkp-f1">W${isoWeek(startMon)} → W${isoWeek(endMon)} · ${totalWks} tuần</div>
+      <div class="wkp-f2">${fmtWkpDate(startMon)} – ${fmtWkpDate(endSun)}</div>
+    </div>`;
+  } else if (startTs) {
+    footer = `<div class="wkp-footer"><div class="wkp-f1" style="color:var(--txt2)">W${isoWeek(startMon)} chọn xong · Tiếp theo: chọn tuần kết thúc</div></div>`;
+  }
+
+  const hint = step === 'start' ? 'Chọn tuần bắt đầu' : 'Chọn tuần kết thúc';
+
+  return `<div class="wkp">
+    <div class="wkp-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>${hint}</div>
+    <div class="wkp-nav">
+      <button class="wkp-nav-btn" id="wkp-prev">‹</button>
+      <span class="wkp-nav-lbl">${WKP_MONTHS[mo]} ${yr}</span>
+      <button class="wkp-nav-btn" id="wkp-next">›</button>
+    </div>
+    <div class="wkp-head"><span></span>${WKP_DAYS.map(d=>`<span>${d}</span>`).join('')}</div>
+    <div id="wkp-rows">${rows}</div>
+    ${footer}
+  </div>`;
+}
+
+function wkpNav(dir) {
+  wkp.mo += dir;
+  if (wkp.mo > 11) { wkp.mo = 0; wkp.yr++; }
+  if (wkp.mo < 0)  { wkp.mo = 11; wkp.yr--; }
+  render();
+}
+
+function wkpClick(monStr) {
+  const mon = parseDate(monStr);
+  if (wkp.step === 'start') {
+    wkp.startMon = mon;
+    wkp.endMon = null;
+    wkp.step = 'end';
+  } else {
+    if (mon.getTime() < wkp.startMon.getTime()) {
+      wkp.endMon = new Date(wkp.startMon); wkp.startMon = mon;
+    } else {
+      wkp.endMon = mon;
+    }
+    wkp.step = 'start';
+  }
+  render();
 }
 
 /* ══════════════════════════════
@@ -913,20 +1060,13 @@ function buildModal() {
   }
 
   if (type === 'cfg') {
-    const tw = totalWeeks();
     return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="Cài đặt Roadmap">
       <h3>${svgIcon('settings',14)} Cài đặt Roadmap</h3>
       <div class="fg"><label>Tên dự án</label>
         <input class="fi" id="m-cfg-title" value="${esc(S.cfg.title)}"/></div>
       <div class="fg"><label>Subtitle</label>
         <input class="fi" id="m-cfg-sub" value="${esc(S.cfg.subtitle)}"/></div>
-      <div class="fg-row">
-        <div class="fg"><label>Ngày bắt đầu</label>
-          <input class="fi" type="date" id="m-cfg-s" value="${S.cfg.start}"/></div>
-        <div class="fg"><label>Ngày kết thúc</label>
-          <input class="fi" type="date" id="m-cfg-e" value="${S.cfg.end}"/></div>
-      </div>
-      <p class="hlp">Hiện có <strong>${tw}</strong> tuần (${S.cfg.start} → ${S.cfg.end})</p>
+      <div class="fg"><label>Thời gian Roadmap</label>${buildWkPicker()}</div>
       <div class="mdl-sep"></div>
       <div class="fg"><label>Giao diện</label>
         <div class="theme-btns">
@@ -1444,6 +1584,26 @@ function bindModal() {
     closeModal();
   });
 
+  /* Week picker */
+  q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
+  q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
+  qAll('.wkp-row').forEach(row => {
+    row.addEventListener('click', () => wkpClick(row.dataset.wmon));
+    row.addEventListener('mouseenter', () => {
+      if (wkp.step !== 'end' || !wkp.startMon) return;
+      const hovTs = parseDate(row.dataset.wmon).getTime();
+      const startTs = wkp.startMon.getTime();
+      qAll('.wkp-row').forEach(r => {
+        const rTs = parseDate(r.dataset.wmon).getTime();
+        r.classList.toggle('hov-range', rTs > startTs && rTs < hovTs);
+        r.classList.toggle('hov-end',   rTs === hovTs);
+      });
+    });
+  });
+  q('#wkp-rows')?.addEventListener('mouseleave', () => {
+    qAll('.wkp-row').forEach(r => r.classList.remove('hov-range','hov-end'));
+  });
+
   /* Share modal — copy link */
   const copyBtn = q('#share-copy-btn');
   const urlInp  = q('#share-url-inp');
@@ -1504,8 +1664,11 @@ function handleAction(action) {
 function saveCfg() {
   S.cfg.title    = q('#m-cfg-title')?.value.trim() || S.cfg.title;
   S.cfg.subtitle = q('#m-cfg-sub')?.value.trim() || '';
-  S.cfg.start    = q('#m-cfg-s')?.value || S.cfg.start;
-  S.cfg.end      = q('#m-cfg-e')?.value || S.cfg.end;
+  if (wkp.startMon && wkp.endMon) {
+    S.cfg.start = dateStrYMD(wkp.startMon);
+    const endSun = new Date(wkp.endMon); endSun.setDate(endSun.getDate() + 6);
+    S.cfg.end = dateStrYMD(endSun);
+  }
   closeModal();
 }
 
@@ -1582,6 +1745,14 @@ function delTag(name) {
 ══════════════════════════════ */
 function openModal(type, data=null) {
   S.ui.modal = {type, data};
+  if (type === 'cfg') {
+    const sm = wkpMonday(parseDate(S.cfg.start));
+    wkp.startMon = sm;
+    wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
+    wkp.yr  = sm.getFullYear();
+    wkp.mo  = sm.getMonth();
+    wkp.step = 'start';
+  }
   render();
 }
 
