@@ -502,7 +502,7 @@ function wkpNav(dir) {
   wkp.mo += dir;
   if (wkp.mo > 11) { wkp.mo = 0; wkp.yr++; }
   if (wkp.mo < 0)  { wkp.mo = 11; wkp.yr--; }
-  render();
+  wkpRefresh();
 }
 
 function wkpClick(monStr) {
@@ -519,7 +519,37 @@ function wkpClick(monStr) {
     }
     wkp.step = 'start';
   }
-  render();
+  wkpRefresh();
+}
+
+function wkpRefresh() {
+  const el = q('.wkp');
+  if (!el) { render(); return; }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildWkPicker();
+  el.replaceWith(tmp.firstElementChild);
+  bindWkPickerEvents();
+}
+
+function bindWkPickerEvents() {
+  q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
+  q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
+  qAll('.wkp-row').forEach(row => {
+    row.addEventListener('click', () => wkpClick(row.dataset.wmon));
+    row.addEventListener('mouseenter', () => {
+      if (wkp.step !== 'end' || !wkp.startMon) return;
+      const hovTs   = parseDate(row.dataset.wmon).getTime();
+      const startTs = wkp.startMon.getTime();
+      qAll('.wkp-row').forEach(r => {
+        const rTs = parseDate(r.dataset.wmon).getTime();
+        r.classList.toggle('hov-range', rTs > startTs && rTs < hovTs);
+        r.classList.toggle('hov-end',   rTs === hovTs);
+      });
+    });
+  });
+  q('#wkp-rows')?.addEventListener('mouseleave', () => {
+    qAll('.wkp-row').forEach(r => r.classList.remove('hov-range','hov-end'));
+  });
 }
 
 /* ══════════════════════════════
@@ -1585,24 +1615,7 @@ function bindModal() {
   });
 
   /* Week picker */
-  q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
-  q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
-  qAll('.wkp-row').forEach(row => {
-    row.addEventListener('click', () => wkpClick(row.dataset.wmon));
-    row.addEventListener('mouseenter', () => {
-      if (wkp.step !== 'end' || !wkp.startMon) return;
-      const hovTs = parseDate(row.dataset.wmon).getTime();
-      const startTs = wkp.startMon.getTime();
-      qAll('.wkp-row').forEach(r => {
-        const rTs = parseDate(r.dataset.wmon).getTime();
-        r.classList.toggle('hov-range', rTs > startTs && rTs < hovTs);
-        r.classList.toggle('hov-end',   rTs === hovTs);
-      });
-    });
-  });
-  q('#wkp-rows')?.addEventListener('mouseleave', () => {
-    qAll('.wkp-row').forEach(r => r.classList.remove('hov-range','hov-end'));
-  });
+  bindWkPickerEvents();
 
   /* Share modal — copy link */
   const copyBtn = q('#share-copy-btn');
