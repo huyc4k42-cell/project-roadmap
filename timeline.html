@@ -406,14 +406,13 @@ let S = {
    DATE & WEEK HELPERS
 ══════════════════════════════ */
 let WW = 64;
-const TLW = 204, WW_DEFAULT = 64, WW_MIN = 50, WW_FILL_THRESHOLD = 12;
+const TLW = 204, WW_FILL_COLS = 12;
 
 function calcWW() {
-  const tw = totalWeeks();
-  if (tw > WW_FILL_THRESHOLD) return WW_DEFAULT;
   const sbW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sb')) || 288;
   const available = window.innerWidth - sbW - TLW - 4;
-  return Math.max(WW_MIN, Math.floor(available / tw));
+  const cols = Math.min(totalWeeks(), WW_FILL_COLS);
+  return Math.floor(available / cols);
 }
 const BAR_H = 34, LANE_PAD = 10, LANE_GAP = 6;
 
@@ -1812,9 +1811,7 @@ render();
 let _resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(_resizeTimer);
-  _resizeTimer = setTimeout(() => {
-    if (totalWeeks() <= WW_FILL_THRESHOLD) render(true);
-  }, 150);
+  _resizeTimer = setTimeout(() => render(true), 150);
 });
 </script>
 </body>
