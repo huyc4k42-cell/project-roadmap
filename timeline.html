@@ -276,7 +276,21 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .wkp-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .wkp-nav-btn{background:none;border:1px solid var(--bd2);border-radius:var(--r);color:var(--txt2);cursor:pointer;padding:4px 12px;font-size:15px;font-family:inherit;transition:all .15s;line-height:1}
 .wkp-nav-btn:hover{color:var(--txt);border-color:var(--bd3)}
-.wkp-nav-lbl{font-size:14px;font-weight:600;color:var(--txt)}
+.wkp-nav-lbl{font-size:14px;font-weight:600;color:var(--txt);cursor:pointer;padding:3px 8px;border-radius:var(--r);transition:all .15s;border:1px solid transparent}
+.wkp-nav-lbl:hover{background:var(--s3);border-color:var(--bd2)}
+/* Month/year grid */
+.wkp-mo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:4px 0 8px}
+.wkp-mo-cell{padding:9px 4px;text-align:center;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--txt2);transition:all .15s;border:1px solid transparent}
+.wkp-mo-cell:hover{background:var(--s3);color:var(--txt)}
+.wkp-mo-cell.cur{background:var(--goldD);color:var(--gold);border-color:var(--gold)}
+.wkp-yr-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.wkp-yr-lbl{font-size:15px;font-weight:700;color:var(--txt)}
+/* Manual date input */
+.wkp-manual{margin-top:10px;display:flex;gap:6px;align-items:center}
+.wkp-manual-inp{flex:1;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 10px;font-size:12px;color:var(--txt2);font-family:inherit;outline:none;transition:border-color .15s}
+.wkp-manual-inp:focus{border-color:var(--gold);color:var(--txt)}
+.wkp-manual-inp::placeholder{color:var(--txt3)}
+.wkp-manual-lbl{font-size:11px;color:var(--txt3);white-space:nowrap}
 .wkp-head{display:grid;grid-template-columns:32px repeat(7,1fr);margin-bottom:2px}
 .wkp-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);text-align:center;padding:2px 0}
 .wkp-row{display:grid;grid-template-columns:32px repeat(7,1fr);border-radius:5px;cursor:pointer;transition:background .1s;margin:1px 0}
@@ -409,7 +423,7 @@ function loadFromHash() {
 /* ══════════════════════════════
    WEEK PICKER
 ══════════════════════════════ */
-let wkp = { yr:2025, mo:0, startMon:null, endMon:null, step:'start' };
+let wkp = { yr:2025, mo:0, startMon:null, endMon:null, step:'start', showMonthSel:false };
 
 const WKP_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
@@ -484,17 +498,34 @@ function buildWkPicker() {
   }
 
   const hint = step === 'start' ? 'Chọn tuần bắt đầu' : 'Chọn tuần kết thúc';
+  const MO_ABBR = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+
+  // Month/year selector view
+  const monthSelBody = wkp.showMonthSel ? `
+    <div class="wkp-yr-nav">
+      <button class="wkp-nav-btn" id="wkp-yr-prev">‹</button>
+      <span class="wkp-yr-lbl">${yr}</span>
+      <button class="wkp-nav-btn" id="wkp-yr-next">›</button>
+    </div>
+    <div class="wkp-mo-grid">
+      ${MO_ABBR.map((m,i)=>`<div class="wkp-mo-cell${i===mo?' cur':''}" data-wmo="${i}">${m}</div>`).join('')}
+    </div>` : `
+    <div class="wkp-head"><span></span>${WKP_DAYS.map(d=>`<span>${d}</span>`).join('')}</div>
+    <div id="wkp-rows">${rows}</div>
+    ${footer}
+    <div class="wkp-manual">
+      <span class="wkp-manual-lbl">Nhập ngày:</span>
+      <input class="wkp-manual-inp" id="wkp-manual" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off"/>
+    </div>`;
 
   return `<div class="wkp">
     <div class="wkp-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>${hint}</div>
     <div class="wkp-nav">
-      <button class="wkp-nav-btn" id="wkp-prev">‹</button>
-      <span class="wkp-nav-lbl">${WKP_MONTHS[mo]} ${yr}</span>
-      <button class="wkp-nav-btn" id="wkp-next">›</button>
+      ${wkp.showMonthSel ? '<span></span>' : `<button class="wkp-nav-btn" id="wkp-prev">‹</button>`}
+      <span class="wkp-nav-lbl" id="wkp-mo-lbl">${WKP_MONTHS[mo]} ${yr}</span>
+      ${wkp.showMonthSel ? '<span></span>' : `<button class="wkp-nav-btn" id="wkp-next">›</button>`}
     </div>
-    <div class="wkp-head"><span></span>${WKP_DAYS.map(d=>`<span>${d}</span>`).join('')}</div>
-    <div id="wkp-rows">${rows}</div>
-    ${footer}
+    ${monthSelBody}
   </div>`;
 }
 
@@ -532,13 +563,31 @@ function wkpRefresh() {
 }
 
 function bindWkPickerEvents() {
+  // Month/year label → toggle month selector
+  q('#wkp-mo-lbl')?.addEventListener('click', () => {
+    wkp.showMonthSel = !wkp.showMonthSel;
+    wkpRefresh();
+  });
+  // Month selector cells
+  qAll('.wkp-mo-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      wkp.mo = +cell.dataset.wmo;
+      wkp.showMonthSel = false;
+      wkpRefresh();
+    });
+  });
+  // Year nav inside month selector
+  q('#wkp-yr-prev')?.addEventListener('click', () => { wkp.yr--; wkpRefresh(); });
+  q('#wkp-yr-next')?.addEventListener('click', () => { wkp.yr++; wkpRefresh(); });
+  // Month prev/next arrows
   q('#wkp-prev')?.addEventListener('click', () => wkpNav(-1));
   q('#wkp-next')?.addEventListener('click', () => wkpNav(1));
+  // Week row click + hover preview
   qAll('.wkp-row').forEach(row => {
     row.addEventListener('click', () => wkpClick(row.dataset.wmon));
     row.addEventListener('mouseenter', () => {
       if (wkp.step !== 'end' || !wkp.startMon) return;
-      const hovTs   = parseDate(row.dataset.wmon).getTime();
+      const hovTs = parseDate(row.dataset.wmon).getTime();
       const startTs = wkp.startMon.getTime();
       qAll('.wkp-row').forEach(r => {
         const rTs = parseDate(r.dataset.wmon).getTime();
@@ -550,6 +599,33 @@ function bindWkPickerEvents() {
   q('#wkp-rows')?.addEventListener('mouseleave', () => {
     qAll('.wkp-row').forEach(r => r.classList.remove('hov-range','hov-end'));
   });
+  // Manual date input — DD/MM/YYYY → navigate + select week
+  const manualInp = q('#wkp-manual');
+  if (manualInp) {
+    manualInp.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      const val = manualInp.value.trim();
+      const parts = val.split('/');
+      if (parts.length !== 3) return;
+      const [d, m, y] = parts.map(Number);
+      if (!d || !m || !y || y < 2000 || y > 2099) return;
+      const date = new Date(y, m - 1, d);
+      if (isNaN(date.getTime())) return;
+      const mon = wkpMonday(date);
+      wkp.yr = mon.getFullYear();
+      wkp.mo = mon.getMonth();
+      manualInp.value = '';
+      // Auto-select as start or end
+      wkpClick(dateStrYMD(mon));
+    });
+    // Auto-format: insert / after DD and MM
+    manualInp.addEventListener('input', () => {
+      let v = manualInp.value.replace(/\D/g,'');
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+      manualInp.value = v;
+    });
+  }
 }
 
 /* ══════════════════════════════
@@ -1765,6 +1841,7 @@ function openModal(type, data=null) {
     wkp.yr  = sm.getFullYear();
     wkp.mo  = sm.getMonth();
     wkp.step = 'start';
+    wkp.showMonthSel = false;
   }
   render();
 }
