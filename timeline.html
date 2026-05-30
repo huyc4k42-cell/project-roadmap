@@ -2196,7 +2196,7 @@ async function exportPDF() {
     // and return '' (empty string) instead. html2canvas treats '' as "not set"
     // and falls back to its backgroundColor option. Restore after capture.
     const _origGCS = window.getComputedStyle;
-    const _stripOklch = (v) => (typeof v === 'string' && v.includes('oklch')) ? '' : v;
+    const _stripOklch = (v) => (typeof v === 'string' && v.includes('oklch')) ? 'transparent' : v;
     window.getComputedStyle = function() {
       const cs = _origGCS.apply(this, arguments);
       return new Proxy(cs, {
