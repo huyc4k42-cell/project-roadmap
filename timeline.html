@@ -2187,30 +2187,33 @@ async function exportPDF() {
   document.body.appendChild(ov);
 
   try {
-    const canvas = await html2canvas(el, {
-      scale: 1.5,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#0b0b0b',
-      width:  el.scrollWidth,
-      height: el.scrollHeight,
-      windowWidth:  el.scrollWidth  + 300,
-      windowHeight: el.scrollHeight + 100,
-      x: 0, y: 0,
-      scrollX: 0, scrollY: 0,
-      onclone: (doc) => {
-        // Remove color-scheme to prevent Chrome from injecting oklch system colors
-        // which html2canvas cannot parse
-        doc.documentElement.style.setProperty('color-scheme', 'unset');
-        // Inline the current theme data attribute so colors still render correctly
-        const theme = document.documentElement.dataset.theme || 'dark';
-        doc.documentElement.setAttribute('data-theme', theme);
-        // Force override any remaining system color references
-        const style = doc.createElement('style');
-        style.textContent = ':root,[data-theme]{color-scheme:unset!important}';
-        doc.head.appendChild(style);
-      },
-    });
+    // Strip color-scheme before capture so Chrome doesn't inject oklch system colors
+    // (html2canvas 1.4.1 cannot parse oklch). Injecting !important style is the only
+    // reliable override — onclone alone is insufficient because the cloned stylesheet
+    // re-applies the rule after the callback.
+    const stripStyle = document.createElement('style');
+    stripStyle.id = '_h2c_strip';
+    stripStyle.textContent = `*,::before,::after{color-scheme:unset!important}`;
+    document.head.appendChild(stripStyle);
+
+    let canvas;
+    try {
+      canvas = await html2canvas(el, {
+        scale: 1.5,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#0b0b0b',
+        width:  el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth:  el.scrollWidth  + 300,
+        windowHeight: el.scrollHeight + 100,
+        x: 0, y: 0,
+        scrollX: 0, scrollY: 0,
+      });
+    } finally {
+      // Always restore, even if html2canvas throws
+      document.getElementById('_h2c_strip')?.remove();
+    }
 
     const { jsPDF } = window.jspdf;
     const W = canvas.width, H = canvas.height;
