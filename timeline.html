@@ -161,9 +161,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .empty-btn{padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
 .empty-btn-primary{background:var(--gold);color:#080808;border:none}.empty-btn-primary:hover{background:var(--goldL)}
 .empty-btn-sec{background:transparent;border:1px solid var(--bd2);color:var(--txt2)}.empty-btn-sec:hover{color:var(--txt);border-color:var(--bd3)}
-/* Stat clickable */
-.stat{text-align:center;cursor:pointer;padding:3px 6px;border-radius:var(--r);transition:background .15s}
-.stat:hover{background:var(--s3)}
+/* Stat clickable — reset all button chrome */
+button.stat{background:none;border:none;font-family:inherit;color:inherit;cursor:pointer;padding:4px 8px;border-radius:var(--r);transition:background .15s;text-align:center;line-height:inherit}
+button.stat:hover{background:var(--s3)}
 /* Share button class */
 .btn-outline-gold{border:1px solid var(--gold)!important;color:var(--gold)!important}
 
@@ -2190,6 +2190,7 @@ async function exportPDF() {
     const canvas = await html2canvas(el, {
       scale: 1.5,
       useCORS: true,
+      logging: false,
       backgroundColor: '#0b0b0b',
       width:  el.scrollWidth,
       height: el.scrollHeight,
@@ -2197,6 +2198,18 @@ async function exportPDF() {
       windowHeight: el.scrollHeight + 100,
       x: 0, y: 0,
       scrollX: 0, scrollY: 0,
+      onclone: (doc) => {
+        // Remove color-scheme to prevent Chrome from injecting oklch system colors
+        // which html2canvas cannot parse
+        doc.documentElement.style.setProperty('color-scheme', 'unset');
+        // Inline the current theme data attribute so colors still render correctly
+        const theme = document.documentElement.dataset.theme || 'dark';
+        doc.documentElement.setAttribute('data-theme', theme);
+        // Force override any remaining system color references
+        const style = doc.createElement('style');
+        style.textContent = ':root,[data-theme]{color-scheme:unset!important}';
+        doc.head.appendChild(style);
+      },
     });
 
     const { jsPDF } = window.jspdf;
