@@ -2196,13 +2196,25 @@ async function exportPDF() {
     // and return '' (empty string) instead. html2canvas treats '' as "not set"
     // and falls back to its backgroundColor option. Restore after capture.
     const _origGCS = window.getComputedStyle;
+    const _stripOklch = (v) => (typeof v === 'string' && v.includes('oklch')) ? '' : v;
     window.getComputedStyle = function() {
       const cs = _origGCS.apply(this, arguments);
       return new Proxy(cs, {
         get(target, prop) {
+          // Intercept getPropertyValue() — html2canvas calls this for most color reads
+          if (prop === 'getPropertyValue') {
+            return (name) => _stripOklch(target.getPropertyValue(name));
+          }
+          // Intercept getPropertyPriority() to avoid any oklch leaking through there
+          if (prop === 'getPropertyPriority') {
+            return (name) => {
+              try { return target.getPropertyPriority(name); } catch { return ''; }
+            };
+          }
           const val = Reflect.get(target, prop);
-          if (typeof prop === 'string' && typeof val === 'string' && val.includes('oklch')) {
-            return '';
+          // Intercept direct property access (cs.backgroundColor, cs.color, etc.)
+          if (typeof prop === 'string' && typeof val === 'string') {
+            return _stripOklch(val);
           }
           return typeof val === 'function' ? val.bind(target) : val;
         }
