@@ -2187,16 +2187,30 @@ async function exportPDF() {
   document.body.appendChild(ov);
 
   try {
-    // Chrome uses oklch() for system colors when color-scheme:dark is active.
-    // html2canvas 1.4.1 cannot parse oklch. Fix: temporarily force color-scheme:light
-    // on <html> — Chrome then uses sRGB system colors (no oklch). Our explicit CSS
-    // custom property colors (--bg, --txt, etc.) are unaffected and render correctly.
-    const htmlEl = document.documentElement;
-    const prevTheme = htmlEl.dataset.theme;
-    const prevCS = htmlEl.style.colorScheme;
-    htmlEl.style.setProperty('color-scheme', 'light', 'important');
-    // Wait one frame so the style recalc happens before html2canvas reads computed styles
-    await new Promise(r => requestAnimationFrame(r));
+    // html2canvas 1.4.1 cannot parse oklch() color values.
+    // Chrome injects oklch for system colors (Canvas, ButtonFace, etc.) when
+    // color-scheme:dark is active. inline/stylesheet overrides don't stop this
+    // because html2canvas reads getComputedStyle() AFTER Chrome resolves system colors.
+    //
+    // Fix: monkey-patch window.getComputedStyle to intercept any oklch value
+    // and return '' (empty string) instead. html2canvas treats '' as "not set"
+    // and falls back to its backgroundColor option. Restore after capture.
+    const _origGCS = window.getComputedStyle;
+    window.getComputedStyle = function() {
+      const cs = _origGCS.apply(this, arguments);
+      return new Proxy(cs, {
+        get(target, prop) {
+          const val = Reflect.get(target, prop);
+          if (typeof prop === 'string' && typeof val === 'string' && val.includes('oklch')) {
+            return '';
+          }
+          return typeof val === 'function' ? val.bind(target) : val;
+        }
+      });
+    };
+
+    const bgColor = _origGCS(document.documentElement)
+      .getPropertyValue('--bg').trim() || '#080808';
 
     let canvas;
     try {
@@ -2205,7 +2219,7 @@ async function exportPDF() {
         useCORS: true,
         allowTaint: true,
         logging: false,
-        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080808',
+        backgroundColor: bgColor,
         width:  el.scrollWidth,
         height: el.scrollHeight,
         windowWidth:  el.scrollWidth  + 300,
@@ -2214,9 +2228,7 @@ async function exportPDF() {
         scrollX: 0, scrollY: 0,
       });
     } finally {
-      // Always restore regardless of success/failure
-      if (prevCS) htmlEl.style.setProperty('color-scheme', prevCS);
-      else htmlEl.style.removeProperty('color-scheme');
+      window.getComputedStyle = _origGCS; // always restore
     }
 
     const { jsPDF } = window.jspdf;
