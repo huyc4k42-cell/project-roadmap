@@ -372,6 +372,62 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .wkp-f1{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
 .wkp-f2{font-size:12px;color:var(--txt2)}
 
+/* ── HOME SCREEN ── */
+.home{min-height:100vh;background:var(--bg);display:flex;flex-direction:column;font-family:'Inter',-apple-system,sans-serif}
+.home-hdr{padding:20px 40px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--bd);background:var(--s1);flex-shrink:0}
+.home-hdr-info{flex:1;min-width:0}
+.home-hdr-info h1{font-family:'Crimson Pro',Georgia,serif;font-size:20px;font-weight:600;color:var(--txt);line-height:1.2}
+.home-hdr-info p{font-size:12px;color:var(--txt2);margin-top:2px}
+.home-body{padding:36px 40px;flex:1;overflow-y:auto}
+.home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+/* Project card */
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:180px}
+.proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-2px)}
+.proj-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
+.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;color:var(--txt);margin-top:10px;margin-bottom:3px;line-height:1.3}
+.proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:1.5;flex:1}
+.proj-card-stats{display:flex;gap:18px;margin-bottom:12px}
+.proj-stat{display:flex;flex-direction:column;gap:1px}
+.proj-stat-n{font-size:17px;font-weight:700;color:var(--txt);line-height:1}
+.proj-stat-l{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.7px;margin-top:2px}
+.proj-tl-wrap{margin-bottom:12px}
+.proj-tl-dates{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px}
+.proj-tl-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
+.proj-tl-fill{height:100%;border-radius:2px;min-width:4px;max-width:100%}
+.proj-card-footer{display:flex;justify-content:space-between;align-items:center}
+.proj-date{font-size:11px;color:var(--txt3)}
+.proj-menu{position:relative}
+.proj-menu-btn{background:none;border:none;color:var(--txt3);cursor:pointer;padding:5px;border-radius:var(--r);transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1}
+.proj-menu-btn:hover{color:var(--txt);background:var(--s3)}
+.proj-ctx{position:absolute;bottom:calc(100% + 4px);right:0;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:5px;min-width:150px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:fdin .1s ease}
+.proj-ctx-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 11px;font-size:13px;color:var(--txt2);background:none;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;transition:all .1s;text-align:left;white-space:nowrap}
+.proj-ctx-item:hover{background:var(--s2);color:var(--txt)}
+.proj-ctx-item.dng{color:var(--red)}.proj-ctx-item.dng:hover{background:rgba(224,87,87,.08)}
+.proj-ctx-sep{height:1px;background:var(--bd);margin:3px 5px}
+/* New project card */
+.proj-new-card{background:transparent;border:1px dashed var(--bd2);border-radius:var(--r2);padding:20px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:180px;color:var(--txt3);font-family:inherit}
+.proj-new-card:hover{border-color:var(--gold);color:var(--gold);background:var(--goldB)}
+.proj-new-ico{width:42px;height:42px;border-radius:50%;border:1.5px dashed currentColor;display:flex;align-items:center;justify-content:center;transition:inherit}
+.proj-new-lbl{font-size:13px;font-weight:500}
+/* Accent picker */
+.proj-accent-grid{display:flex;gap:8px;flex-wrap:wrap}
+.proj-accent-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:all .15s}
+.proj-accent-swatch.sel{border-color:var(--txt);transform:scale(1.2)}
+/* Breadcrumb in detail */
+.breadcrumb{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.bc-home{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--txt2);cursor:pointer;background:none;border:none;font-family:inherit;padding:3px 6px;border-radius:var(--r);transition:all .15s;white-space:nowrap;flex-shrink:0}
+.bc-home:hover{color:var(--gold)}
+.bc-sep{color:var(--bd3);font-size:14px;flex-shrink:0}
+.bc-cur{font-family:'Crimson Pro',Georgia,serif;font-size:17px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:color .15s}
+.bc-cur:hover{color:var(--gold)}
+.bc-cur:hover ~ .edit-pen,.bc-cur-wrap:hover .edit-pen{opacity:1}
+.bc-cur-wrap{display:flex;align-items:center;gap:5px;min-width:0;cursor:pointer}
+/* Home empty */
+.home-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px;text-align:center}
+.home-empty-ico{width:56px;height:56px;border-radius:50%;background:var(--goldD);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.home-empty-title{font-family:'Crimson Pro',Georgia,serif;font-size:24px;font-weight:600;color:var(--txt)}
+.home-empty-sub{font-size:13px;color:var(--txt2);max-width:360px;line-height:1.7}
 /* export overlay */
 .exp-ol{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:10px;color:var(--txt2);font-size:12px}
 .exp-spin{width:26px;height:26px;border:2px solid var(--bd2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
@@ -881,15 +937,28 @@ ${ro ? `<div class="ro-banner">
   </a>
 </div>` : ''}
 <div class="hdr">
-  <div class="logo">${LOGO_IMG}</div>
-  <div class="vsep"></div>
-  <div class="hdr-info">
-    <div class="${ro?'':'hdr-title-wrap'}" ${ro?'':'id="hdr-title-click"'}>
-      <div class="hdr-title">${esc(S.cfg.title)}</div>
-      ${ro?'':` <svg class="edit-pen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`}
-    </div>
-    <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
-  </div>
+  ${currentProjId && !ro
+    ? `<div class="breadcrumb">
+        <button class="bc-home" id="btn-back-home" aria-label="Về trang dự án">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Dự án
+        </button>
+        <span class="bc-sep" aria-hidden="true">›</span>
+        <div class="bc-cur-wrap" id="hdr-title-click" role="button" tabindex="0" aria-label="Đổi tên project">
+          <span class="bc-cur">${esc(S.cfg.title)}</span>
+          <svg class="edit-pen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+       </div>`
+    : `<div class="logo">${LOGO_IMG}</div>
+       <div class="vsep"></div>
+       <div class="hdr-info">
+         <div class="${ro?'':'hdr-title-wrap'}" ${ro?'':'id="hdr-title-click"'}>
+           <div class="hdr-title">${esc(S.cfg.title)}</div>
+           ${ro?'':` <svg class="edit-pen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`}
+         </div>
+         <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
+       </div>`
+  }
   <div class="hdr-stats" role="group" aria-label="Thống kê">
     <button class="stat" id="stat-all" title="Xem tất cả tasks" aria-label="Tổng ${total} tasks"><div class="stat-n gd">${total}</div><div class="stat-l">Tổng</div></button>
     <button class="stat" id="stat-sched" title="Lọc tasks đã xếp lịch" aria-label="${sched} tasks đã xếp"><div class="stat-n gn">${sched}</div><div class="stat-l">Đã xếp</div></button>
@@ -1307,6 +1376,249 @@ function buildTeamRow(tm, tw, twFrac) {
 </div>`;
 }
 
+/* ══════════════════════════════
+   HOME SCREEN
+══════════════════════════════ */
+function renderHome() {
+  document.title = 'Arthur — Projects';
+  document.getElementById('app').innerHTML = buildHome();
+  bindHome();
+}
+
+function buildHome() {
+  const idx = loadIndex();
+  const accentSwatches = PROJ_ACCENTS.map((c,i) =>
+    `<span class="proj-accent-swatch${i===0?' sel':''}" data-acc="${c}" style="background:${c}"></span>`
+  ).join('');
+
+  const modal = S.ui.modal ? buildHomeModal(accentSwatches) : '';
+
+  if (idx.length === 0 && !S.ui.modal) {
+    return `<div class="home">
+      ${buildHomeHdr(0)}
+      <div class="home-empty">
+        <div class="home-empty-ico" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div class="home-empty-title">Chưa có project nào</div>
+        <div class="home-empty-sub">Tạo project đầu tiên để bắt đầu xây dựng roadmap của bạn.</div>
+        <button class="empty-btn empty-btn-primary" id="home-new-btn" style="margin-top:4px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Tạo Project mới
+        </button>
+      </div>
+      ${modal}
+    </div>`;
+  }
+
+  const cards = idx.map(p => buildProjCard(p)).join('');
+
+  return `<div class="home">
+    ${buildHomeHdr(idx.length)}
+    <div class="home-body">
+      <div class="home-section-lbl">${idx.length} project${idx.length!==1?'s':''}</div>
+      <div class="proj-grid">
+        ${cards}
+        <button class="proj-new-card" id="home-new-btn" aria-label="Tạo project mới">
+          <div class="proj-new-ico" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <span class="proj-new-lbl">New Project</span>
+        </button>
+      </div>
+    </div>
+    ${modal}
+  </div>`;
+}
+
+function buildHomeHdr(count) {
+  return `<header class="home-hdr" role="banner">
+    <div class="logo">${LOGO_IMG}</div>
+    <div class="home-hdr-info">
+      <h1>Dự án của tôi</h1>
+      <p>${count} project${count!==1?'s':''}</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-ghost" id="home-theme-btn" title="Đổi giao diện">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <button class="btn btn-gold" id="home-new-hdr-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Project
+      </button>
+    </div>
+  </header>`;
+}
+
+function buildProjCard(p) {
+  // Compute timeline progress
+  const start = p.stats?.phases > 0 ? '' : '';
+  const today = Date.now();
+  const pct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
+
+  const ctxOpen = homeCtxId === p.id;
+  return `
+<div class="proj-card" data-proj-id="${p.id}" role="article" aria-label="${esc(p.name)}">
+  <div class="proj-card-stripe" style="background:${p.accent||'#D0A052'}"></div>
+  <div style="display:flex;justify-content:flex-end">
+    <div class="proj-menu">
+      <button class="proj-menu-btn" data-proj-menu="${p.id}" aria-label="Tùy chọn project" aria-haspopup="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+      </button>
+      ${ctxOpen ? `<div class="proj-ctx" role="menu">
+        <button class="proj-ctx-item" role="menuitem" data-proj-open="${p.id}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Mở
+        </button>
+        <button class="proj-ctx-item" role="menuitem" data-proj-rename="${p.id}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          Đổi tên
+        </button>
+        <button class="proj-ctx-item" role="menuitem" data-proj-dup="${p.id}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Nhân bản
+        </button>
+        <div class="proj-ctx-sep"></div>
+        <button class="proj-ctx-item dng" role="menuitem" data-proj-del="${p.id}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+          Xóa
+        </button>
+      </div>` : ''}
+    </div>
+  </div>
+  <div class="proj-card-name">${esc(p.name)}</div>
+  <div class="proj-card-sub">${esc(p.subtitle||'Chưa có mô tả')}</div>
+  <div class="proj-card-stats">
+    <div class="proj-stat"><span class="proj-stat-n">${p.stats?.phases||0}</span><span class="proj-stat-l">Phase</span></div>
+    <div class="proj-stat"><span class="proj-stat-n">${p.stats?.tasks||0}</span><span class="proj-stat-l">Tasks</span></div>
+    <div class="proj-stat"><span class="proj-stat-n" style="color:${pct>0?'var(--grn)':'var(--txt3)'}">${pct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
+  </div>
+  <div class="proj-tl-wrap">
+    <div class="proj-tl-bar"><div class="proj-tl-fill" style="width:${pct}%;background:${p.accent||'#D0A052'}"></div></div>
+  </div>
+  <div class="proj-card-footer">
+    <span class="proj-date">${timeAgo(p.updatedAt)}</span>
+  </div>
+</div>`;
+}
+
+function buildHomeModal(accentSwatches) {
+  const t = S.ui.modal;
+  if (!t) return '';
+  const isRename = t.type === 'rename-project';
+  const d = t.data || {};
+
+  return `<div class="mbg" id="modal-bg" role="presentation">
+    <div class="mdl" role="dialog" aria-modal="true" aria-label="${isRename?'Đổi tên project':'Project mới'}">
+      <h3>${isRename ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Đổi tên` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Project mới`}</h3>
+      <div class="fg"><label for="hm-name">Tên project *</label>
+        <input class="fi" id="hm-name" value="${esc(d.name||'')}" placeholder="VD: Product Roadmap Q3 2025" autocomplete="off"/></div>
+      <div class="fg"><label for="hm-sub">Mô tả ngắn</label>
+        <input class="fi" id="hm-sub" value="${esc(d.subtitle||'')}" placeholder="Tóm tắt mục tiêu dự án..." autocomplete="off"/></div>
+      ${!isRename ? `<div class="fg"><label>Màu accent</label>
+        <div class="proj-accent-grid" id="hm-accent-grid">${accentSwatches||''}</div>
+      </div>` : ''}
+      <div class="mdl-btns">
+        <button class="bsm b-sec" id="m-cancel">Hủy</button>
+        <button class="bsm b-primary" id="m-save">${isRename?'Lưu':'Tạo Project'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindHome() {
+  /* New project buttons */
+  const openNew = () => { S.ui.modal = {type:'new-project', data:{}}; renderHome(); };
+  q('#home-new-btn')?.addEventListener('click', openNew);
+  q('#home-new-hdr-btn')?.addEventListener('click', openNew);
+
+  /* Card click → open project */
+  qAll('.proj-card[data-proj-id]').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('[data-proj-menu],[data-proj-open],[data-proj-rename],[data-proj-dup],[data-proj-del],.proj-ctx')) return;
+      location.hash = '#project-' + card.dataset.projId;
+    });
+  });
+
+  /* Card context menu toggle */
+  qAll('[data-proj-menu]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      homeCtxId = homeCtxId === btn.dataset.projMenu ? null : btn.dataset.projMenu;
+      renderHome();
+    });
+  });
+
+  /* Context menu actions */
+  qAll('[data-proj-open]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation(); location.hash = '#project-' + b.dataset.projOpen;
+  }));
+  qAll('[data-proj-rename]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const p = loadIndex().find(x => x.id === b.dataset.projRename);
+    homeCtxId = null;
+    S.ui.modal = { type:'rename-project', data:{id:p.id, name:p.name, subtitle:p.subtitle||''} };
+    renderHome();
+  }));
+  qAll('[data-proj-dup]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation(); homeCtxId = null; duplicateProject(b.dataset.projDup);
+  }));
+  qAll('[data-proj-del]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation(); homeCtxId = null;
+    if (confirm('Xóa project này? Hành động không thể hoàn tác.')) deleteProject(b.dataset.projDel);
+    else renderHome();
+  }));
+
+  /* Close ctx when clicking outside */
+  if (homeCtxId) document.addEventListener('click', () => { homeCtxId = null; renderHome(); }, {once:true});
+
+  /* Theme toggle */
+  q('#home-theme-btn')?.addEventListener('click', () => {
+    const cur = getCurrentThemePref();
+    setTheme(cur === 'dark' ? 'light' : cur === 'light' ? 'system' : 'dark');
+    renderHome();
+  });
+
+  /* Modal */
+  const bg = q('#modal-bg');
+  if (!bg) return;
+  bg.addEventListener('click', e => { if (e.target === bg) { S.ui.modal=null; renderHome(); } });
+  q('#m-cancel')?.addEventListener('click', () => { S.ui.modal=null; renderHome(); });
+
+  /* Accent swatches */
+  qAll('.proj-accent-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      qAll('.proj-accent-swatch').forEach(s => s.classList.remove('sel'));
+      sw.classList.add('sel');
+    });
+  });
+
+  /* Auto-focus name input */
+  setTimeout(() => q('#hm-name')?.focus(), 50);
+
+  /* Save */
+  q('#m-save')?.addEventListener('click', () => {
+    const name = q('#hm-name')?.value.trim();
+    if (!name) { shakeErr(q('#hm-name')); return; }
+    const sub = q('#hm-sub')?.value.trim() || '';
+    const type = S.ui.modal?.type;
+    if (type === 'new-project') {
+      const accent = q('.proj-accent-swatch.sel')?.dataset.acc || '#D0A052';
+      S.ui.modal = null;
+      createProject(name, sub, accent); // navigates to project
+    } else if (type === 'rename-project') {
+      const id = S.ui.modal.data.id;
+      S.ui.modal = null;
+      renameProject(id, name, sub);
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { S.ui.modal=null; homeCtxId=null; renderHome(); }
+    if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') q('#m-save')?.click();
+  }, {once:true});
+}
+
 /* ── Modal ── */
 function buildModal() {
   const {type, data} = S.ui.modal;
@@ -1477,6 +1789,9 @@ function buildCtx() {
    BIND EVENTS
 ══════════════════════════════ */
 function bind() {
+  /* Back to Home */
+  q('#btn-back-home')?.addEventListener('click', () => { location.hash = '#home'; });
+
   /* Header */
   q('#hdr-title-click')?.addEventListener('click', () => openModal('cfg'));
   q('#btn-cfg')?.addEventListener('click', () => openModal('cfg'));
@@ -2316,20 +2631,169 @@ function esc(s)   {
 /* ══════════════════════════════
    PERSISTENCE (localStorage)
 ══════════════════════════════ */
-const LS_KEY = 'roadmap-state-v1';
+const LS_KEY        = 'roadmap-state-v1';   // legacy key
+const INDEX_KEY     = 'roadmap-index';
+const PROJ_PFX      = 'roadmap-proj-';
+const PROJ_ACCENTS  = ['#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#e05757'];
+let   currentProjId = null;    // null = Home, string = project id
+let   homeCtxId     = null;    // which card's context menu is open
+
+/* ── Index helpers ── */
+function loadIndex() {
+  try { const r = localStorage.getItem(INDEX_KEY); return r ? JSON.parse(r) : []; }
+  catch(e) { return []; }
+}
+function saveIndex(idx) {
+  try { localStorage.setItem(INDEX_KEY, JSON.stringify(idx)); } catch(e) {}
+}
+
+/* ── Project CRUD ── */
+function projKey(id) { return PROJ_PFX + id; }
+
+function createProject(name, subtitle, accent) {
+  const id = 'proj_' + Date.now();
+  const cfg = { title: name, subtitle: subtitle||'', start:'2025-06-02', end:'2025-11-30' };
+  const data = { cfg, phases:[], teams:[], tasks:[], tags:['tracking','UX','tech','growth','research'], _nextId:1 };
+  try { localStorage.setItem(projKey(id), JSON.stringify(data)); } catch(e) {}
+  const idx = loadIndex();
+  idx.push({ id, name, subtitle:subtitle||'', accent:accent||'#D0A052', updatedAt:Date.now(), stats:{phases:0,tasks:0,sched:0} });
+  saveIndex(idx);
+  location.hash = '#project-' + id;
+}
+
+function deleteProject(id) {
+  try { localStorage.removeItem(projKey(id)); } catch(e) {}
+  saveIndex(loadIndex().filter(p => p.id !== id));
+  renderHome();
+}
+
+function duplicateProject(id) {
+  const raw = localStorage.getItem(projKey(id));
+  if (!raw) return;
+  const data = JSON.parse(raw);
+  data.cfg.title += ' (copy)';
+  const newId = 'proj_' + Date.now();
+  try { localStorage.setItem(projKey(newId), JSON.stringify(data)); } catch(e) {}
+  const idx = loadIndex();
+  const orig = idx.find(p => p.id === id);
+  idx.push({ id:newId, name:data.cfg.title, subtitle:data.cfg.subtitle||'',
+    accent:orig?.accent||'#D0A052', updatedAt:Date.now(),
+    stats: orig ? {...orig.stats} : {phases:0,tasks:0,sched:0} });
+  saveIndex(idx);
+  renderHome();
+}
+
+function renameProject(id, name, subtitle) {
+  const idx = loadIndex();
+  const p = idx.find(p => p.id === id);
+  if (!p) return;
+  p.name = name; p.subtitle = subtitle; p.updatedAt = Date.now();
+  saveIndex(idx);
+  // Also update cfg in project data
+  try {
+    const raw = localStorage.getItem(projKey(id));
+    if (raw) {
+      const d = JSON.parse(raw);
+      d.cfg.title = name; d.cfg.subtitle = subtitle;
+      localStorage.setItem(projKey(id), JSON.stringify(d));
+    }
+  } catch(e) {}
+  renderHome();
+}
+
+function loadProject(id) {
+  // Reset S
+  S.cfg = { title:'Project Roadmap', subtitle:'', start:'2025-06-02', end:'2025-11-30' };
+  S.phases=[]; S.teams=[]; S.tasks=[];
+  S.tags=['tracking','UX','tech','growth','research']; S._nextId=1;
+  S.ui.filter={ phase:'', team:'', tag:'', status:'backlog', search:'' };
+  S.ui.modal=null; S.ui.ctx=null; S.ui.dragData=null;
+  S.ui.resizeData=null; S.ui.phaseResize=null; S.ui.phaseDragId=null;
+  try {
+    const raw = localStorage.getItem(projKey(id));
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (d.cfg)     S.cfg     = {...S.cfg, ...d.cfg};
+    if (d.phases)  S.phases  = d.phases;
+    if (d.teams)   S.teams   = d.teams;
+    if (d.tasks)   S.tasks   = d.tasks;
+    if (d.tags)    S.tags    = d.tags;
+    if (d._nextId) S._nextId = d._nextId;
+  } catch(e) {}
+}
+
+function updateIndexEntry() {
+  if (!currentProjId) return;
+  const idx = loadIndex();
+  const p = idx.find(p => p.id === currentProjId);
+  if (!p) return;
+  p.name = S.cfg.title; p.subtitle = S.cfg.subtitle || '';
+  p.updatedAt = Date.now();
+  p.stats = {
+    phases: S.phases.length,
+    tasks:  S.tasks.length,
+    sched:  S.tasks.filter(t => t.startWeek !== null).length,
+  };
+  saveIndex(idx);
+}
+
+function migrateOldData() {
+  const old = localStorage.getItem(LS_KEY);
+  if (!old) return;
+  if (loadIndex().length > 0) { localStorage.removeItem(LS_KEY); return; }
+  const id = 'proj_' + Date.now();
+  try {
+    const d = JSON.parse(old);
+    localStorage.setItem(projKey(id), old);
+    saveIndex([{ id, name:d.cfg?.title||'My Roadmap', subtitle:d.cfg?.subtitle||'',
+      accent:'#D0A052', updatedAt:Date.now(),
+      stats:{ phases:d.phases?.length||0, tasks:d.tasks?.length||0,
+              sched:d.tasks?.filter(t=>t.startWeek!==null).length||0 } }]);
+    localStorage.removeItem(LS_KEY);
+  } catch(e) {}
+}
+
+/* ── Time helpers ── */
+function timeAgo(ts) {
+  const d = Math.floor((Date.now()-ts)/86400000);
+  if (d===0) return 'Hôm nay';
+  if (d===1) return 'Hôm qua';
+  if (d<30)  return d+' ngày trước';
+  const m = Math.floor(d/30);
+  return m<12 ? m+' tháng trước' : Math.floor(m/12)+' năm trước';
+}
+
+/* ── Router ── */
+function router() {
+  const hash = location.hash;
+  homeCtxId = null;
+  // Share URL (#v1=...) — render roadmap in readonly, no project context
+  if (hash.startsWith(SHARE_PREFIX)) {
+    currentProjId = null;
+    if (loadFromHash()) render();
+    return;
+  }
+  if (hash.startsWith('#project-')) {
+    const id = hash.slice(9);
+    currentProjId = id;
+    loadProject(id);
+    render();
+  } else {
+    currentProjId = null;
+    S.ui.modal = null;
+    renderHome();
+  }
+}
+window.addEventListener('hashchange', router);
 
 function saveState() {
+  if (!currentProjId) return; // don't save when on Home
   try {
-    const toSave = {
-      cfg:    S.cfg,
-      phases: S.phases,
-      teams:  S.teams,
-      tasks:  S.tasks,
-      tags:   S.tags,
-      _nextId: S._nextId,
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(toSave));
-  } catch(e) { /* quota exceeded or private mode */ }
+    const toSave = { cfg:S.cfg, phases:S.phases, teams:S.teams,
+      tasks:S.tasks, tags:S.tags, _nextId:S._nextId };
+    localStorage.setItem(projKey(currentProjId), JSON.stringify(toSave));
+    updateIndexEntry();
+  } catch(e) {}
 }
 
 function loadState() {
@@ -2393,10 +2857,11 @@ function loadSampleData() {
 }
 
 loadTheme();
-if (!loadFromHash()) loadState();
-// Push initial history snapshot after load
+migrateOldData();
+// If no hash yet, go to home
+if (!location.hash || location.hash === '#') location.hash = '#home';
+router();
 setTimeout(() => { if (_history.length === 0) pushHistory(); }, 0);
-render();
 
 /* Re-calc WW when window resizes (only matters for fill-mode ≤12 weeks) */
 let _resizeTimer = null;
