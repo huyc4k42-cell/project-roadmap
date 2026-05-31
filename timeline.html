@@ -374,15 +374,22 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 
 /* ── HOME SCREEN ── */
 .home{min-height:100vh;background:var(--bg);display:flex;flex-direction:column;font-family:'Inter',-apple-system,sans-serif}
-.home-hdr{padding:20px 40px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--bd);background:var(--s1);flex-shrink:0}
-.home-hdr-info{flex:1;min-width:0}
-.home-hdr-info h1{font-family:'Crimson Pro',Georgia,serif;font-size:20px;font-weight:600;color:var(--txt);line-height:1.2}
-.home-hdr-info p{font-size:12px;color:var(--txt2);margin-top:2px}
+.home-hdr{padding:18px 40px;display:flex;align-items:center;border-bottom:1px solid var(--bd);background:var(--s1);flex-shrink:0}
+.home-hdr-spacer,.home-hdr-actions{flex:1}
+.home-hdr-logo{display:flex;justify-content:center;align-items:center}
+.home-hdr-logo img{height:56px;width:auto}
+[data-theme="light"] .home-hdr-logo img{filter:brightness(.52)}
+.home-hdr-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+/* card time-elapsed bar */
+.proj-tl-dates{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:5px}
+.proj-elapsed-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.proj-elapsed-lbl{font-size:11px;color:var(--txt3);white-space:nowrap}
+.proj-elapsed-val{font-size:11px;font-weight:600;color:var(--txt2)}
 .home-body{padding:36px 40px;flex:1;overflow-y:auto}
 .home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 /* Project card */
-.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:180px}
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:180px}
 .proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-2px)}
 .proj-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
 .proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;color:var(--txt);margin-top:10px;margin-bottom:3px;line-height:1.3}
@@ -1433,12 +1440,9 @@ function buildHome() {
 
 function buildHomeHdr(count) {
   return `<header class="home-hdr" role="banner">
-    <div class="logo">${LOGO_IMG}</div>
-    <div class="home-hdr-info">
-      <h1>Dự án của tôi</h1>
-      <p>${count} project${count!==1?'s':''}</p>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="home-hdr-spacer"></div>
+    <div class="home-hdr-logo"><img src="data:image/png;base64,${LOGO_B64}" alt="Arthur" style="height:56px;width:auto"></div>
+    <div class="home-hdr-actions">
       <button class="btn btn-ghost" id="home-theme-btn" title="Đổi giao diện">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>
       </button>
@@ -1451,10 +1455,18 @@ function buildHomeHdr(count) {
 }
 
 function buildProjCard(p) {
-  // Compute timeline progress
-  const start = p.stats?.phases > 0 ? '' : '';
   const today = Date.now();
-  const pct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
+  const schedPct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
+
+  // Timeline elapsed
+  const startTs = p.stats?.start ? new Date(p.stats.start).getTime() : null;
+  const endTs   = p.stats?.end   ? new Date(p.stats.end).getTime()   : null;
+  const totalWeeks = (startTs && endTs && endTs > startTs) ? Math.round((endTs - startTs) / 604800000) : null;
+  const elapsedMs  = startTs ? Math.max(0, today - startTs) : 0;
+  const elapsedWeeks = totalWeeks ? Math.min(Math.round(elapsedMs / 604800000), totalWeeks) : null;
+  const timePct = (startTs && endTs && endTs > startTs)
+    ? Math.min(100, Math.max(0, Math.round((today - startTs) / (endTs - startTs) * 100)))
+    : null;
 
   const ctxOpen = homeCtxId === p.id;
   return `
@@ -1491,10 +1503,16 @@ function buildProjCard(p) {
   <div class="proj-card-stats">
     <div class="proj-stat"><span class="proj-stat-n">${p.stats?.phases||0}</span><span class="proj-stat-l">Phase</span></div>
     <div class="proj-stat"><span class="proj-stat-n">${p.stats?.tasks||0}</span><span class="proj-stat-l">Tasks</span></div>
-    <div class="proj-stat"><span class="proj-stat-n" style="color:${pct>0?'var(--grn)':'var(--txt3)'}">${pct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
+    <div class="proj-stat"><span class="proj-stat-n" style="color:${schedPct>0?'var(--grn)':'var(--txt3)'}">${schedPct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
+    ${totalWeeks !== null ? `<div class="proj-stat"><span class="proj-stat-n" style="color:var(--gold)">${elapsedWeeks}/${totalWeeks}</span><span class="proj-stat-l">Tuần</span></div>` : ''}
   </div>
   <div class="proj-tl-wrap">
-    <div class="proj-tl-bar"><div class="proj-tl-fill" style="width:${pct}%;background:${p.accent||'#D0A052'}"></div></div>
+    ${totalWeeks !== null ? `<div class="proj-tl-dates"><span>${p.stats.start||''}</span><span>${p.stats.end||''}</span></div>` : ''}
+    <div style="position:relative">
+      <div class="proj-tl-bar" style="overflow:hidden"><div class="proj-tl-fill" style="width:${schedPct}%;background:${p.accent||'#D0A052'}"></div></div>
+      ${timePct !== null ? `<div class="proj-tl-bar" style="overflow:hidden;margin-top:4px;background:var(--s3)"><div class="proj-tl-fill" style="width:${timePct}%;background:rgba(208,160,82,.45)"></div></div>` : ''}
+    </div>
+    ${timePct !== null ? `<div style="display:flex;justify-content:flex-end;margin-top:3px"><span style="font-size:10px;color:var(--txt3)">${timePct}% thời gian đã qua</span></div>` : ''}
   </div>
   <div class="proj-card-footer">
     <span class="proj-date">${timeAgo(p.updatedAt)}</span>
@@ -2656,7 +2674,7 @@ function createProject(name, subtitle, accent) {
   const data = { cfg, phases:[], teams:[], tasks:[], tags:['tracking','UX','tech','growth','research'], _nextId:1 };
   try { localStorage.setItem(projKey(id), JSON.stringify(data)); } catch(e) {}
   const idx = loadIndex();
-  idx.push({ id, name, subtitle:subtitle||'', accent:accent||'#D0A052', updatedAt:Date.now(), stats:{phases:0,tasks:0,sched:0} });
+  idx.push({ id, name, subtitle:subtitle||'', accent:accent||'#D0A052', updatedAt:Date.now(), stats:{phases:0,tasks:0,sched:0,start:cfg.start,end:cfg.end} });
   saveIndex(idx);
   location.hash = '#project-' + id;
 }
@@ -2733,6 +2751,8 @@ function updateIndexEntry() {
     phases: S.phases.length,
     tasks:  S.tasks.length,
     sched:  S.tasks.filter(t => t.startWeek !== null).length,
+    start:  S.cfg.start,
+    end:    S.cfg.end,
   };
   saveIndex(idx);
 }
