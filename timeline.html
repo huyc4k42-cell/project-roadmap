@@ -1533,9 +1533,13 @@ function buildHomeModal(accentSwatches) {
         <input class="fi" id="hm-name" value="${esc(d.name||'')}" placeholder="VD: Product Roadmap Q3 2025" autocomplete="off"/></div>
       <div class="fg"><label for="hm-sub">Mô tả ngắn</label>
         <input class="fi" id="hm-sub" value="${esc(d.subtitle||'')}" placeholder="Tóm tắt mục tiêu dự án..." autocomplete="off"/></div>
-      ${!isRename ? `<div class="fg"><label>Màu accent</label>
-        <div class="proj-accent-grid" id="hm-accent-grid">${accentSwatches||''}</div>
-      </div>` : ''}
+      <div class="fg"><label>Màu accent</label>
+        <div class="proj-accent-grid" id="hm-accent-grid">${
+          isRename
+            ? PROJ_ACCENTS.map((c,i) => `<span class="proj-accent-swatch${c===(d.accent||'#D0A052')?' sel':''}" data-acc="${c}" style="background:${c}"></span>`).join('')
+            : (accentSwatches||'')
+        }</div>
+      </div>
       <div class="mdl-btns">
         <button class="bsm b-sec" id="m-cancel">Hủy</button>
         <button class="bsm b-primary" id="m-save">${isRename?'Lưu':'Tạo Project'}</button>
@@ -1575,7 +1579,7 @@ function bindHome() {
     e.stopPropagation();
     const p = loadIndex().find(x => x.id === b.dataset.projRename);
     homeCtxId = null;
-    S.ui.modal = { type:'rename-project', data:{id:p.id, name:p.name, subtitle:p.subtitle||''} };
+    S.ui.modal = { type:'rename-project', data:{id:p.id, name:p.name, subtitle:p.subtitle||'', accent:p.accent||'#D0A052'} };
     renderHome();
   }));
   qAll('[data-proj-dup]').forEach(b => b.addEventListener('click', e => {
@@ -1626,8 +1630,9 @@ function bindHome() {
       createProject(name, sub, accent); // navigates to project
     } else if (type === 'rename-project') {
       const id = S.ui.modal.data.id;
+      const accent = q('.proj-accent-swatch.sel')?.dataset.acc || S.ui.modal.data.accent || '#D0A052';
       S.ui.modal = null;
-      renameProject(id, name, sub);
+      renameProject(id, name, sub, accent);
     }
   });
 
@@ -2701,11 +2706,12 @@ function duplicateProject(id) {
   renderHome();
 }
 
-function renameProject(id, name, subtitle) {
+function renameProject(id, name, subtitle, accent) {
   const idx = loadIndex();
   const p = idx.find(p => p.id === id);
   if (!p) return;
   p.name = name; p.subtitle = subtitle; p.updatedAt = Date.now();
+  if (accent) p.accent = accent;
   saveIndex(idx);
   // Also update cfg in project data
   try {
