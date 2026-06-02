@@ -234,7 +234,8 @@ button.stat:hover{background:var(--s3)}
 .tb:hover{box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:4}
 .tb:active{cursor:grabbing}
 .tb.drg{opacity:.3;z-index:2}
-.tb.tb-swap-target{outline:2px dashed rgba(255,255,255,.7);outline-offset:2px;z-index:4}
+.tb.tb-insert-before{outline:none;z-index:4}
+.tb.tb-insert-before::before{content:'';position:absolute;top:-4px;left:0;right:0;height:2px;background:var(--gold);border-radius:1px;z-index:10}
 .tb-top{display:flex;align-items:center;gap:4px;min-width:0;width:100%}
 .tb-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;line-height:1.35}
 .tb-nm.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -251,7 +252,7 @@ button.stat:hover{background:var(--s3)}
 .today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:8;pointer-events:none;opacity:.75}
 
 /* Filter bar */
-.filter-bar{padding:9px 12px;border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 1fr;gap:5px;flex-shrink:0}
+.filter-bar{padding:9px 12px;border-bottom:1px solid var(--bd);display:flex;flex-direction:row;gap:5px;flex-shrink:0}
 .fi-sel{width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r);padding:6px 9px;font-size:12px;color:var(--txt);outline:none;font-family:inherit;cursor:pointer}
 .fi-sel:focus{border-color:var(--gold);color:var(--txt)}
 .fi-sel option{background:var(--s2);color:var(--txt)}
@@ -262,9 +263,15 @@ button.stat:hover{background:var(--s3)}
 .scope-row-inner{display:flex;flex:1}
 .scope-resize-handle{height:5px;cursor:ns-resize;background:transparent;transition:background .15s;flex-shrink:0;position:relative;z-index:6}
 .scope-resize-handle:hover,.scope-resize-handle.dragging{background:var(--gold);opacity:.5}
-.row-lbl{width:var(--tlw);flex-shrink:0;border-right:1px solid var(--bd);background:var(--s1);padding:10px 12px;position:sticky;left:0;z-index:5}
+.scope-row.collapsed .scope-row-inner,.output-row.collapsed .row-track{display:none}
+.scope-row.collapsed .scope-resize-handle{display:none}
+.row-lbl{width:var(--tlw);flex-shrink:0;border-right:1px solid var(--bd);background:var(--s1);padding:10px 12px;position:sticky;left:0;z-index:5;display:flex;flex-direction:column;justify-content:center}
+.row-lbl-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
 .row-lbl h3{font-family:'Crimson Pro',Georgia,serif;font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px;letter-spacing:.2px}
 .row-lbl p{font-size:11px;color:var(--txt2)}
+.row-toggle{background:none;border:none;color:var(--txt3);cursor:pointer;padding:2px;line-height:1;border-radius:3px;transition:color .15s,transform .15s;display:flex;align-items:center;flex-shrink:0}
+.row-toggle:hover{color:var(--txt)}
+.row-toggle.collapsed{transform:rotate(-90deg)}
 .row-track{display:flex;flex:1}
 .scope-block,.output-block{border-right:1px solid var(--bd);border-left:3px solid;padding:8px;display:flex;flex-direction:column}
 .scope-block{overflow:hidden}
@@ -1126,8 +1133,7 @@ function buildSidebar() {
     `<option value="${p.id}"${f.phase===String(p.id)?' selected':''}>${esc(p.name)}</option>`).join('');
   const tmOpts = S.teams.map(tm =>
     `<option value="${tm.id}"${f.team===String(tm.id)?' selected':''}>${esc(tm.name)}</option>`).join('');
-  const tgOpts = S.tags.map(tg =>
-    `<option value="${esc(tg)}"${f.tag===tg?' selected':''}>${esc(tg)}</option>`).join('');
+
 
   const taskCards = tasks.length
     ? tasks.map(buildTaskCard).join('')
@@ -1157,9 +1163,6 @@ function buildSidebar() {
     </select>
     <select class="fi-sel" id="f-team" aria-label="Lọc nhóm">
       <option value="">Nhóm: Tất cả</option>${tmOpts}
-    </select>
-    <select class="fi-sel" id="f-tag" aria-label="Lọc tag">
-      <option value="">Tag: Tất cả</option>${tgOpts}
     </select>
     <select class="fi-sel" id="f-status" aria-label="Lọc trạng thái">
       <option value="backlog"${f.status==='backlog'||!f.status?' selected':''}>Backlog</option>
@@ -1210,6 +1213,7 @@ function buildTaskCard(t) {
 function buildTimeline() {
   const tw = totalWeeks();
   const twFrac = todayWeekFrac();
+  const rowState = loadRowState();
 
   /* Phase row */
   const sortedPhases = [...S.phases].sort((a,b) => a.startWeek - b.startWeek);
@@ -1352,19 +1356,29 @@ function buildTimeline() {
         <div style="flex:1;background:var(--bg)"></div>
       </div>
     </div>
-    <div class="scope-row" id="scope-row">
+    <div class="scope-row${rowState.scope==='collapsed'?' collapsed':''}" id="scope-row">
       <div class="scope-row-inner">
         <div class="row-lbl">
-          <h3>Phase Scope</h3>
+          <div class="row-lbl-top">
+            <h3>Phase Scope</h3>
+            <button class="row-toggle${rowState.scope==='collapsed'?' collapsed':''}" id="scope-toggle" aria-label="Thu gọn/mở rộng Phase Scope" title="Thu gọn/mở rộng">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
           <p>Phạm vi &amp; mục tiêu</p>
         </div>
         <div class="row-track">${scopeTrack}</div>
       </div>
       <div class="scope-resize-handle" id="scope-resize-handle" title="Kéo để thay đổi chiều cao"></div>
     </div>
-    <div class="output-row">
+    <div class="output-row${rowState.output==='collapsed'?' collapsed':''}" id="output-row">
       <div class="row-lbl">
-        <h3>Output</h3>
+        <div class="row-lbl-top">
+          <h3>Output</h3>
+          <button class="row-toggle${rowState.output==='collapsed'?' collapsed':''}" id="output-toggle" aria-label="Thu gọn/mở rộng Output" title="Thu gọn/mở rộng">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
         <p>Checklist đầu ra</p>
       </div>
       <div class="row-track">${outTrack}</div>
@@ -2102,7 +2116,6 @@ function bind() {
   /* Filter selects */
   q('#f-phase')?.addEventListener('change', e => { S.ui.filter.phase = e.target.value; render(); });
   q('#f-team')?.addEventListener('change',  e => { S.ui.filter.team  = e.target.value; render(); });
-  q('#f-tag')?.addEventListener('change',   e => { S.ui.filter.tag   = e.target.value; render(); });
   q('#f-status')?.addEventListener('change',e => { S.ui.filter.status= e.target.value; render(); });
 
   /* Add tag */
@@ -2325,7 +2338,7 @@ function bind() {
     });
   });
 
-  /* Task bar drag-reorder within same phase */
+  /* Task bar drag-reorder within same phase (insert-before) */
   qAll('.tb[data-task-id]').forEach(el => {
     el.addEventListener('dragover', e => {
       if (!S.ui.dragData || S.ui.dragData.type !== 'bar') return;
@@ -2334,12 +2347,12 @@ function bind() {
       if (!dragTask || !hoverTask) return;
       if (dragTask.id !== hoverTask.id && dragTask.phaseId !== null && dragTask.phaseId === hoverTask.phaseId && dragTask.teamId === hoverTask.teamId) {
         e.preventDefault(); e.stopPropagation();
-        el.classList.add('tb-swap-target');
+        el.classList.add('tb-insert-before');
       }
     });
-    el.addEventListener('dragleave', () => el.classList.remove('tb-swap-target'));
+    el.addEventListener('dragleave', () => el.classList.remove('tb-insert-before'));
     el.addEventListener('drop', e => {
-      el.classList.remove('tb-swap-target');
+      el.classList.remove('tb-insert-before');
       if (!S.ui.dragData || S.ui.dragData.type !== 'bar') return;
       const dragTask = taskById(S.ui.dragData.taskId);
       const hoverTask = taskById(+el.dataset.taskId);
@@ -2347,10 +2360,13 @@ function bind() {
       if (dragTask.phaseId !== null && dragTask.phaseId === hoverTask.phaseId && dragTask.teamId === hoverTask.teamId) {
         e.preventDefault(); e.stopPropagation();
         pushHistory();
+        // Insert dragTask before hoverTask
         const fromIdx = S.tasks.indexOf(dragTask);
-        const toIdx   = S.tasks.indexOf(hoverTask);
+        let toIdx = S.tasks.indexOf(hoverTask);
         if (fromIdx !== -1 && toIdx !== -1) {
           S.tasks.splice(fromIdx, 1);
+          // recalculate toIdx after removal
+          toIdx = S.tasks.indexOf(hoverTask);
           S.tasks.splice(toIdx, 0, dragTask);
         }
         S.ui.dragData = null;
@@ -2526,6 +2542,20 @@ function bind() {
     });
   }
 
+  /* Row collapse toggles */
+  q('#scope-toggle')?.addEventListener('click', () => {
+    const rs = loadRowState();
+    rs.scope = rs.scope === 'collapsed' ? 'expanded' : 'collapsed';
+    saveRowState(rs);
+    render(true);
+  });
+  q('#output-toggle')?.addEventListener('click', () => {
+    const rs = loadRowState();
+    rs.output = rs.output === 'collapsed' ? 'expanded' : 'collapsed';
+    saveRowState(rs);
+    render(true);
+  });
+
   /* Modal */
   if (S.ui.modal?.type === 'import') { bindImportModal(); }
   else { bindModal(); }
@@ -2542,11 +2572,23 @@ function bindModal() {
   if (!bg) return;
   const type = S.ui.modal?.type;
 
-  /* Auto-focus first text input for keyboard accessibility */
+  /* Auto-focus first input + focus trap */
+  const FOCUSABLE = 'input,select,textarea,button:not([disabled]),[tabindex]:not([tabindex="-1"])';
   setTimeout(() => {
     const first = bg.querySelector('input[type=text],input:not([type]),input[type=date],input[type=number]');
     if (first) first.focus();
   }, 50);
+  bg.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    const focusable = [...bg.querySelectorAll(FOCUSABLE)].filter(el => !el.closest('.mbg') || bg.contains(el));
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
 
   bg.addEventListener('click', e => { if (e.target === bg) closeModal(); });
   q('#m-cancel')?.addEventListener('click', closeModal);
@@ -3027,9 +3069,19 @@ function esc(s)   {
 const LS_KEY        = 'roadmap-state-v1';   // legacy key
 const INDEX_KEY     = 'roadmap-index';
 const PROJ_PFX      = 'roadmap-proj-';
+const ROW_STATE_KEY = 'roadmap-row-state';
 const PROJ_ACCENTS  = ['#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#e05757'];
 let   currentProjId = null;    // null = Home, string = project id
 let   homeCtxId     = null;    // which card's context menu is open
+
+/* ── Row state helpers (scope/output collapsed) ── */
+function loadRowState() {
+  try { const r = localStorage.getItem(ROW_STATE_KEY); return r ? JSON.parse(r) : {scope:'expanded',output:'expanded'}; }
+  catch(e) { return {scope:'expanded',output:'expanded'}; }
+}
+function saveRowState(s) {
+  try { localStorage.setItem(ROW_STATE_KEY, JSON.stringify(s)); } catch(e) {}
+}
 
 /* ── Index helpers ── */
 function loadIndex() {
