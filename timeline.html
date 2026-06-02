@@ -439,6 +439,56 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .exp-ol{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:10px;color:var(--txt2);font-size:12px}
 .exp-spin{width:26px;height:26px;border:2px solid var(--bd2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── IMPORT MODAL ── */
+.mdl.mdl-wide{max-width:700px;width:96vw}
+.imp-steps{display:flex;align-items:center;margin-bottom:20px}
+.imp-step-dot{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;color:var(--txt3);white-space:nowrap}
+.imp-step-dot.active{color:var(--gold)}
+.imp-step-dot.done{color:var(--grn)}
+.imp-step-num{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .2s}
+.imp-step-dot.active .imp-step-num{background:var(--gold);border-color:var(--gold);color:#080808}
+.imp-step-dot.done .imp-step-num{background:var(--grn);border-color:var(--grn);color:#fff}
+.imp-step-line{flex:1;height:1px;background:var(--bd2);margin:0 10px}
+.imp-dropzone{border:1.5px dashed var(--bd2);border-radius:var(--r2);padding:26px 20px;text-align:center;cursor:pointer;transition:all .15s;margin-top:4px}
+.imp-dropzone:hover,.imp-dropzone.drag-over{border-color:var(--gold);background:var(--goldB)}
+.imp-dropzone-ico{color:var(--txt3);margin-bottom:8px}
+.imp-dropzone-lbl{font-size:13px;color:var(--txt2);line-height:1.6}
+.imp-dropzone-sub{font-size:11px;color:var(--txt3);margin-top:3px}
+.imp-file-chosen{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--s3);border-radius:var(--r);margin-top:6px;font-size:13px}
+.imp-file-name{flex:1;color:var(--txt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imp-file-clear{background:none;border:none;color:var(--txt3);cursor:pointer;padding:2px 5px;font-size:15px;line-height:1;border-radius:3px}
+.imp-file-clear:hover{color:var(--red);background:rgba(224,87,87,.1)}
+.imp-tpl-row{display:flex;gap:8px;margin-top:5px}
+.imp-tpl-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.imp-tpl-csv{background:var(--s3);border:1px solid var(--bd2);color:var(--txt2)}.imp-tpl-csv:hover{color:var(--txt);border-color:var(--bd3);background:var(--s4)}
+.imp-tpl-sheets{background:transparent;border:1px solid var(--bd2);color:var(--txt2)}.imp-tpl-sheets:hover{color:var(--txt);border-color:var(--bd3)}
+.imp-mode-row{display:flex;gap:8px;margin-top:6px}
+.imp-mode-btn{flex:1;padding:10px 14px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);color:var(--txt2);background:var(--s2);font-family:inherit;transition:all .15s;text-align:left;line-height:1.4}
+.imp-mode-btn.sel{border-color:var(--gold);color:var(--gold);background:var(--goldD)}
+.imp-mode-replace.sel{border-color:var(--red)!important;color:var(--red)!important;background:rgba(224,87,87,.07)!important}
+.imp-mode-warn{font-size:11px;color:var(--red);margin-top:5px;padding:7px 10px;background:rgba(224,87,87,.07);border-radius:var(--r);display:none}
+.imp-mode-warn.show{display:block}
+.imp-struct-err{background:rgba(224,87,87,.07);border:1px solid rgba(224,87,87,.25);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--red);margin-top:8px;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.imp-preview-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.imp-preview-summary{font-size:13px;color:var(--txt2)}
+.imp-preview-summary b{color:var(--txt)}
+.imp-preview-summary .err-c{color:var(--red)}
+.imp-back-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--txt3);cursor:pointer;background:none;border:1px solid var(--bd2);font-family:inherit;padding:5px 10px;border-radius:var(--r);transition:all .15s}
+.imp-back-btn:hover{color:var(--txt);border-color:var(--bd3)}
+.imp-table-wrap{overflow:auto;max-height:280px;border:1px solid var(--bd);border-radius:var(--r)}
+.imp-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.imp-tbl th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--txt3);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:2;white-space:nowrap}
+.imp-tbl td{padding:7px 10px;border-bottom:1px solid var(--bd);color:var(--txt2);vertical-align:middle;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imp-tbl td:first-child{width:30px;text-align:center;padding:0 8px}
+.imp-tbl tr:last-child td{border-bottom:none}
+.imp-tbl tr.row-err td{background:rgba(224,87,87,.05);color:var(--red)!important;opacity:.85}
+.imp-tbl tr.row-skip td:not(:first-child){opacity:.35}
+.imp-err-tag{display:inline-block;font-size:10px;color:var(--red);background:rgba(224,87,87,.12);padding:1px 5px;border-radius:3px;margin-left:4px;white-space:nowrap;vertical-align:middle}
+.imp-badge-bl{display:inline-block;font-size:10px;color:var(--txt3);background:var(--s3);padding:1px 5px;border-radius:3px}
+/* toast */
+.imp-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:10px 18px;font-size:13px;color:var(--txt);box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:300;animation:fdin .2s ease;white-space:nowrap;pointer-events:none}
+@keyframes fdin{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 </style>
 </head>
 <body>
@@ -985,6 +1035,8 @@ ${ro ? `<div class="ro-banner">
         <button class="add-dd-item" role="menuitem" data-add="phase">${svgIcon('map',13)} Phase</button>
         <button class="add-dd-item" role="menuitem" data-add="add-task">${svgIcon('edit',13)} Task</button>
         <button class="add-dd-item" role="menuitem" data-add="add-team">${svgIcon('users',13)} Nhóm</button>
+        <div style="height:1px;background:var(--bd);margin:3px 5px"></div>
+        <button class="add-dd-item" role="menuitem" data-add="import-csv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Import CSV</button>
       </div>
     </div>
     <button class="btn btn-gold" id="btn-export">${svgIcon('package',13)} Export PDF</button>
@@ -998,7 +1050,7 @@ ${ro ? `<div class="ro-banner">
   ${buildSidebar()}
   ${buildTimeline()}
 </div>
-${S.ui.modal ? buildModal() : ''}
+${S.ui.modal ? (S.ui.modal.type === 'import' ? buildImportModal() : buildModal()) : ''}
 ${S.ui.ctx   ? buildCtx()   : ''}`;
 }
 
@@ -1398,7 +1450,9 @@ function buildHome() {
     `<span class="proj-accent-swatch${i===0?' sel':''}" data-acc="${c}" style="background:${c}"></span>`
   ).join('');
 
-  const modal = S.ui.modal ? buildHomeModal(accentSwatches) : '';
+  const modal = S.ui.modal
+    ? (S.ui.modal.type === 'import' ? buildImportModal() : buildHomeModal(accentSwatches))
+    : '';
 
   if (idx.length === 0 && !S.ui.modal) {
     return `<div class="home">
@@ -1443,6 +1497,10 @@ function buildHomeHdr(count) {
     <div class="home-hdr-spacer"></div>
     <div class="home-hdr-logo"><img src="data:image/png;base64,${LOGO_B64}" alt="Arthur" style="height:56px;width:auto"></div>
     <div class="home-hdr-actions">
+      <button class="btn btn-ghost" id="home-import-btn" title="Import từ CSV">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Import CSV
+      </button>
       <button class="btn btn-ghost" id="home-theme-btn" title="Đổi giao diện">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>
       </button>
@@ -1554,6 +1612,9 @@ function bindHome() {
   q('#home-new-btn')?.addEventListener('click', openNew);
   q('#home-new-hdr-btn')?.addEventListener('click', openNew);
 
+  /* Import CSV button */
+  q('#home-import-btn')?.addEventListener('click', () => openImportModal(null));
+
   /* Card click → open project */
   qAll('.proj-card[data-proj-id]').forEach(card => {
     card.addEventListener('click', e => {
@@ -1640,6 +1701,9 @@ function bindHome() {
     if (e.key === 'Escape') { S.ui.modal=null; homeCtxId=null; renderHome(); }
     if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') q('#m-save')?.click();
   }, {once:true});
+
+  // Import modal bind (runs on top of or instead of normal modal bind)
+  if (S.ui.modal?.type === 'import') bindImportModal();
 }
 
 /* ── Modal ── */
@@ -1851,6 +1915,7 @@ function bind() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       q('#add-new-menu')?.classList.remove('open');
+      if (btn.dataset.add === 'import-csv') { openImportModal(currentProjId); return; }
       const type = btn.dataset.add === 'phase' ? 'add-phase' : btn.dataset.add;
       openModal(type);
     });
@@ -2192,7 +2257,8 @@ function bind() {
   });
 
   /* Modal */
-  bindModal();
+  if (S.ui.modal?.type === 'import') { bindImportModal(); }
+  else { bindModal(); }
 
   /* Global close — remove before re-adding to prevent accumulation */
   document.removeEventListener('click', onDocClick);
@@ -2880,6 +2946,473 @@ function loadSampleData() {
   ];
   S.tags = ['research','UX','tech','growth','tracking'];
   render();
+}
+
+/* ══════════════════════════════
+   CSV IMPORT FEATURE
+══════════════════════════════ */
+const SHEETS_TEMPLATE_URL = 'https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms/copy';
+
+/* ── Helpers ── */
+function showToast(msg, dur = 3000) {
+  const el = document.createElement('div');
+  el.className = 'imp-toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), dur);
+}
+
+function rerender() {
+  if (currentProjId) render(); else renderHome();
+}
+
+/* ── Entry point ── */
+function openImportModal(fromProjId) {
+  const idx = loadIndex();
+  const defaultTarget = fromProjId || (idx.length ? idx[0].id : 'new');
+  S.ui.modal = {
+    type: 'import',
+    step: 1,
+    fromProject: fromProjId,
+    targetId: fromProjId || 'new',
+    mode: 'merge',
+    newProjName: '',
+    newProjAccent: '#D0A052',
+    filename: '',
+    parsedData: null,
+    validatedRows: null,
+    checkedRows: null,
+    cfgStart: null,
+    cfgEnd: null,
+    structError: null,
+  };
+  rerender();
+}
+
+/* ── Build Import Modal HTML ── */
+function buildImportModal() {
+  const t = S.ui.modal;
+  if (!t || t.type !== 'import') return '';
+  const step = t.step || 1;
+  const idx = loadIndex();
+
+  const stepsHtml = `<div class="imp-steps">
+    <div class="imp-step-dot ${step > 1 ? 'done' : 'active'}">
+      <div class="imp-step-num">${step > 1 ? '✓' : '1'}</div><span>Cài đặt</span>
+    </div>
+    <div class="imp-step-line"></div>
+    <div class="imp-step-dot ${step === 2 ? 'active' : ''}">
+      <div class="imp-step-num">2</div><span>Xem trước</span>
+    </div>
+  </div>`;
+
+  if (step === 1) {
+    const isNew = !t.targetId || t.targetId === 'new';
+    const projOptions = idx.map(p =>
+      `<option value="${p.id}"${t.targetId === p.id ? ' selected' : ''}>${esc(p.name)}</option>`
+    ).join('');
+
+    return `<div class="mbg" id="modal-bg" role="presentation">
+      <div class="mdl mdl-wide" role="dialog" aria-modal="true" aria-label="Import CSV">
+        <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Import từ CSV</h3>
+        ${stepsHtml}
+
+        <div class="fg">
+          <label for="imp-target">Import vào project</label>
+          <select class="fi" id="imp-target" style="cursor:pointer">
+            <option value="new"${isNew ? ' selected' : ''}>✨ Tạo project mới từ CSV</option>
+            ${idx.length ? `<optgroup label="— Hoặc chọn project có sẵn —">${projOptions}</optgroup>` : ''}
+          </select>
+        </div>
+
+        ${isNew ? `<div class="fg" id="imp-newname-row">
+          <label for="imp-newname">Tên project mới</label>
+          <input class="fi" id="imp-newname" value="${esc(t.newProjName||'')}" placeholder="VD: Product Roadmap Q3 2025" autocomplete="off"/>
+        </div>` : `<div class="fg">
+          <label>Xử lý dữ liệu hiện có</label>
+          <div class="imp-mode-row">
+            <button class="imp-mode-btn${t.mode !== 'replace' ? ' sel' : ''}" id="imp-mode-merge">
+              <strong>🔀 Gộp thêm vào</strong><br>
+              <span style="font-size:11px;font-weight:400;opacity:.7">Giữ data cũ, chỉ thêm mới từ CSV</span>
+            </button>
+            <button class="imp-mode-btn imp-mode-replace${t.mode === 'replace' ? ' sel' : ''}" id="imp-mode-replace">
+              <strong>🔄 Thay thế toàn bộ</strong><br>
+              <span style="font-size:11px;font-weight:400;opacity:.7">Xóa data cũ, thay bằng CSV</span>
+            </button>
+          </div>
+          <div class="imp-mode-warn${t.mode === 'replace' ? ' show' : ''}">⚠️ Toàn bộ phases, teams và tasks hiện tại sẽ bị xóa vĩnh viễn.</div>
+        </div>`}
+
+        <div class="fg">
+          <label>File CSV</label>
+          ${t.filename ? `<div class="imp-file-chosen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--grn)" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+            <span class="imp-file-name">${esc(t.filename)}</span>
+            <button class="imp-file-clear" id="imp-file-clear" title="Xóa file">✕</button>
+          </div>` : `<div class="imp-dropzone" id="imp-dropzone">
+            <div class="imp-dropzone-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+            <div class="imp-dropzone-lbl">Kéo thả file CSV vào đây</div>
+            <div class="imp-dropzone-sub">hoặc click để chọn file</div>
+            <input type="file" id="imp-file-input" accept=".csv,text/csv" style="display:none">
+          </div>`}
+          ${t.structError ? `<div class="imp-struct-err">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div>${esc(t.structError)}</div>
+          </div>` : ''}
+        </div>
+
+        <div class="fg">
+          <label>Template mẫu</label>
+          <div class="imp-tpl-row">
+            <button class="imp-tpl-btn imp-tpl-csv" id="imp-dl-tpl">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Tải template CSV
+            </button>
+            <a class="imp-tpl-btn imp-tpl-sheets" href="${SHEETS_TEMPLATE_URL}" target="_blank" rel="noopener noreferrer">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Mở Google Sheets template ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="mdl-btns">
+          <button class="bsm b-sec" id="m-cancel">Hủy</button>
+          <button class="bsm b-primary" id="imp-next"${!t.filename ? ' disabled style="opacity:.45;cursor:not-allowed"' : ''}>Xem trước →</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Step 2: Preview ── */
+  const { validatedRows = [], checkedRows = new Set() } = t;
+  const errCount = validatedRows.filter(r => r._errors.length).length;
+  const okChecked = [...checkedRows].filter(i => !validatedRows[i]?._errors.length).length;
+
+  const tableRows = validatedRows.map((row, i) => {
+    const hasErr = row._errors.length > 0;
+    const isChecked = checkedRows.has(i);
+    const rowCls = hasErr ? 'row-err' : (!isChecked ? 'row-skip' : '');
+    const errTag = hasErr ? `<span class="imp-err-tag">${esc(row._errors[0])}</span>` : '';
+    const startCell = row._weekStart ? esc(row.start_date) : `<span class="imp-badge-bl">Backlog</span>`;
+    return `<tr class="${rowCls}" data-row-i="${i}">
+      <td><input type="checkbox" class="imp-cb" data-i="${i}"${isChecked?' checked':''}${hasErr?' disabled':''}></td>
+      <td>${esc(row.task_name||'—')}${errTag}</td>
+      <td>${esc(row.phase_name||'—')}</td>
+      <td>${esc(row.team_name||'—')}</td>
+      <td>${startCell}</td>
+      <td>${esc(row.end_date||'')}</td>
+      <td>${esc((row.tags||'').replace(/[;|]/g,', ').substring(0,25))}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="mbg" id="modal-bg" role="presentation">
+    <div class="mdl mdl-wide" role="dialog" aria-modal="true" aria-label="Import CSV - Xem trước">
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Import từ CSV</h3>
+      ${stepsHtml}
+
+      <div class="imp-preview-hd">
+        <div class="imp-preview-summary" id="imp-summary">
+          <b>${okChecked}</b> tasks sẽ import
+          ${errCount ? `· <span class="err-c">${errCount} row lỗi bị bỏ qua</span>` : ''}
+        </div>
+        <button class="imp-back-btn" id="imp-back">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          Quay lại
+        </button>
+      </div>
+
+      <div class="imp-table-wrap">
+        <table class="imp-tbl">
+          <thead><tr>
+            <th><input type="checkbox" id="imp-cb-all" title="Chọn/bỏ tất cả" checked></th>
+            <th>Task</th><th>Phase</th><th>Team</th><th>Start</th><th>End</th><th>Tags</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+
+      <div class="mdl-btns" style="margin-top:14px">
+        <button class="bsm b-sec" id="m-cancel">Hủy</button>
+        <button class="bsm b-primary" id="imp-confirm"${okChecked===0?' disabled style="opacity:.45;cursor:not-allowed"':''}>✓ Import ${okChecked} task${okChecked!==1?'s':''}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── Bind Import Modal ── */
+function bindImportModal() {
+  const t = S.ui.modal;
+  if (!t || t.type !== 'import') return;
+
+  const close = () => { S.ui.modal = null; rerender(); };
+  q('#m-cancel')?.addEventListener('click', close);
+  q('#modal-bg')?.addEventListener('click', e => { if (e.target.id === 'modal-bg') close(); });
+
+  if (t.step === 1) {
+    q('#imp-target')?.addEventListener('change', e => {
+      t.targetId = e.target.value;
+      if (!t.mode) t.mode = 'merge';
+      rerender();
+    });
+    q('#imp-newname')?.addEventListener('input', e => { t.newProjName = e.target.value; });
+    q('#imp-mode-merge')?.addEventListener('click', () => { t.mode = 'merge'; rerender(); });
+    q('#imp-mode-replace')?.addEventListener('click', () => { t.mode = 'replace'; rerender(); });
+    q('#imp-dl-tpl')?.addEventListener('click', downloadCSVTemplate);
+    q('#imp-file-clear')?.addEventListener('click', () => {
+      t.filename = ''; t.structError = null; t.parsedData = null; rerender();
+    });
+    const dz = q('#imp-dropzone');
+    if (dz) {
+      dz.addEventListener('click', () => q('#imp-file-input')?.click());
+      dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+      dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+      dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); const f = e.dataTransfer.files[0]; if (f) handleCSVFile(f); });
+    }
+    q('#imp-file-input')?.addEventListener('change', e => { const f = e.target.files[0]; if (f) handleCSVFile(f); });
+
+    q('#imp-next')?.addEventListener('click', () => {
+      if (!t.parsedData) return;
+      t.targetId = q('#imp-target')?.value || 'new';
+      const nameEl = q('#imp-newname');
+      if (nameEl) t.newProjName = nameEl.value.trim() || t.newProjName;
+
+      let cfgStart, cfgEnd;
+      if (t.targetId !== 'new') {
+        try { const raw = localStorage.getItem(projKey(t.targetId)); if (raw) { const d = JSON.parse(raw); cfgStart = d.cfg?.start; cfgEnd = d.cfg?.end; } } catch(e) {}
+      } else {
+        const dates = t.parsedData.rows.flatMap(r => [r.start_date, r.end_date].filter(Boolean))
+          .map(s => { try { const d = parseDate(s); return isNaN(d) ? null : d; } catch(e) { return null; } }).filter(Boolean);
+        if (dates.length) {
+          const mn = new Date(Math.min(...dates.map(d => d.getTime())));
+          const mx = new Date(Math.max(...dates.map(d => d.getTime())));
+          const dow = mn.getDay(); mn.setDate(mn.getDate() + (dow===0?-6:1-dow));
+          cfgStart = dateStrYMD(mn); cfgEnd = dateStrYMD(mx);
+        } else {
+          const n = new Date(); const e2 = new Date(n); e2.setMonth(e2.getMonth()+6);
+          cfgStart = dateStrYMD(n); cfgEnd = dateStrYMD(e2);
+        }
+      }
+      t.cfgStart = cfgStart; t.cfgEnd = cfgEnd;
+      t.validatedRows = validateCSVRows(t.parsedData.rows, cfgStart, cfgEnd);
+      t.checkedRows = new Set(t.validatedRows.map((_,i)=>i).filter(i => !t.validatedRows[i]._errors.length));
+      t.step = 2;
+      rerender();
+    });
+
+  } else {
+    q('#imp-back')?.addEventListener('click', () => { t.step = 1; rerender(); });
+
+    qAll('.imp-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const i = parseInt(cb.dataset.i);
+        cb.checked ? t.checkedRows.add(i) : t.checkedRows.delete(i);
+        refreshImportPreview();
+      });
+    });
+    q('#imp-cb-all')?.addEventListener('change', e => {
+      qAll('.imp-cb:not(:disabled)').forEach(cb => {
+        cb.checked = e.target.checked;
+        const i = parseInt(cb.dataset.i);
+        e.target.checked ? t.checkedRows.add(i) : t.checkedRows.delete(i);
+      });
+      refreshImportPreview();
+    });
+    q('#imp-confirm')?.addEventListener('click', executeCSVImport);
+  }
+}
+
+function refreshImportPreview() {
+  const t = S.ui.modal;
+  if (!t || !t.validatedRows) return;
+  const okChecked = [...t.checkedRows].filter(i => !t.validatedRows[i]?._errors.length).length;
+  const errCount = t.validatedRows.filter(r => r._errors.length).length;
+  const btn = q('#imp-confirm');
+  if (btn) { btn.textContent = `✓ Import ${okChecked} task${okChecked!==1?'s':''}`; btn.disabled = okChecked===0; btn.style.opacity = okChecked===0?'.45':'1'; }
+  const sum = q('#imp-summary');
+  if (sum) sum.innerHTML = `<b>${okChecked}</b> tasks sẽ import${errCount?` · <span class="err-c">${errCount} row lỗi bị bỏ qua</span>`:''}`;
+  qAll('.imp-tbl tr[data-row-i]').forEach(tr => {
+    const i = parseInt(tr.dataset.rowI);
+    const hasErr = t.validatedRows[i]?._errors.length > 0;
+    if (!hasErr) tr.className = t.checkedRows.has(i) ? '' : 'row-skip';
+  });
+}
+
+/* ── CSV Parsing ── */
+function handleCSVFile(file) {
+  const t = S.ui.modal;
+  if (!t) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'csv' && file.type !== 'text/csv') {
+    t.structError = `File không hợp lệ (nhận được .${ext}). Vui lòng chọn file .csv`;
+    t.filename = ''; t.parsedData = null; rerender(); return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    let text = e.target.result;
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // strip BOM
+    const result = parseCSVText(text);
+    if (result.error) { t.structError = result.error; t.filename = ''; t.parsedData = null; }
+    else {
+      t.structError = null; t.filename = file.name; t.parsedData = result;
+      if (!t.newProjName) t.newProjName = file.name.replace(/\.csv$/i,'').replace(/[-_]/g,' ');
+    }
+    rerender();
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCSVText(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return { error: 'File CSV rỗng.' };
+  const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
+  if (!headers.includes('task_name')) return { error: `Thiếu cột bắt buộc "task_name". Cột hiện có: ${headers.join(', ')}` };
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h,j) => { row[h] = (vals[j]||'').trim(); });
+    rows.push(row);
+  }
+  if (!rows.length) return { error: 'File CSV không có dòng dữ liệu (chỉ có header).' };
+  return { headers, rows };
+}
+
+function parseCSVLine(line) {
+  const res = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
+    else if (c === ',' && !inQ) { res.push(cur); cur=''; }
+    else cur += c;
+  }
+  res.push(cur); return res;
+}
+
+/* ── Validation ── */
+function validateCSVRows(rows, cfgStart, cfgEnd) {
+  const startMon = cfgStart ? startMonday(cfgStart) : null;
+  const endDate  = cfgEnd   ? parseDate(cfgEnd)     : null;
+  return rows.map(row => {
+    const r = {...row, _errors:[], _weekStart:null, _weekDur:1};
+    if (!r.task_name) { r._errors.push('Thiếu task_name'); return r; }
+    const hasDates = r.start_date || r.end_date;
+    if (!hasDates) return r; // backlog — OK
+    let sd = null, ed = null;
+    if (r.start_date) { try { sd = parseDate(r.start_date); if (isNaN(sd.getTime())) sd=null; } catch(e){} if (!sd) r._errors.push(`start_date không hợp lệ`); }
+    if (r.end_date)   { try { ed = parseDate(r.end_date);   if (isNaN(ed.getTime())) ed=null; } catch(e){} if (!ed) r._errors.push(`end_date không hợp lệ`); }
+    if (sd && ed && sd > ed) r._errors.push('start_date sau end_date');
+    if (sd && startMon && sd < startMon) r._errors.push(`start_date trước ngày bắt đầu project`);
+    if (ed && endDate && ed > new Date(endDate.getTime()+7*86400000)) r._errors.push(`end_date vượt ngoài timeline`);
+    if (!r._errors.length && sd && startMon) {
+      const diffDays = (sd - startMon) / 86400000;
+      r._weekStart = Math.max(1, Math.floor(diffDays/7)+1);
+      if (ed) {
+        const diffEnd = (ed - startMon) / 86400000;
+        r._weekDur = Math.max(1, Math.floor(diffEnd/7)+1 - r._weekStart + 1);
+      }
+    }
+    return r;
+  });
+}
+
+/* ── Execute Import ── */
+function executeCSVImport() {
+  const t = S.ui.modal;
+  if (!t) return;
+  const { targetId, mode, newProjName, validatedRows, checkedRows, cfgStart, cfgEnd } = t;
+  const rowsToImport = validatedRows.filter((_,i) => checkedRows.has(i) && !validatedRows[i]._errors.length);
+  if (!rowsToImport.length) return;
+
+  let projId, projData;
+  if (targetId === 'new') {
+    projId = 'proj_' + Date.now();
+    projData = { cfg:{title:newProjName||'Imported Project',subtitle:'',start:cfgStart,end:cfgEnd}, phases:[], teams:[], tasks:[], tags:['tracking','UX','tech','growth','research'], _nextId:1 };
+  } else {
+    projId = targetId;
+    try { const raw = localStorage.getItem(projKey(projId)); projData = raw ? JSON.parse(raw) : null; } catch(e) {}
+    if (!projData) { showToast('Không tìm thấy project!'); return; }
+    if (mode === 'replace') { projData.phases=[]; projData.teams=[]; projData.tasks=[]; projData._nextId=1; }
+  }
+
+  let nid = projData._nextId || 1;
+  const nxtId = () => nid++;
+  const phaseMap = {}, teamMap = {};
+  (projData.phases||[]).forEach(p => { phaseMap[p.name.toLowerCase()] = p.id; });
+  (projData.teams||[]).forEach(t2 => { teamMap[t2.name.toLowerCase()] = t2.id; });
+
+  const teamIcons = ['package','code','heart','bar','users','star','globe','target'];
+  rowsToImport.forEach(row => {
+    const pn = (row.phase_name?.trim()||'Uncategorized').toLowerCase();
+    if (!phaseMap[pn]) {
+      const pid = nxtId();
+      const ci = Object.keys(phaseMap).length % PHASE_COLORS.length;
+      projData.phases.push({id:pid, name:row.phase_name?.trim()||'Uncategorized', startWeek:1, endWeek:4, color:PHASE_COLORS[ci], scope:'', outputs:[]});
+      phaseMap[pn] = pid;
+    }
+    if (row.team_name?.trim()) {
+      const tn = row.team_name.trim().toLowerCase();
+      if (!teamMap[tn]) {
+        const tid = nxtId();
+        const ci = Object.keys(teamMap).length;
+        projData.teams.push({id:tid, name:row.team_name.trim(), icon:teamIcons[ci%teamIcons.length], color:PROJ_ACCENTS[ci%PROJ_ACCENTS.length]});
+        teamMap[tn] = tid;
+      }
+    }
+  });
+
+  rowsToImport.forEach(row => {
+    const phaseId = phaseMap[(row.phase_name?.trim()||'Uncategorized').toLowerCase()] || null;
+    const teamId  = row.team_name?.trim() ? (teamMap[row.team_name.trim().toLowerCase()]||null) : null;
+    const tags    = row.tags ? row.tags.split(/[;,|]/).map(s=>s.trim()).filter(Boolean) : [];
+    projData.tasks.push({id:nxtId(), name:row.task_name, phaseId, teamId, startWeek:row._weekStart||null, dur:row._weekDur||1, tags, desc:row.description||''});
+  });
+
+  // Auto-fit phase ranges to cover their tasks
+  projData.phases.forEach(phase => {
+    const pt = projData.tasks.filter(t2 => t2.phaseId===phase.id && t2.startWeek!==null);
+    if (pt.length) { phase.startWeek=Math.min(...pt.map(t2=>t2.startWeek)); phase.endWeek=Math.max(...pt.map(t2=>t2.startWeek+t2.dur-1)); }
+  });
+  projData._nextId = nid;
+
+  try { localStorage.setItem(projKey(projId), JSON.stringify(projData)); }
+  catch(e) { showToast('Lỗi lưu dữ liệu — dung lượng đầy?'); return; }
+
+  const idx = loadIndex();
+  const ex = idx.find(p => p.id === projId);
+  const statsObj = { phases:projData.phases.length, tasks:projData.tasks.length, sched:projData.tasks.filter(t2=>t2.startWeek!==null).length, start:projData.cfg.start, end:projData.cfg.end };
+  if (ex) { ex.updatedAt=Date.now(); ex.stats=statsObj; }
+  else idx.push({ id:projId, name:projData.cfg.title, subtitle:'', accent:t.newProjAccent||'#D0A052', updatedAt:Date.now(), stats:statsObj });
+  saveIndex(idx);
+
+  S.ui.modal = null;
+  const cnt = rowsToImport.length;
+  showToast(`✓ Đã import ${cnt} task${cnt!==1?'s':''} · ${projData.phases.length} phases`);
+  location.hash = '#project-' + projId;
+}
+
+/* ── Download Template ── */
+function downloadCSVTemplate() {
+  const now = new Date();
+  const fmt = d => dateStrYMD(d);
+  const addW = w => { const d = new Date(now); d.setDate(d.getDate()+w*7); return fmt(d); };
+  const headers = ['task_name','phase_name','team_name','start_date','end_date','tags','description'];
+  const rows = [
+    ['User Research',       'Discovery','Product',addW(0), addW(2), 'ux;research','Phỏng vấn người dùng'],
+    ['Competitive Analysis','Discovery','Product',addW(2), addW(4), 'research',   'Phân tích đối thủ'],
+    ['Wireframes',          'Design',   'Design', addW(4), addW(7), 'ux',         'Thiết kế wireframe chính'],
+    ['Prototype v1',        'Design',   'Design', addW(7), addW(10),'ux',         'Prototype tương tác'],
+    ['Backend API',         'Build',    'Eng',    addW(10),addW(14),'tech',       'Xây dựng REST API'],
+    ['Frontend',            'Build',    'Eng',    addW(12),addW(16),'tech',       ''],
+    ['Write spec',          '',         '',       '',      '',      '',           'Chưa có lịch - sẽ vào Backlog'],
+    ['Launch plan',         '',         'Product','',      '',      'growth',     'Kế hoạch ra mắt'],
+  ];
+  const esc2 = v => (v.includes(',')||v.includes('"')||v.includes('\n')) ? `"${v.replace(/"/g,'""')}"` : v;
+  const csv = [headers.join(','), ...rows.map(r => r.map(esc2).join(','))].join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='roadmap-template.csv'; a.click();
+  URL.revokeObjectURL(url);
 }
 
 loadTheme();
