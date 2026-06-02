@@ -87,8 +87,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ph-add-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r);font-size:12px;font-weight:500;color:var(--txt2);background:transparent;border:1px dashed var(--bd2);cursor:pointer;font-family:inherit;transition:all .15s}
 .ph-add-btn:hover{color:var(--gold);border-color:var(--gold);background:var(--goldB)}
 /* Team row label clickable */
-.trl{cursor:pointer!important}
+.trl{cursor:pointer!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .trl:hover{background:var(--s2)!important}
+/* Team drag handle */
+.team-drag-handle{margin-top:auto;padding:4px 6px;color:var(--txt3);cursor:grab;border-radius:var(--r);transition:all .15s;opacity:0;display:flex;align-items:center;justify-content:center}
+.trl:hover .team-drag-handle{opacity:1}
+.team-drag-handle:hover{color:var(--txt2);background:var(--s3)}
+.team-drag-handle:active{cursor:grabbing}
+.tm-row.team-drag-over .trl{background:var(--goldD)!important;border-top:2px solid var(--gold)}
 /* Week stub sticky */
 .wk-stub{position:sticky;left:0;z-index:14;background:var(--s2)}
 
@@ -227,6 +233,7 @@ button.stat:hover{background:var(--s3)}
 .tb:hover{box-shadow:0 4px 14px rgba(0,0,0,.5);z-index:4}
 .tb:active{cursor:grabbing}
 .tb.drg{opacity:.3;z-index:2}
+.tb.tb-swap-target{outline:2px dashed rgba(255,255,255,.7);outline-offset:2px;z-index:4}
 .tb-top{display:flex;align-items:center;gap:4px;min-width:0;width:100%}
 .tb-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;line-height:1.35}
 .tb-nm.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
@@ -403,19 +410,27 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 /* Project card */
-.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:180px}
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:200px}
 .proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-2px)}
-.proj-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
-.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;color:var(--txt);margin-top:10px;margin-bottom:3px;line-height:1.3}
-.proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:1.5;flex:1}
-.proj-card-stats{display:flex;gap:18px;margin-bottom:12px}
+.proj-card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--r2) var(--r2) 0 0}
+.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:24px;font-weight:600;color:var(--txt);margin-top:12px;margin-bottom:4px;line-height:1.25}
+.proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:16px;line-height:1.5;flex:1}
+/* card body: stats left, circle right */
+.proj-card-body{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.proj-card-stats{display:flex;flex-direction:column;gap:10px;flex:1}
+.proj-stat-row{display:flex;gap:18px}
 .proj-stat{display:flex;flex-direction:column;gap:1px}
-.proj-stat-n{font-size:17px;font-weight:700;color:var(--txt);line-height:1}
+.proj-stat-n{font-size:16px;font-weight:700;color:var(--txt);line-height:1}
 .proj-stat-l{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.7px;margin-top:2px}
-.proj-tl-wrap{margin-bottom:12px}
-.proj-tl-dates{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px}
+/* time bar */
+.proj-time-bar-wrap{margin-top:8px}
+.proj-time-bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px}
 .proj-tl-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
 .proj-tl-fill{height:100%;border-radius:2px;min-width:4px;max-width:100%}
+/* circle progress for weeks */
+.proj-circle-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.proj-circle-svg{transform:rotate(-90deg)}
+.proj-circle-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;text-align:center}
 .proj-card-footer{display:flex;justify-content:space-between;align-items:center}
 .proj-date{font-size:11px;color:var(--txt3)}
 .proj-menu{position:relative}
@@ -879,6 +894,7 @@ let S = {
     resizeData: null,
     phaseResize: null,
     phaseDragId: null,
+    teamDragId: null,
     readonly:   false,
   },
   _nextId: 1,
@@ -1390,6 +1406,15 @@ function swapPhases(idA, idB) {
   [a.endWeek,   b.endWeek  ] = [b.endWeek,   a.endWeek  ];
 }
 
+function reorderTeam(dragId, targetId) {
+  pushHistory();
+  const fromIdx = S.teams.findIndex(t => t.id === dragId);
+  const toIdx   = S.teams.findIndex(t => t.id === targetId);
+  if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+  const [team] = S.teams.splice(fromIdx, 1);
+  S.teams.splice(toIdx, 0, team);
+}
+
 /* ── RAF-throttled render (for drag/resize) ── */
 let _rafId = null;
 function renderRAF() {
@@ -1399,17 +1424,45 @@ function renderRAF() {
 
 /* ── Multi-lane algorithm ── */
 function assignLanes(tasks) {
-  const sorted = [...tasks].sort((a,b) => a.startWeek - b.startWeek);
-  const laneEnds = [];   // laneEnds[i] = endWeek of last task in lane i
-  const laneH   = [];    // laneH[i]    = max barH in lane i
-  const result  = {};
+  const result = {};
+  const laneH  = [];
+
+  // Group tasks by phaseId; null-phase tasks handled separately
+  const byPhase = {};
+  const noPhase = [];
+  for (const t of tasks) {
+    if (t.phaseId !== null && t.phaseId !== undefined) {
+      if (!byPhase[t.phaseId]) byPhase[t.phaseId] = [];
+      byPhase[t.phaseId].push(t);
+    } else {
+      noPhase.push(t);
+    }
+  }
+  // Within each phase, preserve S.tasks insertion order
+  for (const k of Object.keys(byPhase)) {
+    byPhase[k].sort((a, b) => S.tasks.indexOf(a) - S.tasks.indexOf(b));
+  }
+
+  // Assign phase-grouped tasks: each gets its own sequential lane (vertical stacking)
+  let nextLane = 0;
+  for (const phaseTasks of Object.values(byPhase)) {
+    for (const t of phaseTasks) {
+      result[t.id] = nextLane;
+      laneH[nextLane] = taskBarH(t);
+      nextLane++;
+    }
+  }
+
+  // No-phase tasks: greedy side-by-side packing starting from nextLane
+  const laneEnds = new Array(nextLane).fill(Infinity); // phase lanes are fully blocked
+  const sorted = [...noPhase].sort((a, b) => a.startWeek - b.startWeek);
   for (const t of sorted) {
     const h = taskBarH(t);
     let placed = false;
-    for (let i = 0; i < laneEnds.length; i++) {
+    for (let i = nextLane; i < laneEnds.length; i++) {
       if (t.startWeek > laneEnds[i]) {
         laneEnds[i] = t.startWeek + t.dur - 1;
-        laneH[i]    = Math.max(laneH[i], h);
+        laneH[i] = Math.max(laneH[i] || 0, h);
         result[t.id] = i;
         placed = true;
         break;
@@ -1421,7 +1474,8 @@ function assignLanes(tasks) {
       laneH.push(h);
     }
   }
-  return { assignments: result, numLanes: Math.max(laneEnds.length, 1), laneH: laneH.length ? laneH : [34] };
+
+  return { assignments: result, numLanes: Math.max(laneH.length, 1), laneH: laneH.length ? laneH : [34] };
 }
 
 function buildTeamRow(tm, tw, twFrac) {
@@ -1458,7 +1512,7 @@ function buildTeamRow(tm, tw, twFrac) {
     const ph    = t.phaseId ? phaseById(t.phaseId) : null;
     const longTitle = (t.name||'').length > 22;
     const tagsHtml = t.tags?.length
-      ? `<div class="tb-tags">${t.tags.slice(0,4).map(tg=>`<span class="tb-tag">#${esc(tg)}</span>`).join('')}</div>`
+      ? `<div class="tb-tags">${t.tags.slice(0,4).map(tg=>`<span class="tb-tag">${esc(tg)}</span>`).join('')}</div>`
       : '';
     return `<div class="tb" draggable="true" data-task-id="${t.id}"
       style="left:${left}px;top:${top}px;width:${width}px;height:${barH}px;background:${color}cc;border-left:3px solid ${color}"
@@ -1481,6 +1535,9 @@ function buildTeamRow(tm, tw, twFrac) {
   <div class="trl" data-team-id="${tm.id}" data-team-ctx="${tm.id}" style="min-height:${rowH}px">
     <div class="tm-ico" style="color:${tm.color||'var(--gold)'}">${svgIcon(tm.icon||'layers',15)}</div>
     <span class="tm-nm">${esc(tm.name)}</span>
+    <div class="team-drag-handle" data-team-drag="${tm.id}" draggable="true" title="Kéo để thay đổi thứ tự nhóm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+    </div>
   </div>
   <div class="trr" data-team="${tm.id}" style="height:${rowH}px">
     ${cells}${todayLine}${bars}
@@ -1568,6 +1625,7 @@ function buildHomeHdr(count) {
 function buildProjCard(p) {
   const today = Date.now();
   const schedPct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
+  const accent = p.accent || '#D0A052';
 
   // Timeline elapsed
   const startTs = p.stats?.start ? new Date(p.stats.start).getTime() : null;
@@ -1579,10 +1637,28 @@ function buildProjCard(p) {
     ? Math.min(100, Math.max(0, Math.round((today - startTs) / (endTs - startTs) * 100)))
     : null;
 
+  // Circle progress SVG (r=15.9 → circumference ≈ 100)
+  const r = 15.9, circ = 2 * Math.PI * r;
+  const weekPct = totalWeeks ? Math.min(100, Math.round((elapsedWeeks / totalWeeks) * 100)) : 0;
+  const dash = totalWeeks ? (weekPct / 100 * circ).toFixed(1) : 0;
+  const circleHtml = totalWeeks !== null ? `
+    <div class="proj-circle-wrap">
+      <svg class="proj-circle-svg" width="60" height="60" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--s4)" stroke-width="2.8"/>
+        <circle cx="18" cy="18" r="${r}" fill="none" stroke="${accent}" stroke-width="2.8"
+          stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
+        <g transform="rotate(90 18 18)">
+          <text x="18" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="var(--txt)" font-family="Inter,sans-serif">${elapsedWeeks}</text>
+          <text x="18" y="23" text-anchor="middle" font-size="5.5" fill="var(--txt3)" font-family="Inter,sans-serif">/ ${totalWeeks}</text>
+        </g>
+      </svg>
+      <span class="proj-circle-lbl">Tuần</span>
+    </div>` : '';
+
   const ctxOpen = homeCtxId === p.id;
   return `
 <div class="proj-card" data-proj-id="${p.id}" role="article" aria-label="${esc(p.name)}">
-  <div class="proj-card-stripe" style="background:${p.accent||'#D0A052'}"></div>
+  <div class="proj-card-stripe" style="background:${accent}"></div>
   <div style="display:flex;justify-content:flex-end">
     <div class="proj-menu">
       <button class="proj-menu-btn" data-proj-menu="${p.id}" aria-label="Tùy chọn project" aria-haspopup="true">
@@ -1611,19 +1687,24 @@ function buildProjCard(p) {
   </div>
   <div class="proj-card-name">${esc(p.name)}</div>
   <div class="proj-card-sub">${esc(p.subtitle||'Chưa có mô tả')}</div>
-  <div class="proj-card-stats">
-    <div class="proj-stat"><span class="proj-stat-n">${p.stats?.phases||0}</span><span class="proj-stat-l">Phase</span></div>
-    <div class="proj-stat"><span class="proj-stat-n">${p.stats?.tasks||0}</span><span class="proj-stat-l">Tasks</span></div>
-    <div class="proj-stat"><span class="proj-stat-n" style="color:${schedPct>0?'var(--grn)':'var(--txt3)'}">${schedPct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
-    ${totalWeeks !== null ? `<div class="proj-stat"><span class="proj-stat-n" style="color:var(--gold)">${elapsedWeeks}/${totalWeeks}</span><span class="proj-stat-l">Tuần</span></div>` : ''}
-  </div>
-  <div class="proj-tl-wrap">
-    ${totalWeeks !== null ? `<div class="proj-tl-dates"><span>${p.stats.start||''}</span><span>${p.stats.end||''}</span></div>` : ''}
-    <div style="position:relative">
-      <div class="proj-tl-bar" style="overflow:hidden"><div class="proj-tl-fill" style="width:${schedPct}%;background:${p.accent||'#D0A052'}"></div></div>
-      ${timePct !== null ? `<div class="proj-tl-bar" style="overflow:hidden;margin-top:4px;background:var(--s3)"><div class="proj-tl-fill" style="width:${timePct}%;background:rgba(208,160,82,.45)"></div></div>` : ''}
+  <div class="proj-card-body">
+    <div class="proj-card-stats">
+      <div class="proj-stat-row">
+        <div class="proj-stat"><span class="proj-stat-n">${p.stats?.phases||0}</span><span class="proj-stat-l">Phase</span></div>
+        <div class="proj-stat"><span class="proj-stat-n">${p.stats?.tasks||0}</span><span class="proj-stat-l">Tasks</span></div>
+        <div class="proj-stat"><span class="proj-stat-n" style="color:${schedPct>0?'var(--grn)':'var(--txt3)'}">${schedPct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
+      </div>
+      ${timePct !== null ? `
+      <div class="proj-time-bar-wrap">
+        <div class="proj-time-bar-lbl">
+          <span>${p.stats?.start||''}</span>
+          <span style="color:var(--txt2);font-weight:500">${timePct}% đã qua</span>
+          <span>${p.stats?.end||''}</span>
+        </div>
+        <div class="proj-tl-bar"><div class="proj-tl-fill" style="width:${timePct}%;background:${accent}"></div></div>
+      </div>` : ''}
     </div>
-    ${timePct !== null ? `<div style="display:flex;justify-content:flex-end;margin-top:3px"><span style="font-size:10px;color:var(--txt3)">${timePct}% thời gian đã qua</span></div>` : ''}
+    ${circleHtml}
   </div>
   <div class="proj-card-footer">
     <span class="proj-date">${timeAgo(p.updatedAt)}</span>
@@ -2202,6 +2283,68 @@ function bind() {
     });
   });
 
+  /* Team row drag/reorder */
+  qAll('.team-drag-handle[data-team-drag]').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      S.ui.teamDragId = +el.dataset.teamDrag;
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => { S.ui.teamDragId = null; });
+  });
+  qAll('.tm-row[data-team-id]').forEach(el => {
+    el.addEventListener('dragover', e => {
+      if (!S.ui.teamDragId) return;
+      const targetId = +el.dataset.teamId;
+      if (targetId !== S.ui.teamDragId) { e.preventDefault(); el.classList.add('team-drag-over'); }
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('team-drag-over'));
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      el.classList.remove('team-drag-over');
+      const targetId = +el.dataset.teamId;
+      if (S.ui.teamDragId && targetId !== S.ui.teamDragId) {
+        reorderTeam(S.ui.teamDragId, targetId);
+        S.ui.teamDragId = null;
+        render();
+      }
+    });
+  });
+
+  /* Task bar drag-reorder within same phase */
+  qAll('.tb[data-task-id]').forEach(el => {
+    el.addEventListener('dragover', e => {
+      if (!S.ui.dragData || S.ui.dragData.type !== 'bar') return;
+      const dragTask = taskById(S.ui.dragData.taskId);
+      const hoverTask = taskById(+el.dataset.taskId);
+      if (!dragTask || !hoverTask) return;
+      if (dragTask.id !== hoverTask.id && dragTask.phaseId !== null && dragTask.phaseId === hoverTask.phaseId && dragTask.teamId === hoverTask.teamId) {
+        e.preventDefault(); e.stopPropagation();
+        el.classList.add('tb-swap-target');
+      }
+    });
+    el.addEventListener('dragleave', () => el.classList.remove('tb-swap-target'));
+    el.addEventListener('drop', e => {
+      el.classList.remove('tb-swap-target');
+      if (!S.ui.dragData || S.ui.dragData.type !== 'bar') return;
+      const dragTask = taskById(S.ui.dragData.taskId);
+      const hoverTask = taskById(+el.dataset.taskId);
+      if (!dragTask || !hoverTask || dragTask.id === hoverTask.id) return;
+      if (dragTask.phaseId !== null && dragTask.phaseId === hoverTask.phaseId && dragTask.teamId === hoverTask.teamId) {
+        e.preventDefault(); e.stopPropagation();
+        pushHistory();
+        const fromIdx = S.tasks.indexOf(dragTask);
+        const toIdx   = S.tasks.indexOf(hoverTask);
+        if (fromIdx !== -1 && toIdx !== -1) {
+          S.tasks.splice(fromIdx, 1);
+          S.tasks.splice(toIdx, 0, dragTask);
+        }
+        S.ui.dragData = null;
+        render();
+      }
+    });
+  });
+
   /* Sidebar drop zone (unschedule) */
   const sb = q('#sidebar');
   if (sb) {
@@ -2741,6 +2884,29 @@ async function exportPDF() {
     const bgColor = _origGCS(document.documentElement)
       .getPropertyValue('--bg').trim() || '#080808';
 
+    // Expand scope textareas and output blocks to show full content before capture
+    const scopeAreas = el.querySelectorAll('.scope-block textarea');
+    const scopeOrigH = [];
+    scopeAreas.forEach((ta, i) => {
+      scopeOrigH[i] = ta.style.height;
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+      ta.style.overflow = 'hidden';
+    });
+    const scopeBlocks = el.querySelectorAll('.scope-block');
+    const scopeBlockOrigH = [];
+    scopeBlocks.forEach((b, i) => {
+      scopeBlockOrigH[i] = b.style.height;
+      b.style.height = 'auto';
+    });
+    const outBlocks = el.querySelectorAll('.output-block');
+    const outBlockOrigH = [];
+    outBlocks.forEach((b, i) => {
+      outBlockOrigH[i] = b.style.minHeight || '';
+      b.style.minHeight = 'auto';
+      b.style.height = 'auto';
+    });
+
     let canvas;
     try {
       canvas = await html2canvas(el, {
@@ -2758,6 +2924,10 @@ async function exportPDF() {
       });
     } finally {
       window.getComputedStyle = _origGCS; // always restore
+      // Restore scope/output heights
+      scopeAreas.forEach((ta, i) => { ta.style.height = scopeOrigH[i]; ta.style.overflow = ''; });
+      scopeBlocks.forEach((b, i) => { b.style.height = scopeBlockOrigH[i]; });
+      outBlocks.forEach((b, i) => { b.style.minHeight = outBlockOrigH[i]; b.style.height = ''; });
     }
 
     const { jsPDF } = window.jspdf;
