@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-03 · Commit: `cc3d12c`
+> Cập nhật lần cuối: 2026-06-03 · Commit app: `cc3d12c` · Commit docs: `8399e74`
 
 ---
 
