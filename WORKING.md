@@ -18,8 +18,9 @@ Deploy sau khi hoàn thành Wave 2.
 **Trạng thái hiện tại:**
 - ✅ Code app: commit `c6c217a` — đang live tại https://project-roadmap-eight.vercel.app
 - ✅ Wave 1 + Wave 2: hoàn thành, commit `c6c217a`
-- ✅ Wave 3: hoàn thành, commit `2cb3d53` — đang live
-- 🔜 Chưa làm: Wave 4 (Sidebar collapse rail)
+- ✅ Wave 3: hoàn thành, commit `2cb3d53`
+- ✅ Wave 4: hoàn thành, commit `70b903f` — đang live
+- 🎉 Tất cả Wave 1–4 đã hoàn thành và deployed
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
@@ -57,15 +58,9 @@ Deploy sau khi hoàn thành Wave 2.
 
 ---
 
-## 🔵 Backlog — Wave 4 (New Feature)
+## ✅ Wave 4 — Done
 
-> Làm sau khi Wave 3 stable. Thay đổi layout lớn nhất — để sau cùng.
-
-- [ ] **W4-1** Sidebar thin rail collapse.
-  - Thu gọn sidebar thành 48px: hiện icon list + badge số backlog tasks.
-  - Click badge/icon để expand lại full 288px.
-  - Khi collapsed: drag task từ backlog yêu cầu expand trước (không có flyout).
-  - State lưu trong `localStorage.setItem('roadmap-sidebar-state', 'collapsed'|'expanded')`.
+- [x] **W4-1** Sidebar thin rail collapse (48px rail ↔ 288px expanded, state persist)
 
 ---
 
