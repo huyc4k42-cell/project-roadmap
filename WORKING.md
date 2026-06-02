@@ -16,9 +16,9 @@ Deploy sau khi hoàn thành Wave 2.
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Code app: commit `cc3d12c` — đang live tại https://project-roadmap-eight.vercel.app
-- ✅ Docs: commit `8399e74` — PROJECT_CONTEXT.md + WORKING.md đã tạo
-- 🔜 Chưa làm: Wave 1 (4 bug fixes) + Wave 2 (4 quick wins)
+- ✅ Code app: commit `c6c217a` — đang live tại https://project-roadmap-eight.vercel.app
+- ✅ Wave 1 + Wave 2: hoàn thành, đã deploy
+- 🔜 Chưa làm: Wave 3 (Core UX) + Wave 4 (Sidebar collapse)
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
@@ -30,36 +30,20 @@ Deploy sau khi hoàn thành Wave 2.
 
 ### 🔴 Wave 1 — Stability (Bugs)
 
-- [ ] **W1-1** Fix `assignLanes` — no-phase tasks greedy packing bị broken.
+- [x] **W1-1** Fix `assignLanes` — no-phase tasks greedy packing bị broken.
   - **Nguyên nhân:** `laneEnds = new Array(nextLane).fill(Infinity)` nên `laneEnds.length === nextLane`, loop `for (i = nextLane; i < laneEnds.length)` không bao giờ chạy.
   - **Fix:** Tách `noLaneEnds = []` riêng (empty array) cho no-phase tasks, loop tìm lane trống trong `noLaneEnds`, map về `globalLane = nextLane + i`.
 
-- [ ] **W1-2** Fix phase stacking sort theo visual order.
-  - **Nguyên nhân:** `Object.keys(byPhase)` trả về insertion order của integer keys — không đảm bảo đúng thứ tự trái→phải.
-  - **Fix:** Sort phase keys theo `S.phases.find(p => p.id === +k)?.startWeek` trước khi assign lanes.
-
-- [ ] **W1-3** Fix `Escape` key không reset drag states.
-  - **Nguyên nhân:** Handler Escape hiện tại chỉ đóng modal, không reset `S.ui.teamDragId` và `S.ui.phaseDragId`.
-  - **Fix:** Thêm reset 3 drag states vào Escape handler: `dragData`, `teamDragId`, `phaseDragId`.
-
-- [ ] **W1-4** `localStorage` error boundary.
-  - **Fix:** Wrap `localStorage.setItem(...)` trong `saveState()` bằng try/catch. Khi `QuotaExceededError` → `showToast('⚠️ Bộ nhớ đầy — không thể lưu. Xoá bớt project cũ.', 5000)`.
+- [x] **W1-2** Fix phase stacking sort theo visual order.
+- [x] **W1-3** Fix `Escape` key không reset drag states.
+- [x] **W1-4** `localStorage` error boundary.
 
 ### 🟡 Wave 2 — Quick Wins (Polish)
 
-- [ ] **W2-1** Fix contrast `--txt3`.
-  - **Fix:** Đổi `--txt3: #857d75` → `#9a9490` trong `:root`. Đổi tương tự trong `[data-theme="light"]` nếu cần.
-
-- [ ] **W2-2** Today line + "Hôm nay" label.
-  - **Fix today line:** `.today-line { width: 2px; opacity: 0.75; }`
-  - **Fix label:** Trong `buildTimeline()`, tìm `wkCells` render, thêm class `cur-today` vào week column của tuần hiện tại. Trong CSS: `.wk-c.cur::after { content: 'Hôm nay'; font-size: 9px; ... }`
-
-- [ ] **W2-3** Home card improvements.
-  - **Card height:** `.proj-card { min-height: 240px; }`
-  - **Circle progress:** Đổi từ SVG text (khó đọc) sang HTML overlay — `position: absolute` div bên trong `.proj-circle-ring`, hiện số tuần to hơn (16px bold).
-
-- [ ] **W2-4** Fix ARIA `role="separator"` → `role="slider"` trên resize handles.
-  - **Vị trí:** Tìm `data-resize-left` và `data-resize` trong `buildTeamRow()` → đổi `role="separator"` thành `role="slider"` + thêm `aria-label` mô tả.
+- [x] **W2-1** Fix contrast `--txt3` → `#9a9490`.
+- [x] **W2-2** Today line 2px + "Hôm nay" label via `::after`.
+- [x] **W2-3** Home card `min-height: 240px` + circle HTML overlay.
+- [x] **W2-4** ARIA resize handles `role="slider"` + `aria-orientation`.
 
 ---
 
