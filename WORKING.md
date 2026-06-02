@@ -17,8 +17,9 @@ Deploy sau khi hoàn thành Wave 2.
 
 **Trạng thái hiện tại:**
 - ✅ Code app: commit `c6c217a` — đang live tại https://project-roadmap-eight.vercel.app
-- ✅ Wave 1 + Wave 2: hoàn thành, đã deploy
-- 🔜 Chưa làm: Wave 3 (Core UX) + Wave 4 (Sidebar collapse)
+- ✅ Wave 1 + Wave 2: hoàn thành, commit `c6c217a`
+- ✅ Wave 3: hoàn thành, commit `2cb3d53` — đang live
+- 🔜 Chưa làm: Wave 4 (Sidebar collapse rail)
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
@@ -47,26 +48,12 @@ Deploy sau khi hoàn thành Wave 2.
 
 ---
 
-## 🟢 Backlog — Wave 3 (Core UX)
+## ✅ Wave 3 — Done
 
-> Làm sau khi Wave 1+2 stable và deployed.
-
-- [ ] **W3-1** Task drag reorder: đổi từ **swap** → **insert-before**.
-  - Logic hiện tại (sai): `splice(fromIdx,1)` rồi `splice(toIdx,0,drag)` — đây là insert-before nhưng visual indicator vẫn dùng outline, không có gold line.
-  - **Fix cần làm:** Đảm bảo logic insert-before đúng + thêm gold line `position: absolute` phía **trên** task target khi dragover.
-
-- [ ] **W3-2** Sidebar filter cleanup.
-  - Xoá `<select id="f-tag">` khỏi `buildSidebar()`.
-  - Gộp 3 select còn lại (Phase/Nhóm/Trạng thái) thành 1 row `display: flex; gap: 5px`.
-
-- [ ] **W3-3** Focus trap trong modal.
-  - Khi modal render xong: query tất cả focusable elements, bind Tab/Shift+Tab để trap focus bên trong.
-  - Auto-focus element đầu tiên trong modal khi mở.
-
-- [ ] **W3-4** Phase Scope + Output rows collapsible.
-  - Thêm toggle button vào `.row-lbl` của cả 2 rows.
-  - State lưu vào `localStorage.setItem('roadmap-row-state', JSON.stringify({scope, output}))`.
-  - First-run default: `{ scope: 'expanded', output: 'expanded' }`.
+- [x] **W3-1** Task drag reorder → insert-before + gold line indicator
+- [x] **W3-2** Sidebar filter: xoá Tag select, gộp 3 selects thành 1 flex row
+- [x] **W3-3** Focus trap trong modal (Tab/Shift+Tab cycle)
+- [x] **W3-4** Phase Scope + Output rows collapsible, state nhớ qua reload
 
 ---
 
