@@ -10,7 +10,7 @@
 :root{
   --bg:#080808;--s1:#111111;--s2:#1b1b1b;--s3:#262626;--s4:#303030;--s5:#3e3e3e;
   --bd:#2e2e2e;--bd2:#3e3e3e;--bd3:#545454;
-  --txt:#ede9e4;--txt2:#b2aaa0;--txt3:#857d75;
+  --txt:#ede9e4;--txt2:#b2aaa0;--txt3:#9a9490;
   color-scheme:dark;
   --gold:#D0A052;--goldL:#e8c07a;--goldD:rgba(208,160,82,.18);--goldB:rgba(208,160,82,.07);
   --grn:#4caf7d;--red:#e05757;
@@ -21,7 +21,7 @@
 [data-theme="light"]{
   --bg:#f4f1ed;--s1:#ece7e0;--s2:#f8f6f3;--s3:#e8e2db;--s4:#ddd7cf;--s5:#cec7be;
   --bd:#d8d2ca;--bd2:#c5bdb4;--bd3:#aaa098;
-  --txt:#1c1814;--txt2:#5a5048;--txt3:#6e6058;
+  --txt:#1c1814;--txt2:#5a5048;--txt3:#6a5f58;
   --gold:#7f6018;--goldL:#9a7820;--goldD:rgba(127,96,24,.15);--goldB:rgba(127,96,24,.07);
   --grn:#2d7a50;--red:#c0392b;
   color-scheme:light;
@@ -215,6 +215,7 @@ button.stat:hover{background:var(--s3)}
 .wk-c.cur{background:rgba(208,160,82,.06)}
 .wk-c.cur .wn{color:var(--gold)}
 .wk-c.cur .wd{color:var(--gold);opacity:.75}
+.wk-c.cur .wn::after{content:'Hôm nay';display:block;font-size:8px;font-weight:600;color:var(--gold);letter-spacing:.4px;line-height:1;margin-top:2px;opacity:.9}
 
 /* Team rows */
 .tm-rows{position:relative}
@@ -247,7 +248,7 @@ button.stat:hover{background:var(--s3)}
 .tb:hover .tb-lh,.tb:hover .tb-rh{opacity:1}
 
 /* Today line */
-.today-line{position:absolute;top:0;bottom:0;width:1px;background:var(--red);z-index:8;pointer-events:none;opacity:.5}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:8;pointer-events:none;opacity:.75}
 
 /* Filter bar */
 .filter-bar{padding:9px 12px;border-bottom:1px solid var(--bd);display:grid;grid-template-columns:1fr 1fr;gap:5px;flex-shrink:0}
@@ -410,7 +411,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 /* Project card */
-.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:200px}
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:240px}
 .proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-2px)}
 .proj-card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--r2) var(--r2) 0 0}
 .proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:24px;font-weight:600;color:var(--txt);margin-top:12px;margin-bottom:4px;line-height:1.25}
@@ -428,8 +429,11 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .proj-tl-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
 .proj-tl-fill{height:100%;border-radius:2px;min-width:4px;max-width:100%}
 /* circle progress for weeks */
-.proj-circle-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.proj-circle-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
 .proj-circle-svg{transform:rotate(-90deg)}
+.proj-circle-overlay{position:absolute;top:0;left:0;width:60px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.proj-circle-num{font-size:16px;font-weight:700;color:var(--txt);line-height:1;font-family:'Inter',sans-serif}
+.proj-circle-den{font-size:10px;color:var(--txt2);line-height:1;margin-top:2px;font-family:'Inter',sans-serif}
 .proj-circle-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;text-align:center}
 .proj-card-footer{display:flex;justify-content:space-between;align-items:center}
 .proj-date{font-size:11px;color:var(--txt3)}
@@ -1220,7 +1224,7 @@ function buildTimeline() {
       const phDone  = phTasks.filter(t => t.startWeek !== null).length;
       const phPct   = phTasks.length ? Math.round(phDone / phTasks.length * 100) : 0;
       phCells += `<div class="ph-cell" style="width:${span*WW}px;background:${ph.color}" data-phase-id="${ph.id}">
-        <div class="ph-lh" data-ph-resize-left="${ph.id}" aria-label="Kéo để thay đổi ngày bắt đầu phase" role="separator"></div>
+        <div class="ph-lh" data-ph-resize-left="${ph.id}" aria-label="Kéo để thay đổi ngày bắt đầu phase" role="slider" aria-orientation="horizontal"></div>
         <div class="ph-body" draggable="true" data-ph-drag="${ph.id}">
           <div class="ph-hd-row">
             <div class="ph-num">Phase ${phIdx + 1}</div>
@@ -1229,7 +1233,7 @@ function buildTimeline() {
           <div class="ph-name">${esc(ph.name)}</div>
           <div class="ph-dates">W${ph.startWeek}–${ph.endWeek} · ${weekLabel(ph.startWeek)} → ${weekLabel(ph.endWeek)}</div>
         </div>
-        <div class="ph-rh" data-ph-resize-right="${ph.id}" aria-label="Kéo để thay đổi ngày kết thúc phase" role="separator"></div>
+        <div class="ph-rh" data-ph-resize-right="${ph.id}" aria-label="Kéo để thay đổi ngày kết thúc phase" role="slider" aria-orientation="horizontal"></div>
         ${phTasks.length ? `<div class="ph-prog" aria-label="${phPct}% tasks đã xếp lịch"><div class="ph-prog-fill" style="width:${phPct}%"></div></div>` : ''}
       </div>`;
       w = ph.endWeek + 1;
@@ -1443,9 +1447,17 @@ function assignLanes(tasks) {
     byPhase[k].sort((a, b) => S.tasks.indexOf(a) - S.tasks.indexOf(b));
   }
 
+  // Sort phase keys by visual startWeek order (left→right)
+  const sortedPhaseKeys = Object.keys(byPhase).sort((a, b) => {
+    const pa = S.phases.find(p => p.id === +a);
+    const pb = S.phases.find(p => p.id === +b);
+    return (pa?.startWeek ?? 0) - (pb?.startWeek ?? 0);
+  });
+
   // Assign phase-grouped tasks: each gets its own sequential lane (vertical stacking)
   let nextLane = 0;
-  for (const phaseTasks of Object.values(byPhase)) {
+  for (const k of sortedPhaseKeys) {
+    const phaseTasks = byPhase[k];
     for (const t of phaseTasks) {
       result[t.id] = nextLane;
       laneH[nextLane] = taskBarH(t);
@@ -1453,25 +1465,27 @@ function assignLanes(tasks) {
     }
   }
 
-  // No-phase tasks: greedy side-by-side packing starting from nextLane
-  const laneEnds = new Array(nextLane).fill(Infinity); // phase lanes are fully blocked
+  // No-phase tasks: greedy side-by-side packing in their own lane pool
+  const noLaneEnds = []; // separate from phase lanes
   const sorted = [...noPhase].sort((a, b) => a.startWeek - b.startWeek);
   for (const t of sorted) {
     const h = taskBarH(t);
     let placed = false;
-    for (let i = nextLane; i < laneEnds.length; i++) {
-      if (t.startWeek > laneEnds[i]) {
-        laneEnds[i] = t.startWeek + t.dur - 1;
-        laneH[i] = Math.max(laneH[i] || 0, h);
-        result[t.id] = i;
+    for (let i = 0; i < noLaneEnds.length; i++) {
+      if (t.startWeek > noLaneEnds[i]) {
+        noLaneEnds[i] = t.startWeek + t.dur - 1;
+        const globalLane = nextLane + i;
+        laneH[globalLane] = Math.max(laneH[globalLane] || 0, h);
+        result[t.id] = globalLane;
         placed = true;
         break;
       }
     }
     if (!placed) {
-      result[t.id] = laneEnds.length;
-      laneEnds.push(t.startWeek + t.dur - 1);
-      laneH.push(h);
+      const globalLane = nextLane + noLaneEnds.length;
+      noLaneEnds.push(t.startWeek + t.dur - 1);
+      laneH[globalLane] = h;
+      result[t.id] = globalLane;
     }
   }
 
@@ -1517,13 +1531,13 @@ function buildTeamRow(tm, tw, twFrac) {
     return `<div class="tb" draggable="true" data-task-id="${t.id}"
       style="left:${left}px;top:${top}px;width:${width}px;height:${barH}px;background:${color}cc;border-left:3px solid ${color}"
       title="${esc(t.name)}${ph?' · '+esc(ph.name):''}">
-      <div class="tb-lh" data-resize-left="${t.id}" aria-label="Kéo để thay đổi ngày bắt đầu" role="separator"></div>
+      <div class="tb-lh" data-resize-left="${t.id}" aria-label="Kéo để thay đổi ngày bắt đầu" role="slider" aria-orientation="horizontal"></div>
       <div class="tb-top">
         <span class="tb-nm${longTitle?' wrap':''}">${esc(t.name)}</span>
         ${t.dur >= 2 ? `<span class="tb-dur">${t.dur}w</span>` : ''}
       </div>
       ${tagsHtml}
-      <div class="tb-rh" data-resize="${t.id}" aria-label="Kéo để thay đổi thời lượng" role="separator"></div>
+      <div class="tb-rh" data-resize="${t.id}" aria-label="Kéo để thay đổi thời lượng" role="slider" aria-orientation="horizontal"></div>
     </div>`;
   }).join('');
 
@@ -1647,11 +1661,11 @@ function buildProjCard(p) {
         <circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--s4)" stroke-width="2.8"/>
         <circle cx="18" cy="18" r="${r}" fill="none" stroke="${accent}" stroke-width="2.8"
           stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
-        <g transform="rotate(90 18 18)">
-          <text x="18" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="var(--txt)" font-family="Inter,sans-serif">${elapsedWeeks}</text>
-          <text x="18" y="23" text-anchor="middle" font-size="5.5" fill="var(--txt3)" font-family="Inter,sans-serif">/ ${totalWeeks}</text>
-        </g>
       </svg>
+      <div class="proj-circle-overlay">
+        <span class="proj-circle-num">${elapsedWeeks}</span>
+        <span class="proj-circle-den">/ ${totalWeeks}</span>
+      </div>
       <span class="proj-circle-lbl">Tuần</span>
     </div>` : '';
 
@@ -2748,6 +2762,13 @@ function onDocClick() { closeCtx(); }
 function onKey(e) {
   const ctrl = e.ctrlKey || e.metaKey;
 
+  // Escape resets all drag states regardless of modal
+  if (e.key === 'Escape') {
+    S.ui.dragData = null;
+    S.ui.teamDragId = null;
+    S.ui.phaseDragId = null;
+  }
+
   // Modal open — Escape/Enter
   if (S.ui.modal) {
     if (e.key === 'Escape') { closeModal(); return; }
@@ -3168,7 +3189,11 @@ function saveState() {
       tasks:S.tasks, tags:S.tags, _nextId:S._nextId };
     localStorage.setItem(projKey(currentProjId), JSON.stringify(toSave));
     updateIndexEntry();
-  } catch(e) {}
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      showToast('⚠️ Bộ nhớ đầy — không thể lưu. Xoá bớt project cũ.', 5000);
+    }
+  }
 }
 
 function loadState() {
