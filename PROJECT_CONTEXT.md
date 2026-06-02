@@ -1,15 +1,16 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
-> **Dùng file này để nạp context đầy đủ vào đầu mỗi session Claude mới.**  
-> Cập nhật lần cuối: 2026-06-02 · Commit: `8c67803`
+> **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
+> Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
+> Cập nhật lần cuối: 2026-06-03 · Commit: `cc3d12c`
 
 ---
 
 ## 1. Tổng quan sản phẩm
 
-**Tên:** Arthur — Project Roadmap Timeline  
-**URL Production:** https://project-roadmap-eight.vercel.app  
-**Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap  
-**File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~3546 dòng)
+**Tên:** Arthur — Project Roadmap Timeline
+**URL Production:** https://project-roadmap-eight.vercel.app
+**Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap
+**File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~3750 dòng)
 
 ### Kiến trúc cốt lõi
 - **Single HTML file** — toàn bộ CSS + JS nằm trong 1 file `timeline.html`
@@ -20,7 +21,7 @@
 ### Deploy
 - **Vercel** với `vercel.json` redirect root → `timeline.html`
 - **GitHub** repo `huyc4k42-cell/project-roadmap`, branch `main`
-- Deploy: `vercel deploy --prod` từ thư mục project (git push cũng trigger nhưng chậm hơn)
+- Deploy: `vercel deploy --prod` từ thư mục project
 
 ---
 
@@ -32,6 +33,7 @@ roadmap-index          → JSON array of project index entries
 roadmap-proj-{id}      → JSON object of full project data
 roadmap-state-v1       → LEGACY (old single-project format, tự migrate)
 roadmap-theme          → 'dark' | 'light' | 'system'
+roadmap-row-state      → { scope: 'expanded'|'collapsed', output: 'expanded'|'collapsed' }
 ```
 
 ### Index Entry (per project)
@@ -105,13 +107,14 @@ const S = {
   _nextId: 1,
   ui: {
     filter: { phase: '', team: '', tag: '', status: 'backlog', search: '' },
-    modal: null,    // { type, ...data } — xem phần Modal Types
-    ctx: null,      // context menu state
-    dragData: null,
-    resizeData: null,
-    phaseResize: null,
-    phaseDragId: null,
-    importModal: null  // deprecated, dùng modal.type='import'
+    modal: null,        // { type, ...data } — xem Modal Types bên dưới
+    ctx: null,          // context menu state
+    dragData: null,     // { type: 'backlog'|'bar'|'tag', taskId, tag }
+    resizeData: null,   // task resize state
+    phaseResize: null,  // phase resize state
+    phaseDragId: null,  // phase drag/swap state
+    teamDragId: null,   // team row reorder state (mới thêm)
+    readonly: false,
   }
 }
 ```
@@ -142,19 +145,24 @@ render()
   └── buildTimeline()
         ├── phCells        → Phase row (drag/resize handles, week count badge)
         ├── moCells        → Month labels
-        ├── wkCells        → Week columns (W1, W2...)
+        ├── wkCells        → Week columns (W1, W2...) — cur week highlighted gold
         ├── teamRows       → buildTeamRow() per team
-        │     └── assignLanes() → no-overlap lane algorithm
-        │     └── task bars với dynamic height + tags
-        ├── scopeTrack     → Phase Scope row (resizable)
-        └── outTrack       → Output/Checklist row (paste to list)
+        │     ├── assignLanes()  → lane algorithm (xem mục 7)
+        │     ├── task bars với dynamic height + tags
+        │     └── team-drag-handle → kéo để reorder team rows
+        ├── scopeTrack     → Phase Scope row (resizable, collapsible)
+        └── outTrack       → Output/Checklist row (paste to list, collapsible)
 ```
 
 ```
 renderHome()
   └── buildHome()
         ├── buildHomeHdr() → logo center, Import CSV, New Project, Theme toggle
-        ├── buildProjCard() per project → stats, week elapsed bar
+        ├── buildProjCard() per project
+        │     ├── accent stripe, title (24px Crimson Pro)
+        │     ├── stats row: phases / tasks / sched%
+        │     ├── circle SVG progress (weeks elapsed/total)
+        │     └── time progress bar (% thời gian đã qua)
         └── buildHomeModal() / buildImportModal()
 ```
 
@@ -173,14 +181,14 @@ renderHome()
 --bd2: #3e3e3e         /* stronger borders */
 --txt: #ede9e4         /* primary text */
 --txt2: #b2aaa0        /* secondary text */
---txt3: #857d75        /* placeholder/muted */
+--txt3: #857d75        /* placeholder/muted — ⚠️ WCAG fail, cần fix → #9a9490 */
 --gold: #D0A052        /* accent/primary action */
 --goldD: rgba(208,160,82,.18)  /* gold bg tint */
 --grn: #4caf7d         /* success */
 --red: #e05757         /* error/danger */
 --sb: 288px            /* sidebar width */
---tlw: 204px           /* timeline label width */
---ww: 64px             /* week column width (recalculated) */
+--tlw: 204px           /* timeline label col width */
+--ww: 64px             /* week column width (recalculated by calcWW()) */
 --hdr: 58px            /* header height */
 ```
 
@@ -196,7 +204,7 @@ renderHome()
 
 ```js
 const TLW = 204              // timeline label col width (px)
-const WW_FILL_COLS = 9       // số cột tối đa khi fill (đổi từ 12 xuống 9)
+const WW_FILL_COLS = 9       // số cột tối đa khi fill
 const LANE_PAD = 10          // padding trên/dưới mỗi team row (px)
 const LANE_GAP = 5           // khoảng cách giữa các lane (px)
 const PHASE_COLORS = [       // màu auto-assign cho phases
@@ -207,14 +215,13 @@ const PROJ_ACCENTS = [       // màu accent cho project cards
   '#D0A052','#7c3aed','#1d4ed8','#047857',
   '#be185d','#0e7490','#b45309','#e05757'
 ]
-const SHEETS_TEMPLATE_URL = 'https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms/copy'
-// ⚠️ URL placeholder — cần replace bằng Google Sheet thật nếu muốn dùng
 ```
 
 ---
 
-## 7. Task Bar Height Algorithm
+## 7. Algorithms
 
+### Task Bar Height
 ```js
 function taskBarH(task) {
   const longTitle = task.name.length > 22;
@@ -224,60 +231,69 @@ function taskBarH(task) {
 }
 ```
 
-### Lane Assignment (no-overlap stacking)
+### Lane Assignment — `assignLanes(tasks)`
+**Logic hiện tại (sau refactor 2026-06-02):**
+- Tasks cùng phaseId → mỗi task 1 lane riêng, xếp dọc theo thứ tự trong `S.tasks`
+- Phase groups sort theo `startWeek` (thứ tự visual trái→phải)
+- Tasks không có phase (phaseId=null) → greedy side-by-side packing
+- ⚠️ **Bug đã biết:** greedy packing cho no-phase tasks có lỗi loop không chạy → cần fix (xem WORKING.md Wave 1)
+
 ```js
 assignLanes(tasks)
 // → { assignments: {taskId: laneIndex}, numLanes, laneH: [maxHPerLane] }
 // Top offset = LANE_PAD + Σ(laneH[0..lane-1]) + lane * LANE_GAP
 ```
 
+### Team Reorder — `reorderTeam(dragId, targetId)`
+```js
+// Kéo team handle → insert dragId trước targetId trong S.teams array
+// Triggers: pushHistory() → splice → render()
+```
+
 ---
 
-## 8. Features Implemented (Chronological)
+## 8. Features Implemented
 
-### Core Timeline (v1)
-- [x] Phase bar với drag-to-move và resize handles (left/right)
-- [x] Team rows với task bars drag-drop
+### Core Timeline
+- [x] Phase bar: drag-to-move, resize handles (left/right), week count badge
+- [x] Team rows: task bars drag-drop từ backlog vào timeline
+- [x] Task bars: dynamic height (title length + tags), tag chips không có # prefix
 - [x] Task resize (left/right handles)
-- [x] Backlog sidebar (task list chưa xếp lịch)
-- [x] Phase Scope textarea (lưu per phase)
-- [x] Output/Checklist per phase
+- [x] Task stacking: lane algorithm, không bao giờ overlap
+- [x] **Team row reorder:** grip handle ở cuối label → drag để đổi thứ tự
+- [x] **Task reorder trong phase:** kéo task bar thả lên task khác cùng phase+team → insert trước
+- [x] Backlog sidebar: task list, search, tag filter pills, filter selects
+- [x] Phase Scope textarea (lưu per phase, resizable height)
+- [x] Output/Checklist per phase (paste multi-line)
 - [x] Today line indicator
 - [x] Dark/Light/System theme toggle
-- [x] Share roadmap (URL encode)
-- [x] Export PDF (html2canvas + jsPDF)
+- [x] Share roadmap (URL encode + LZ compress)
+- [x] Export PDF (html2canvas + jsPDF, tự expand scope/output trước capture)
 - [x] Week picker calendar (click month → chọn range)
-- [x] Keyboard shortcuts (Ctrl+Z undo, Ctrl+K search, Escape đóng modal)
-- [x] Tag system (filter, color, drag-drop tag onto task)
-- [x] Search tasks
-- [x] Sample data loader
+- [x] Keyboard shortcuts: Ctrl+Z undo, Ctrl+K search, Escape đóng modal
+- [x] Tag system: filter, color palette, drag-drop tag onto task
+- [x] Context menu: right-click task bar / team label
 
 ### Multi-Project Home Screen
-- [x] Home page với project cards grid
+- [x] Project cards grid: title 24px Crimson Pro, accent stripe 4px
+- [x] Card stats: phases / tasks / sched% / time bar / circle week progress
 - [x] Hash routing `#home` / `#project-{id}`
 - [x] Project CRUD (Create, Rename, Duplicate, Delete)
-- [x] Accent color picker (khi tạo mới và khi đổi tên)
-- [x] Card stats: phases, tasks, % xếp lịch, tuần elapsed/total
-- [x] Empty state với "Tạo Project mới" button
-- [x] Logo centered, bỏ "Dự án của tôi"
+- [x] Accent color picker
+- [x] Empty state
 
-### CSV Import Feature
-- [x] Entry point: Home header "Import CSV" + Project "Thêm mới" → "Import CSV"
-- [x] Step 1: Chọn project đích / tạo mới, chọn Replace/Merge, upload file
-- [x] Step 2: Preview table với checkboxes, row lỗi highlight đỏ
-- [x] Validation: fail-fast (structure errors), per-row (date errors, out-of-range)
-- [x] CSV schema: `task_name, phase_name, team_name, start_date, end_date, tags, description`
+### CSV Import
+- [x] 2-step flow: chọn project → preview table
+- [x] Schema: `task_name, phase_name, team_name, start_date, end_date, tags, description`
 - [x] Auto-create phases + teams từ CSV
-- [x] Download CSV template (8 row mẫu với ngày thực)
-- [x] Link Google Sheets template (cần setup URL thật)
+- [x] Download CSV template
 
-### Timeline UX Overhaul (Latest)
-- [x] **Week columns**: WW_FILL_COLS 12 → **9** (rộng hơn)
-- [x] **Phase header**: badge "N tuần" per phase
-- [x] **Task bars**: dynamic height theo title length + tags, hiện tag chips
-- [x] **Task stacking**: sum-based lane offsets, không bao giờ overlap
-- [x] **Scope row resize**: kéo handle đáy để thay đổi chiều cao, lưu state
-- [x] **Output paste**: paste nhiều dòng → auto split thành todo items; Enter = thêm 1 item
+### Known Limitations (Won't Fix — documented)
+- ❌ Mobile responsive — desktop only
+- ❌ Keyboard drag-drop alternative
+- ❌ CSS token rename (--s1, --s2...)
+- ❌ Google Sheets template URL (placeholder hiện tại)
+- ❌ Phase scope per-block resize (toàn row resize only)
 
 ---
 
@@ -288,6 +304,7 @@ assignLanes(tasks)
 // Mỗi thay đổi data → gọi render() (project) hoặc renderHome() (home)
 // render(noSave=false) → render HTML + bind events + saveState (nếu noSave=false)
 // Không dùng virtual DOM — innerHTML replace toàn bộ mỗi lần render
+// renderRAF() → debounce via requestAnimationFrame (dùng khi drag/resize)
 ```
 
 ### Helper Functions hay dùng
@@ -297,20 +314,22 @@ qAll('.class')       // document.querySelectorAll shorthand
 esc(str)             // HTML escape
 nextId()             // trả về S._nextId++ (auto-increment)
 saveState()          // save toàn bộ S vào localStorage
-render(true)         // re-render không save (dùng cho live-update như search)
+saveIndex()          // save roadmap-index (home screen stats)
+render(true)         // re-render không save (live-update)
 rerender()           // render() hoặc renderHome() tùy currentProjId
-showToast(msg, dur)  // hiện toast notification (3s default)
+showToast(msg, dur)  // toast notification (3s default)
+pushHistory()        // save undo snapshot trước khi mutate
 ```
 
 ### Date Functions
 ```js
-parseDate('2025-06-02')          // → Date object
-dateStrYMD(dateObj)              // → 'YYYY-MM-DD'
-startMonday('2025-06-02')        // → Date của thứ 2 đầu tuần
-weekDate(weekNum)                // → Date của ngày đầu tuần N
-weekLabel(weekNum)               // → 'DD/MM' string
-totalWeeks()                     // → số tuần trong project
-todayWeekFrac()                  // → vị trí today (fractional week number)
+parseDate('2025-06-02')   // → Date object
+dateStrYMD(dateObj)       // → 'YYYY-MM-DD'
+startMonday('2025-06-02') // → Date của thứ 2 đầu tuần
+weekDate(weekNum)         // → Date của ngày đầu tuần N
+weekLabel(weekNum)        // → 'DD/MM' string
+totalWeeks()              // → số tuần trong project
+todayWeekFrac()           // → vị trí today (fractional week number)
 ```
 
 ### ID System
@@ -324,8 +343,9 @@ todayWeekFrac()                  // → vị trí today (fractional week number)
 
 ```
 [Claude] Project Roadmap/
-├── timeline.html          ← FILE DUY NHẤT của app
-├── PROJECT_CONTEXT.md     ← file này
+├── timeline.html          ← FILE DUY NHẤT của app (~3750 dòng)
+├── PROJECT_CONTEXT.md     ← file này — technical reference (stable)
+├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
 ├── vercel.json            ← Vercel config (redirect / → /timeline.html)
 ├── Logo.png               ← Logo source (embedded as base64 trong HTML)
 ├── .vercel/
@@ -336,15 +356,24 @@ todayWeekFrac()                  // → vị trí today (fractional week number)
 
 ---
 
-## 11. Pending / Backlog Items
+## 11. Design Decisions Log
 
-> Các item đã thảo luận nhưng chưa implement hoặc cần follow-up:
+> Append-only. Không xóa entry cũ — dùng để trace lý do đằng sau các quyết định.
 
-- [ ] **Google Sheets template URL** — cần tạo real Google Sheet và update `SHEETS_TEMPLATE_URL`
-- [ ] **Weeks/elapsed% trên card** — chỉ hiện sau khi mở project 1 lần (start/end cần được save vào index)
-- [ ] **Scope row auto-scale khi import** — hiện import không update `scopeRowHeight`, scope text có thể overflow
-- [ ] **Phase scope per-block resize** — hiện resize là toàn row; per-phase resize phức tạp hơn (chưa implement)
-- [ ] **Mobile responsive** — layout hiện chỉ dùng được trên desktop
+### [2026-06-03] UX Overhaul — Grill-me Session
+| # | Quyết định |
+|---|-----------|
+| D01 | Sidebar collapse → thin rail 48px (icon list + badge số backlog tasks). Click để expand. |
+| D02 | Muốn drag task từ backlog khi rail collapsed → phải expand sidebar trước, không có flyout. |
+| D03 | Filter sidebar: xoá select "Tag" (trùng với tag pills). Giữ tag pills (dual: filter + drag source). Gộp Phase/Nhóm/Trạng thái thành 1 row. |
+| D04 | Task drag-reorder trong cùng phase+team: **insert before** target (không swap). |
+| D05 | Insert-before visual indicator: **gold line ngang phía trên** task target. |
+| D06 | Phase Scope & Output rows: có toggle collapse riêng, nhớ state per-row trong `roadmap-row-state` localStorage. |
+| D07 | First-run default (chưa có localStorage): cả 2 rows expanded. |
+| D08 | "Hôm nay" label gắn vào **week column sticky (week row)**, màu gold, cùng highlight `.wk-c.cur`. |
+| D09 | Header stats (Tổng/Đã xếp/Backlog/Tuần): giữ nguyên, chưa xử lý declutter. |
+| D10 | CSS token rename (--s1 → --surface-base...): **bỏ qua**, zero user value, rủi ro cao. |
+| D11 | Keyboard drag-drop alternative: **bỏ qua**, known limitation. |
 
 ---
 
@@ -359,23 +388,20 @@ Khi gặp lỗi, kiểm tra theo thứ tự:
 5. **Import không navigate?** → `location.hash = '#project-' + projId` sau `saveIndex()`
 6. **Dropdown menu bị clipped?** → `.proj-card` không được có `overflow:hidden`
 7. **Context menu lệch?** → `.proj-ctx` dùng `top: calc(100% + 4px)` (không phải `bottom`)
+8. **Drag state bị stuck?** → Kiểm tra `S.ui.dragData`, `S.ui.teamDragId`, `S.ui.phaseDragId` — Escape phải reset hết
+9. **Lane overlap?** → `assignLanes()` — phase tasks dùng sequential lanes, no-phase dùng greedy. Xem bug note mục 7.
 
 ---
 
 ## 13. Deployment Checklist
 
 ```bash
-# Commit + push + deploy
 cd "/Users/arthur/Desktop/[Claude] Project Roadmap"
-git add timeline.html
+git add timeline.html PROJECT_CONTEXT.md WORKING.md
 git commit -m "feat: mô tả thay đổi"
 git push origin main
 vercel deploy --prod
 ```
 
-**Vercel project ID:** `prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx`  
+**Vercel project ID:** `prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx`
 **Team ID:** `team_P9FfhTlhYVKuixkXkc9Ge26j`
-
----
-
-*File này được tạo bởi Claude Sonnet 4.6 vào 2026-06-02. Cập nhật file này sau mỗi session có thay đổi lớn.*
