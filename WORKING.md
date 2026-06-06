@@ -13,7 +13,7 @@
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Commit mới nhất: `033e072` — đang live tại https://project-roadmap-eight.vercel.app
+- ✅ Commit mới nhất: `063fc59` — đang live tại https://aroadmap.vercel.app
 - ✅ Wave 1–4 hoàn thành (13 fixes + features)
 - ✅ Firebase Firestore + Google Auth đã integrate
 - ✅ **Firestore security rules đã deploy** — không còn test mode

@@ -8,7 +8,7 @@
 ## 1. Tổng quan sản phẩm
 
 **Tên:** Arthur — Project Roadmap Timeline
-**URL Production:** https://project-roadmap-eight.vercel.app
+**URL Production:** https://aroadmap.vercel.app
 **Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap
 **File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~4100 dòng)
 
@@ -491,7 +491,7 @@ firebase deploy --only firestore:rules
 
 **Firebase project:** `a-roadmap`
 **Firestore region:** `asia-southeast1`
-**Auth domain:** `project-roadmap-eight.vercel.app` (đã authorized)
+**Auth domain:** `aroadmap.vercel.app` (đã authorized), `project-roadmap-eight.vercel.app` (domain cũ, giữ lại)
 
 ### Firestore Security Rules (production-ready)
 ```
