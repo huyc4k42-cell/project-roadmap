@@ -419,6 +419,18 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .home-hdr-logo img{height:56px;width:auto}
 [data-theme="light"] .home-hdr-logo img{filter:brightness(.52)}
 .home-hdr-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+/* Auth UI */
+.auth-user{display:flex;align-items:center;gap:8px}
+.auth-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--bd2);flex-shrink:0}
+.auth-name{font-size:12px;color:var(--txt2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.home-signin{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:100px 40px;flex:1}
+.home-signin-icon{width:64px;height:64px;border-radius:50%;background:var(--goldD);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.home-signin-title{font-family:'Crimson Pro',Georgia,serif;font-size:30px;font-weight:600;color:var(--txt);margin:0}
+.home-signin-sub{font-size:14px;color:var(--txt2);text-align:center;max-width:340px;line-height:1.7;margin:0}
+.btn-lg{padding:12px 24px;font-size:15px;gap:10px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);display:inline-block;margin-right:4px;flex-shrink:0}
+.sync-dot.saving{background:var(--gold);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 /* card time-elapsed bar */
 .proj-tl-dates{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:5px}
 .proj-elapsed-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
@@ -547,12 +559,38 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-<script>
+<script type="module">
+import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut,
+         onAuthStateChanged }                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc,
+         collection, query, where, getDocs, onSnapshot }         from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 /* ══════════════════════════════
    LOGO (embedded SVG)
 ══════════════════════════════ */
 const LOGO_B64 = `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`;
 const LOGO_IMG = `<img src="data:image/png;base64,${LOGO_B64}" alt="Arthur" aria-label="Arthur logo" style="height:36px;width:auto">`;
+
+/* ══════════════════════════════
+   FIREBASE CONFIG
+   → Tạo project tại https://console.firebase.google.com
+   → Project Settings → Your apps → Add web app → Copy config vào đây
+══════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            'REPLACE_WITH_YOUR_API_KEY',
+  authDomain:        'REPLACE_WITH_YOUR_PROJECT.firebaseapp.com',
+  projectId:         'REPLACE_WITH_YOUR_PROJECT_ID',
+  storageBucket:     'REPLACE_WITH_YOUR_PROJECT.appspot.com',
+  messagingSenderId: 'REPLACE_WITH_YOUR_SENDER_ID',
+  appId:             'REPLACE_WITH_YOUR_APP_ID',
+};
+
+/* Firebase runtime state */
+let _db = null, _auth = null, _gProvider = null;
+let currentUser  = null;   // Firebase Auth user object
+let _projIndex   = [];     // in-memory project list (synced from Firestore)
+let _unsubProj   = null;   // onSnapshot cleanup fn for current project
+let _fbSaving    = false;  // guard: ignore onSnapshot triggered by our own save
 
 /* ══════════════════════════════
    ICONS (Lucide-style SVG paths)
@@ -1607,6 +1645,24 @@ function renderHome() {
 }
 
 function buildHome() {
+  // Not signed in → show sign-in screen
+  if (!currentUser) {
+    return `<div class="home">
+      ${buildHomeHdr(0)}
+      <div class="home-signin" role="main">
+        <div class="home-signin-icon" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h2 class="home-signin-title">Project Roadmap</h2>
+        <p class="home-signin-sub">Đăng nhập để quản lý roadmap và đồng bộ dữ liệu qua nhiều thiết bị, cùng cộng tác với team.</p>
+        <button class="btn btn-gold btn-lg" id="home-signin-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Đăng nhập với Google
+        </button>
+      </div>
+    </div>`;
+  }
+
   const idx = loadIndex();
   const accentSwatches = PROJ_ACCENTS.map((c,i) =>
     `<span class="proj-accent-swatch${i===0?' sel':''}" data-acc="${c}" style="background:${c}"></span>`
@@ -1655,21 +1711,32 @@ function buildHome() {
 }
 
 function buildHomeHdr(count) {
+  const authHtml = currentUser
+    ? `<div class="auth-user">
+        ${currentUser.photoURL ? `<img class="auth-avatar" src="${esc(currentUser.photoURL)}" alt="${esc(currentUser.displayName||'')}">` : ''}
+        <span class="auth-name">${esc(currentUser.displayName||currentUser.email||'')}</span>
+        <button class="btn btn-ghost" id="home-signout-btn" title="Đăng xuất">Đăng xuất</button>
+      </div>`
+    : `<button class="btn btn-ghost" id="home-signin-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+        Đăng nhập
+      </button>`;
   return `<header class="home-hdr" role="banner">
     <div class="home-hdr-spacer"></div>
     <div class="home-hdr-logo"><img src="data:image/png;base64,${LOGO_B64}" alt="Arthur" style="height:56px;width:auto"></div>
     <div class="home-hdr-actions">
-      <button class="btn btn-ghost" id="home-import-btn" title="Import từ CSV">
+      ${currentUser ? `<button class="btn btn-ghost" id="home-import-btn" title="Import từ CSV">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
         Import CSV
-      </button>
+      </button>` : ''}
       <button class="btn btn-ghost" id="home-theme-btn" title="Đổi giao diện">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>
       </button>
-      <button class="btn btn-gold" id="home-new-hdr-btn">
+      ${currentUser ? `<button class="btn btn-gold" id="home-new-hdr-btn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         New Project
-      </button>
+      </button>` : ''}
+      ${authHtml}
     </div>
   </header>`;
 }
@@ -1793,6 +1860,10 @@ function buildHomeModal(accentSwatches) {
 }
 
 function bindHome() {
+  /* Auth buttons */
+  q('#home-signin-btn')?.addEventListener('click', fbSignIn);
+  q('#home-signout-btn')?.addEventListener('click', fbSignOut);
+
   /* New project buttons */
   const openNew = () => { S.ui.modal = {type:'new-project', data:{}}; renderHome(); };
   q('#home-new-btn')?.addEventListener('click', openNew);
@@ -3096,149 +3167,243 @@ function esc(s)   {
 }
 
 /* ══════════════════════════════
-   PERSISTENCE (localStorage)
+   PERSISTENCE
 ══════════════════════════════ */
-const LS_KEY        = 'roadmap-state-v1';   // legacy key
-const INDEX_KEY     = 'roadmap-index';
-const PROJ_PFX      = 'roadmap-proj-';
+const LS_KEY            = 'roadmap-state-v1';
+const INDEX_KEY         = 'roadmap-index';
+const PROJ_PFX          = 'roadmap-proj-';
 const ROW_STATE_KEY     = 'roadmap-row-state';
 const SIDEBAR_STATE_KEY = 'roadmap-sidebar-state';
 const PROJ_ACCENTS  = ['#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#e05757'];
-let   currentProjId = null;    // null = Home, string = project id
-let   homeCtxId     = null;    // which card's context menu is open
+let   currentProjId = null;
+let   homeCtxId     = null;
 
-/* ── Row state helpers (scope/output collapsed) ── */
+/* ── UI prefs (localStorage only — no auth needed) ── */
 function loadRowState() {
   try { const r = localStorage.getItem(ROW_STATE_KEY); return r ? JSON.parse(r) : {scope:'expanded',output:'expanded'}; }
   catch(e) { return {scope:'expanded',output:'expanded'}; }
 }
-function saveRowState(s) {
-  try { localStorage.setItem(ROW_STATE_KEY, JSON.stringify(s)); } catch(e) {}
-}
+function saveRowState(s) { try { localStorage.setItem(ROW_STATE_KEY, JSON.stringify(s)); } catch(e) {} }
+function loadSidebarState() { try { return localStorage.getItem(SIDEBAR_STATE_KEY) || 'expanded'; } catch(e) { return 'expanded'; } }
+function saveSidebarState(s) { try { localStorage.setItem(SIDEBAR_STATE_KEY, s); } catch(e) {} }
 
-/* ── Sidebar state helpers ── */
-function loadSidebarState() {
-  try { return localStorage.getItem(SIDEBAR_STATE_KEY) || 'expanded'; }
-  catch(e) { return 'expanded'; }
-}
-function saveSidebarState(s) {
-  try { localStorage.setItem(SIDEBAR_STATE_KEY, s); } catch(e) {}
-}
+/* ── In-memory index (Firestore → cache → render) ── */
+function loadIndex() { return _projIndex; }
+function saveIndex(idx) { _projIndex = idx; }
 
-/* ── Index helpers ── */
-function loadIndex() {
-  try { const r = localStorage.getItem(INDEX_KEY); return r ? JSON.parse(r) : []; }
-  catch(e) { return []; }
-}
-function saveIndex(idx) {
-  try { localStorage.setItem(INDEX_KEY, JSON.stringify(idx)); } catch(e) {}
-}
-
-/* ── Project CRUD ── */
+/* ── Local cache ── */
 function projKey(id) { return PROJ_PFX + id; }
-
-function createProject(name, subtitle, accent) {
-  const id = 'proj_' + Date.now();
-  const cfg = { title: name, subtitle: subtitle||'', start:'2025-06-02', end:'2025-11-30' };
-  const data = { cfg, phases:[], teams:[], tasks:[], tags:['tracking','UX','tech','growth','research'], _nextId:1 };
-  try { localStorage.setItem(projKey(id), JSON.stringify(data)); } catch(e) {}
-  const idx = loadIndex();
-  idx.push({ id, name, subtitle:subtitle||'', accent:accent||'#D0A052', updatedAt:Date.now(), stats:{phases:0,tasks:0,sched:0,start:cfg.start,end:cfg.end} });
-  saveIndex(idx);
-  location.hash = '#project-' + id;
+function cacheProject(id, data) { try { localStorage.setItem(projKey(id), JSON.stringify(data)); } catch(e) {} }
+function readCachedProject(id) {
+  try { const r = localStorage.getItem(projKey(id)); return r ? JSON.parse(r) : null; } catch(e) { return null; }
 }
 
-function deleteProject(id) {
-  try { localStorage.removeItem(projKey(id)); } catch(e) {}
-  saveIndex(loadIndex().filter(p => p.id !== id));
-  renderHome();
+/* ── Firebase Auth ── */
+async function fbSignIn() {
+  try { await signInWithPopup(_auth, _gProvider); }
+  catch(e) { if (e.code !== 'auth/popup-closed-by-user') showToast('Đăng nhập thất bại: ' + e.message, 4000); }
+}
+async function fbSignOut() {
+  _unsubProj?.(); _unsubProj = null;
+  await signOut(_auth);
+  currentUser = null; _projIndex = []; currentProjId = null;
+  location.hash = '#home';
 }
 
-function duplicateProject(id) {
-  const raw = localStorage.getItem(projKey(id));
-  if (!raw) return;
-  const data = JSON.parse(raw);
-  data.cfg.title += ' (copy)';
-  const newId = 'proj_' + Date.now();
-  try { localStorage.setItem(projKey(newId), JSON.stringify(data)); } catch(e) {}
-  const idx = loadIndex();
-  const orig = idx.find(p => p.id === id);
-  idx.push({ id:newId, name:data.cfg.title, subtitle:data.cfg.subtitle||'',
-    accent:orig?.accent||'#D0A052', updatedAt:Date.now(),
-    stats: orig ? {...orig.stats} : {phases:0,tasks:0,sched:0} });
-  saveIndex(idx);
-  renderHome();
+/* ── Firestore helpers ── */
+function _fsDoc(id) { return doc(_db, 'projects', id); }
+
+function _payload(id, data, accent) {
+  return {
+    ownerId: currentUser.uid, ownerName: currentUser.displayName||'', ownerPhoto: currentUser.photoURL||'',
+    name: data.cfg.title, subtitle: data.cfg.subtitle||'',
+    accent: accent || _projIndex.find(p=>p.id===id)?.accent || '#D0A052',
+    updatedAt: Date.now(),
+    stats: { phases:data.phases.length, tasks:data.tasks.length,
+      sched:data.tasks.filter(t=>t.startWeek!==null).length, start:data.cfg.start, end:data.cfg.end },
+    cfg:data.cfg, phases:data.phases, teams:data.teams, tasks:data.tasks, tags:data.tags, _nextId:data._nextId,
+  };
 }
 
-function renameProject(id, name, subtitle, accent) {
-  const idx = loadIndex();
-  const p = idx.find(p => p.id === id);
-  if (!p) return;
-  p.name = name; p.subtitle = subtitle; p.updatedAt = Date.now();
-  if (accent) p.accent = accent;
-  saveIndex(idx);
-  // Also update cfg in project data
+async function _refreshIndex() {
+  if (!currentUser || !_db) { _projIndex = []; return; }
   try {
-    const raw = localStorage.getItem(projKey(id));
-    if (raw) {
-      const d = JSON.parse(raw);
-      d.cfg.title = name; d.cfg.subtitle = subtitle;
-      localStorage.setItem(projKey(id), JSON.stringify(d));
-    }
-  } catch(e) {}
-  renderHome();
+    const snap = await getDocs(query(collection(_db, 'projects'), where('ownerId','==',currentUser.uid)));
+    _projIndex = snap.docs.map(d => {
+      const dd = d.data();
+      return { id:d.id, name:dd.name, subtitle:dd.subtitle||'', accent:dd.accent||'#D0A052', updatedAt:dd.updatedAt||0, stats:dd.stats||{} };
+    }).sort((a,b) => b.updatedAt - a.updatedAt);
+  } catch(e) { console.error('refreshIndex:', e); }
 }
 
-function loadProject(id) {
-  // Reset S
-  S.cfg = { title:'Project Roadmap', subtitle:'', start:'2025-06-02', end:'2025-11-30' };
-  S.phases=[]; S.teams=[]; S.tasks=[];
-  S.tags=['tracking','UX','tech','growth','research']; S._nextId=1;
-  S.ui.filter={ phase:'', team:'', tag:'', status:'backlog', search:'' };
-  S.ui.modal=null; S.ui.ctx=null; S.ui.dragData=null;
-  S.ui.resizeData=null; S.ui.phaseResize=null; S.ui.phaseDragId=null;
+async function _saveToFirestore(id, data, accent) {
+  if (!_db || !currentUser) return;
+  _fbSaving = true;
   try {
-    const raw = localStorage.getItem(projKey(id));
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (d.cfg)     S.cfg     = {...S.cfg, ...d.cfg};
+    const pl = _payload(id, data, accent);
+    await setDoc(_fsDoc(id), pl);
+    const p = _projIndex.find(p=>p.id===id);
+    if (p) { p.name=pl.name; p.subtitle=pl.subtitle; p.updatedAt=pl.updatedAt; p.stats=pl.stats; }
+  } catch(e) { console.error('saveToFirestore:', e); }
+  setTimeout(()=>{ _fbSaving=false; }, 800);
+}
+
+function _subscribeToProject(id) {
+  _unsubProj?.(); _unsubProj = null;
+  if (!_db || !currentUser) return;
+  _unsubProj = onSnapshot(_fsDoc(id), snap => {
+    if (_fbSaving || currentProjId !== id || !snap.exists()) return;
+    const d = snap.data();
+    if (d.cfg)     S.cfg     = {...S.cfg,...d.cfg};
     if (d.phases)  S.phases  = d.phases;
     if (d.teams)   S.teams   = d.teams;
     if (d.tasks)   S.tasks   = d.tasks;
     if (d.tags)    S.tags    = d.tags;
     if (d._nextId) S._nextId = d._nextId;
-  } catch(e) {}
+    cacheProject(id,{cfg:S.cfg,phases:S.phases,teams:S.teams,tasks:S.tasks,tags:S.tags,_nextId:S._nextId});
+    render(true);
+    showToast('🔄 Cập nhật từ thiết bị khác', 2500);
+  });
+}
+
+/* ── Migration: localStorage → Firestore (first login) ── */
+async function _migrateLocalToFirestore() {
+  if (!currentUser || !_db) return;
+  const chk = await getDocs(query(collection(_db,'projects'),where('ownerId','==',currentUser.uid)));
+  if (chk.size > 0) return;
+  let localIdx = [];
+  try { const r = localStorage.getItem(INDEX_KEY); localIdx = r ? JSON.parse(r) : []; } catch(e) {}
+  if (localIdx.length === 0) {
+    // also check legacy single-project key
+    const old = localStorage.getItem(LS_KEY);
+    if (!old) return;
+    try {
+      const d = JSON.parse(old);
+      const id = 'proj_' + Date.now();
+      cacheProject(id, d);
+      localIdx = [{ id, name:d.cfg?.title||'My Roadmap', subtitle:'', accent:'#D0A052', updatedAt:Date.now(), stats:{} }];
+    } catch(e) { return; }
+  }
+  let count = 0;
+  for (const entry of localIdx) {
+    const data = readCachedProject(entry.id);
+    if (!data) continue;
+    try { await setDoc(_fsDoc(entry.id), _payload(entry.id, data, entry.accent)); count++; } catch(e) {}
+  }
+  if (count > 0) showToast(`☁️ Đã đồng bộ ${count} project lên cloud!`, 4000);
+}
+
+/* ── Project CRUD ── */
+async function createProject(name, subtitle, accent) {
+  const id = 'proj_' + Date.now();
+  const now = new Date(), y=now.getFullYear(), m=now.getMonth(), d=now.getDate();
+  const start = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const endD = new Date(y,m+6,d);
+  const end = `${endD.getFullYear()}-${String(endD.getMonth()+1).padStart(2,'0')}-${String(endD.getDate()).padStart(2,'0')}`;
+  const cfg = { title:name, subtitle:subtitle||'', start, end, scopeRowHeight:100 };
+  const data = { cfg, phases:[], teams:[], tasks:[], tags:['tracking','UX','tech','growth','research'], _nextId:1 };
+  cacheProject(id, data);
+  if (_db && currentUser) { try { await setDoc(_fsDoc(id), _payload(id,data,accent||'#D0A052')); } catch(e) {} }
+  _projIndex.unshift({ id, name, subtitle:subtitle||'', accent:accent||'#D0A052', updatedAt:Date.now(), stats:{phases:0,tasks:0,sched:0,start,end} });
+  location.hash = '#project-' + id;
+}
+
+async function deleteProject(id) {
+  try { localStorage.removeItem(projKey(id)); } catch(e) {}
+  if (_db && currentUser) { try { await deleteDoc(_fsDoc(id)); } catch(e) {} }
+  _projIndex = _projIndex.filter(p=>p.id!==id);
+  renderHome();
+}
+
+async function duplicateProject(id) {
+  let data = null;
+  if (_db && currentUser) { try { const s=await getDoc(_fsDoc(id)); if(s.exists()) data=s.data(); } catch(e) {} }
+  if (!data) data = readCachedProject(id);
+  if (!data) return;
+  data.cfg = {...data.cfg, title:(data.cfg?.title||'Project')+' (copy)'};
+  const newId = 'proj_' + Date.now();
+  const orig = _projIndex.find(p=>p.id===id);
+  cacheProject(newId, {cfg:data.cfg,phases:data.phases,teams:data.teams,tasks:data.tasks,tags:data.tags,_nextId:data._nextId});
+  if (_db && currentUser) { try { await setDoc(_fsDoc(newId), _payload(newId,data,orig?.accent)); } catch(e) {} }
+  _projIndex.unshift({ id:newId, name:data.cfg.title, subtitle:data.cfg.subtitle||'',
+    accent:orig?.accent||'#D0A052', updatedAt:Date.now(), stats:orig?{...orig.stats}:{} });
+  renderHome();
+}
+
+async function renameProject(id, name, subtitle, accent) {
+  const p = _projIndex.find(p=>p.id===id);
+  if (!p) return;
+  p.name=name; p.subtitle=subtitle; p.updatedAt=Date.now(); if(accent) p.accent=accent;
+  const cached = readCachedProject(id);
+  if (cached) { cached.cfg.title=name; cached.cfg.subtitle=subtitle; cacheProject(id,cached); }
+  if (_db && currentUser) {
+    try {
+      const s = await getDoc(_fsDoc(id));
+      if (s.exists()) {
+        const d = s.data();
+        await setDoc(_fsDoc(id),{...d,name,subtitle,accent:accent||d.accent,cfg:{...d.cfg,title:name,subtitle}});
+      }
+    } catch(e) {}
+  }
+  renderHome();
+}
+
+async function loadProject(id) {
+  S.cfg={title:'Project Roadmap',subtitle:'',start:'2025-06-02',end:'2025-11-30',scopeRowHeight:100};
+  S.phases=[]; S.teams=[]; S.tasks=[];
+  S.tags=['tracking','UX','tech','growth','research']; S._nextId=1;
+  S.ui.filter={phase:'',team:'',tag:'',status:'backlog',search:''};
+  S.ui.modal=null; S.ui.ctx=null; S.ui.dragData=null;
+  S.ui.resizeData=null; S.ui.phaseResize=null; S.ui.phaseDragId=null;
+  if (_db && currentUser) {
+    try {
+      const snap = await getDoc(_fsDoc(id));
+      if (snap.exists()) {
+        const d = snap.data();
+        if(d.cfg)     S.cfg     = {...S.cfg,...d.cfg};
+        if(d.phases)  S.phases  = d.phases;
+        if(d.teams)   S.teams   = d.teams;
+        if(d.tasks)   S.tasks   = d.tasks;
+        if(d.tags)    S.tags    = d.tags;
+        if(d._nextId) S._nextId = d._nextId;
+        cacheProject(id,{cfg:S.cfg,phases:S.phases,teams:S.teams,tasks:S.tasks,tags:S.tags,_nextId:S._nextId});
+        _subscribeToProject(id);
+        return;
+      }
+    } catch(e) { console.error('loadProject:', e); }
+  }
+  const cached = readCachedProject(id);
+  if (cached) {
+    if(cached.cfg)     S.cfg     = {...S.cfg,...cached.cfg};
+    if(cached.phases)  S.phases  = cached.phases;
+    if(cached.teams)   S.teams   = cached.teams;
+    if(cached.tasks)   S.tasks   = cached.tasks;
+    if(cached.tags)    S.tags    = cached.tags;
+    if(cached._nextId) S._nextId = cached._nextId;
+  }
 }
 
 function updateIndexEntry() {
   if (!currentProjId) return;
-  const idx = loadIndex();
-  const p = idx.find(p => p.id === currentProjId);
+  const p = _projIndex.find(p=>p.id===currentProjId);
   if (!p) return;
-  p.name = S.cfg.title; p.subtitle = S.cfg.subtitle || '';
-  p.updatedAt = Date.now();
-  p.stats = {
-    phases: S.phases.length,
-    tasks:  S.tasks.length,
-    sched:  S.tasks.filter(t => t.startWeek !== null).length,
-    start:  S.cfg.start,
-    end:    S.cfg.end,
-  };
-  saveIndex(idx);
+  p.name=S.cfg.title; p.subtitle=S.cfg.subtitle||''; p.updatedAt=Date.now();
+  p.stats={phases:S.phases.length,tasks:S.tasks.length,
+    sched:S.tasks.filter(t=>t.startWeek!==null).length,start:S.cfg.start,end:S.cfg.end};
 }
 
 function migrateOldData() {
+  // legacy single-project → multi (localStorage only, pre-Firebase)
   const old = localStorage.getItem(LS_KEY);
   if (!old) return;
-  if (loadIndex().length > 0) { localStorage.removeItem(LS_KEY); return; }
+  const localIdx = (() => { try{const r=localStorage.getItem(INDEX_KEY);return r?JSON.parse(r):[];}catch(e){return[];} })();
+  if (localIdx.length > 0) { localStorage.removeItem(LS_KEY); return; }
   const id = 'proj_' + Date.now();
   try {
     const d = JSON.parse(old);
-    localStorage.setItem(projKey(id), old);
-    saveIndex([{ id, name:d.cfg?.title||'My Roadmap', subtitle:d.cfg?.subtitle||'',
-      accent:'#D0A052', updatedAt:Date.now(),
-      stats:{ phases:d.phases?.length||0, tasks:d.tasks?.length||0,
-              sched:d.tasks?.filter(t=>t.startWeek!==null).length||0 } }]);
+    cacheProject(id, d);
+    _projIndex = [{ id, name:d.cfg?.title||'My Roadmap', subtitle:'', accent:'#D0A052', updatedAt:Date.now(),
+      stats:{phases:d.phases?.length||0,tasks:d.tasks?.length||0,sched:d.tasks?.filter(t=>t.startWeek!==null).length||0} }];
     localStorage.removeItem(LS_KEY);
   } catch(e) {}
 }
@@ -3254,21 +3419,24 @@ function timeAgo(ts) {
 }
 
 /* ── Router ── */
-function router() {
+async function router() {
   const hash = location.hash;
   homeCtxId = null;
-  // Share URL (#v1=...) — render roadmap in readonly, no project context
   if (hash.startsWith(SHARE_PREFIX)) {
+    _unsubProj?.(); _unsubProj = null;
     currentProjId = null;
     if (loadFromHash()) render();
     return;
   }
   if (hash.startsWith('#project-')) {
+    if (!currentUser) { location.hash = '#home'; return; }
     const id = hash.slice(9);
+    _unsubProj?.(); _unsubProj = null;
     currentProjId = id;
-    loadProject(id);
+    await loadProject(id);
     render();
   } else {
+    _unsubProj?.(); _unsubProj = null;
     currentProjId = null;
     S.ui.modal = null;
     renderHome();
@@ -3277,31 +3445,14 @@ function router() {
 window.addEventListener('hashchange', router);
 
 function saveState() {
-  if (!currentProjId) return; // don't save when on Home
-  try {
-    const toSave = { cfg:S.cfg, phases:S.phases, teams:S.teams,
-      tasks:S.tasks, tags:S.tags, _nextId:S._nextId };
-    localStorage.setItem(projKey(currentProjId), JSON.stringify(toSave));
-    updateIndexEntry();
-  } catch(e) {
-    if (e.name === 'QuotaExceededError' || e.code === 22) {
-      showToast('⚠️ Bộ nhớ đầy — không thể lưu. Xoá bớt project cũ.', 5000);
-    }
-  }
-}
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    if (saved.cfg)     S.cfg     = {...S.cfg, ...saved.cfg};
-    if (saved.phases)  S.phases  = saved.phases;
-    if (saved.teams)   S.teams   = saved.teams;
-    if (saved.tasks)   S.tasks   = saved.tasks;
-    if (saved.tags)    S.tags    = saved.tags;
-    if (saved._nextId) S._nextId = saved._nextId;
-  } catch(e) { /* corrupted data, start fresh */ }
+  if (!currentProjId) return;
+  const toSave = { cfg:S.cfg, phases:S.phases, teams:S.teams, tasks:S.tasks, tags:S.tags, _nextId:S._nextId };
+  // Cache locally
+  try { localStorage.setItem(projKey(currentProjId), JSON.stringify(toSave)); }
+  catch(e) { if(e.name==='QuotaExceededError'||e.code===22) showToast('⚠️ Bộ nhớ đầy — không thể lưu.', 5000); }
+  updateIndexEntry();
+  // Save to Firestore (async, fire-and-forget)
+  if (_db && currentUser) _saveToFirestore(currentProjId, toSave).catch(console.error);
 }
 
 
@@ -3818,11 +3969,40 @@ function downloadCSVTemplate() {
 }
 
 loadTheme();
-migrateOldData();
-// If no hash yet, go to home
-if (!location.hash || location.hash === '#') location.hash = '#home';
-router();
-setTimeout(() => { if (_history.length === 0) pushHistory(); }, 0);
+migrateOldData(); // legacy localStorage single→multi
+
+/* ── Firebase init ── */
+function initFirebase() {
+  try {
+    const app = initializeApp(FIREBASE_CONFIG);
+    _db  = getFirestore(app);
+    _auth = getAuth(app);
+    _gProvider = new GoogleAuthProvider();
+    _gProvider.setCustomParameters({ prompt: 'select_account' });
+
+    onAuthStateChanged(_auth, async user => {
+      currentUser = user;
+      if (user) {
+        await _migrateLocalToFirestore();
+        await _refreshIndex();
+      } else {
+        _projIndex = [];
+        currentProjId = null;
+      }
+      if (!location.hash || location.hash === '#') location.hash = '#home';
+      await router();
+      if (_history.length === 0) pushHistory();
+    });
+  } catch(e) {
+    console.error('Firebase init failed — running offline:', e);
+    // Fallback: run without Firebase
+    if (!location.hash || location.hash === '#') location.hash = '#home';
+    router();
+    setTimeout(() => { if (_history.length === 0) pushHistory(); }, 0);
+  }
+}
+
+initFirebase();
 
 /* Re-calc WW when window resizes (only matters for fill-mode ≤12 weeks) */
 let _resizeTimer = null;
