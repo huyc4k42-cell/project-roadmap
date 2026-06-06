@@ -13,10 +13,12 @@
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Commit mới nhất: `063fc59` — đang live tại https://aroadmap.vercel.app
+- ✅ Commit mới nhất: `8c52b89` — đang live tại https://aroadmap.cloud
 - ✅ Wave 1–4 hoàn thành (13 fixes + features)
 - ✅ Firebase Firestore + Google Auth đã integrate
-- ✅ **Firestore security rules đã deploy** — không còn test mode
+- ✅ Firestore security rules đã deploy — không còn test mode
+- ✅ Custom domain `aroadmap.cloud` đã live (mua tại Mắt Bão)
+- ✅ GitHub → Vercel auto-deploy (push là live, không cần `vercel deploy --prod`)
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
@@ -107,6 +109,21 @@ service cloud.firestore {
 ---
 
 ## 📝 Session Log
+
+### 2026-06-07 — Custom Domain + Auto-deploy Setup
+
+**Custom domain `aroadmap.cloud`:**
+- Mua domain tại Mắt Bão
+- Thêm A record `@` → `76.76.21.21` và CNAME `www` → `cname.vercel-dns.com` tại Mắt Bão
+- Add domain vào Vercel → `aroadmap.cloud` + `www.aroadmap.cloud` — Valid Configuration
+- Add `aroadmap.cloud` + `www.aroadmap.cloud` vào Firebase Authorized domains
+- Fix lỗi `auth/unauthorized-domain` khi đổi domain từ `project-roadmap-eight.vercel.app` → `aroadmap.vercel.app` → `aroadmap.cloud`
+
+**GitHub → Vercel auto-deploy:**
+- Kết nối repo `huyc4k42-cell/project-roadmap` với Vercel project
+- Từ giờ `git push origin main` → Vercel tự deploy, không cần `vercel deploy --prod`
+
+---
 
 ### 2026-06-07 — Firebase Security Rules Deploy
 

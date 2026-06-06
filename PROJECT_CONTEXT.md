@@ -8,7 +8,7 @@
 ## 1. Tổng quan sản phẩm
 
 **Tên:** Arthur — Project Roadmap Timeline
-**URL Production:** https://aroadmap.vercel.app
+**URL Production:** https://aroadmap.cloud (primary) · https://www.aroadmap.cloud · https://aroadmap.vercel.app
 **Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap
 **File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~4100 dòng)
 
@@ -23,7 +23,8 @@
 ### Deploy
 - **Vercel** với `vercel.json` redirect root → `timeline.html`
 - **GitHub** repo `huyc4k42-cell/project-roadmap`, branch `main`
-- Deploy: `vercel deploy --prod` từ thư mục project
+- Deploy: **auto** — `git push origin main` → Vercel tự deploy (~30s). Không cần `vercel deploy --prod` nữa.
+- **Custom domain:** `aroadmap.cloud` (mua tại Mắt Bão, DNS trỏ về Vercel)
 - **Firebase project:** `a-roadmap` (console.firebase.google.com/project/a-roadmap)
 - **Firestore:** asia-southeast1, test mode (cần deploy security rules)
 - **Auth:** Google Sign-In enabled, domain `project-roadmap-eight.vercel.app` authorized
@@ -475,7 +476,7 @@ cd "/Users/arthur/Desktop/[Claude] Project Roadmap"
 git add timeline.html PROJECT_CONTEXT.md WORKING.md
 git commit -m "feat: mô tả thay đổi"
 git push origin main
-vercel deploy --prod
+# → Vercel tự động deploy, live tại aroadmap.cloud sau ~30 giây
 ```
 
 **Vercel project ID:** `prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx`
@@ -491,7 +492,7 @@ firebase deploy --only firestore:rules
 
 **Firebase project:** `a-roadmap`
 **Firestore region:** `asia-southeast1`
-**Auth domain:** `aroadmap.vercel.app` (đã authorized), `project-roadmap-eight.vercel.app` (domain cũ, giữ lại)
+**Auth domain:** `aroadmap.cloud`, `www.aroadmap.cloud`, `aroadmap.vercel.app` (đã authorized trong Firebase)
 
 ### Firestore Security Rules (production-ready)
 ```
