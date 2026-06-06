@@ -3984,7 +3984,7 @@ loadTheme();
 migrateOldData(); // legacy localStorage single→multi
 
 /* ── Firebase init ── */
-function initFirebase() {
+async function initFirebase() {
   try {
     const app = initializeApp(FIREBASE_CONFIG);
     _db  = getFirestore(app);
@@ -3992,10 +3992,10 @@ function initFirebase() {
     _gProvider = new GoogleAuthProvider();
     _gProvider.setCustomParameters({ prompt: 'select_account' });
 
-    getRedirectResult(_auth).catch(e => {
-      if (e?.code !== 'auth/cancelled-popup-request')
-        showToast('Đăng nhập thất bại: ' + e.message, 4000);
-    });
+    // Wait for redirect result before setting up listener
+    // so auth state is settled when onAuthStateChanged fires
+    try { await getRedirectResult(_auth); }
+    catch(e) { if (e?.code && e.code !== 'auth/cancelled-popup-request') showToast('Đăng nhập thất bại: ' + e.message, 4000); }
 
     onAuthStateChanged(_auth, async user => {
       currentUser = user;
