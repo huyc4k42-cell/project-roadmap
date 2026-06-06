@@ -564,7 +564,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <script type="module">
 import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut,
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut,
          onAuthStateChanged, browserLocalPersistence, setPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc,
          collection, query, where, getDocs, onSnapshot, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -3209,11 +3209,19 @@ function readCachedProject(id) {
 
 /* ── Firebase Auth ── */
 async function fbSignIn() {
+  await setPersistence(_auth, browserLocalPersistence);
   try {
-    await setPersistence(_auth, browserLocalPersistence);
-    await signInWithRedirect(_auth, _gProvider);
+    // Try popup first (desktop); Safari/mobile will throw → fallback to redirect
+    await signInWithPopup(_auth, _gProvider);
+  } catch(e) {
+    const fallbackCodes = ['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'];
+    if (fallbackCodes.includes(e.code) || e.message?.includes('missing initial state') || e.message?.includes('storage-partitioned')) {
+      try { await signInWithRedirect(_auth, _gProvider); }
+      catch(e2) { showToast('Đăng nhập thất bại: ' + e2.message, 4000); }
+    } else if (e.code !== 'auth/popup-closed-by-user') {
+      showToast('Đăng nhập thất bại: ' + e.message, 4000);
+    }
   }
-  catch(e) { showToast('Đăng nhập thất bại: ' + e.message, 4000); }
 }
 async function fbSignOut() {
   _unsubProj?.(); _unsubProj = null;
