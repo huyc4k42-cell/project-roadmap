@@ -565,7 +565,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 <script type="module">
 import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut,
-         onAuthStateChanged }                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+         onAuthStateChanged, browserLocalPersistence, setPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc,
          collection, query, where, getDocs, onSnapshot, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 /* ══════════════════════════════
@@ -3209,7 +3209,10 @@ function readCachedProject(id) {
 
 /* ── Firebase Auth ── */
 async function fbSignIn() {
-  try { await signInWithRedirect(_auth, _gProvider); }
+  try {
+    await setPersistence(_auth, browserLocalPersistence);
+    await signInWithRedirect(_auth, _gProvider);
+  }
   catch(e) { showToast('Đăng nhập thất bại: ' + e.message, 4000); }
 }
 async function fbSignOut() {
