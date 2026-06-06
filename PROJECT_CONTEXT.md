@@ -354,6 +354,7 @@ assignLanes(tasks)
 - ❌ CSS token rename (--s1, --s2...)
 - ❌ Google Sheets template URL (placeholder hiện tại)
 - ❌ Phase scope per-block resize (toàn row resize only)
+- ✅ **Firestore security rules** — deployed 2026-06-07 (owner-only access, không còn test mode)
 
 ---
 
@@ -408,8 +409,9 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 ├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
 ├── vercel.json            ← Vercel config (redirect / → /timeline.html)
 ├── Logo.png               ← Logo source (embedded as base64 trong HTML)
-├── firestore.rules        ← (cần tạo) Firestore security rules
-├── .firebaserc            ← (cần tạo sau firebase init) project alias
+├── firestore.rules        ← Firestore security rules (đã deploy 2026-06-07)
+├── firebase.json          ← Firebase CLI config (firestore rules pointer)
+├── .firebaserc            ← project alias: default → a-roadmap
 ├── .vercel/
 │   └── project.json       ← projectId + orgId (đừng xóa)
 └── .claude/
@@ -431,7 +433,7 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 | D15 | Migration: first login tự detect localStorage projects → migrate lên Firestore, không hỏi |
 | D16 | `_projIndex` in-memory array thay cho `localStorage roadmap-index` — không persist index riêng |
 | D17 | Collaborator: hiện tại chỉ owner (last-write-wins). Invite/share role để sau. |
-| D18 | Security rules: hiện test mode. Cần deploy rules trước khi production. |
+| D18 | ✅ Security rules: đã deploy lên production 2026-06-07. Owner-only read/write. |
 
 ### [2026-06-03] UX Overhaul — Grill-me Session
 | # | Quyết định |

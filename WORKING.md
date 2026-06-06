@@ -16,29 +16,22 @@
 - ✅ Commit mới nhất: `033e072` — đang live tại https://project-roadmap-eight.vercel.app
 - ✅ Wave 1–4 hoàn thành (13 fixes + features)
 - ✅ Firebase Firestore + Google Auth đã integrate
-- 🔴 **Việc cần làm ngay:** Deploy Firestore security rules (hiện đang test mode)
+- ✅ **Firestore security rules đã deploy** — không còn test mode
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
 
-## 🔴 Việc cần làm ngay — Firebase Security Rules
+## ✅ Firestore Security Rules — HOÀN THÀNH (2026-06-07)
 
-**Vấn đề:** Firestore đang ở test mode — bất kỳ ai biết projectId cũng có thể đọc/ghi.
+~~**Vấn đề:** Firestore đang ở test mode — bất kỳ ai biết projectId cũng có thể đọc/ghi.~~
 
-**Cách fix:**
-```bash
-# Terminal máy local
-npm install -g firebase-tools   # nếu chưa có
-firebase login
-cd "/Users/arthur/Desktop/[Claude] Project Roadmap"
-firebase init firestore
-# → Use existing project → a-roadmap
-# → Rules file: firestore.rules
-# → Indexes file: firestore.indexes.json
-firebase deploy --only firestore:rules
-```
+**Đã làm:**
+- Cài `firebase-tools` v15.19.1 qua `npm install -g firebase-tools`
+- `firebase login` — xác thực Google account thành công
+- Tạo `firestore.rules`, `.firebaserc`, `firebase.json`
+- `firebase deploy --only firestore:rules` → compiled OK, released to cloud.firestore
 
-**Rules cần dùng** (tạo file `firestore.rules`):
+**Rules đang live:**
 ```
 rules_version = '2';
 service cloud.firestore {
@@ -109,11 +102,27 @@ service cloud.firestore {
 | D15 | Migration tự động không hỏi khi first login |
 | D16 | `_projIndex` in-memory, không persist index riêng |
 | D17 | Collaborator: last-write-wins, invite để Wave 5 |
-| D18 | Security rules: cần deploy trước production |
+| D18 | ✅ Security rules: đã deploy lên production (2026-06-07) |
 
 ---
 
 ## 📝 Session Log
+
+### 2026-06-07 — Firebase Security Rules Deploy
+
+**Kiểm tra kết nối Firestore:**
+- Xác nhận Firebase SDK v10.12.2 import đúng, config đủ 6 fields
+- `initFirebase()` → `onAuthStateChanged` → migrate → `_refreshIndex` → `router()` — flow đúng
+- Phát hiện `_fbSaving` timeout cứng 800ms (edge case nếu mạng chậm, không critical)
+- Phát hiện `_saveToFirestore` catch chỉ `console.error`, không toast user (known limitation)
+
+**Deploy security rules:**
+- `npm install -g firebase-tools` → v15.19.1 (warning Node v26 chưa supported nhưng không ảnh hưởng)
+- `firebase login` → xác thực thành công
+- Tạo `firestore.rules`, `.firebaserc`, `firebase.json`
+- `firebase deploy --only firestore:rules` → ✅ compiled + released to cloud.firestore
+
+---
 
 ### 2026-06-07 — Wave 1→4 + Firebase
 
@@ -147,7 +156,3 @@ service cloud.firestore {
 - localStorage giữ vai trò cache + offline fallback
 - Firebase config: project `a-roadmap`, region `asia-southeast1`
 - Commit: `033e072`
-
-**Còn pending:**
-- Deploy Firestore security rules (hiện test mode)
-- firebase-tools đang install trên máy user
