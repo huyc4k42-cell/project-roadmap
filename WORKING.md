@@ -1,7 +1,7 @@
 # WORKING — Arthur Roadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-03
+> Cập nhật lần cuối: 2026-06-07
 
 ---
 
@@ -9,58 +9,77 @@
 
 **Prompt nạp context:**
 ```
-Đọc PROJECT_CONTEXT.md và WORKING.md.
-Bắt đầu implement Wave 1 theo thứ tự W1-1 → W1-2 → W1-3 → W1-4,
-sau đó tiếp tục Wave 2: W2-1 → W2-2 → W2-3 → W2-4.
-Deploy sau khi hoàn thành Wave 2.
+Đọc PROJECT_CONTEXT.md và WORKING.md để nắm trạng thái dự án.
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Code app: commit `c6c217a` — đang live tại https://project-roadmap-eight.vercel.app
-- ✅ Wave 1 + Wave 2: hoàn thành, commit `c6c217a`
-- ✅ Wave 3: hoàn thành, commit `2cb3d53`
-- ✅ Wave 4: hoàn thành, commit `70b903f` — đang live
-- 🎉 Tất cả Wave 1–4 đã hoàn thành và deployed
+- ✅ Commit mới nhất: `033e072` — đang live tại https://project-roadmap-eight.vercel.app
+- ✅ Wave 1–4 hoàn thành (13 fixes + features)
+- ✅ Firebase Firestore + Google Auth đã integrate
+- 🔴 **Việc cần làm ngay:** Deploy Firestore security rules (hiện đang test mode)
 - 📁 File cần edit: `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html`
 
 ---
 
-## 🎯 Active Sprint — Wave 1 + 2
+## 🔴 Việc cần làm ngay — Firebase Security Rules
 
-> Mục tiêu: fix bugs + quick wins trước khi thêm feature mới.
-> Estimate: ~1.5–2h. Deploy ngay sau khi hoàn thành Wave 2.
+**Vấn đề:** Firestore đang ở test mode — bất kỳ ai biết projectId cũng có thể đọc/ghi.
 
-### 🔴 Wave 1 — Stability (Bugs)
+**Cách fix:**
+```bash
+# Terminal máy local
+npm install -g firebase-tools   # nếu chưa có
+firebase login
+cd "/Users/arthur/Desktop/[Claude] Project Roadmap"
+firebase init firestore
+# → Use existing project → a-roadmap
+# → Rules file: firestore.rules
+# → Indexes file: firestore.indexes.json
+firebase deploy --only firestore:rules
+```
 
-- [x] **W1-1** Fix `assignLanes` — no-phase tasks greedy packing bị broken.
-  - **Nguyên nhân:** `laneEnds = new Array(nextLane).fill(Infinity)` nên `laneEnds.length === nextLane`, loop `for (i = nextLane; i < laneEnds.length)` không bao giờ chạy.
-  - **Fix:** Tách `noLaneEnds = []` riêng (empty array) cho no-phase tasks, loop tìm lane trống trong `noLaneEnds`, map về `globalLane = nextLane + i`.
-
-- [x] **W1-2** Fix phase stacking sort theo visual order.
-- [x] **W1-3** Fix `Escape` key không reset drag states.
-- [x] **W1-4** `localStorage` error boundary.
-
-### 🟡 Wave 2 — Quick Wins (Polish)
-
-- [x] **W2-1** Fix contrast `--txt3` → `#9a9490`.
-- [x] **W2-2** Today line 2px + "Hôm nay" label via `::after`.
-- [x] **W2-3** Home card `min-height: 240px` + circle HTML overlay.
-- [x] **W2-4** ARIA resize handles `role="slider"` + `aria-orientation`.
+**Rules cần dùng** (tạo file `firestore.rules`):
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
+```
 
 ---
 
-## ✅ Wave 3 — Done
+## 🟡 Backlog — Collaborator (Wave 5)
 
-- [x] **W3-1** Task drag reorder → insert-before + gold line indicator
-- [x] **W3-2** Sidebar filter: xoá Tag select, gộp 3 selects thành 1 flex row
-- [x] **W3-3** Focus trap trong modal (Tab/Shift+Tab cycle)
-- [x] **W3-4** Phase Scope + Output rows collapsible, state nhớ qua reload
+> Hiện tại: chỉ owner mới xem/sửa được project. Để chia sẻ edit cần implement invite.
+
+- [ ] **W5-1** Invite collaborator bằng email
+  - Thêm `collaborators: [uid]` vào Firestore document
+  - Update security rules: `|| request.auth.uid in resource.data.collaborators`
+  - UI: nút "Chia sẻ edit" trong project header → nhập email → lookup uid → add to array
+
+- [ ] **W5-2** Presence indicator — "Huy đang xem" badge
+  - Dùng Firestore realtime: `presence/{projectId}/{uid}` document
+  - TTL: update mỗi 30s, cleanup khi disconnect
+
+- [ ] **W5-3** Conflict toast rõ hơn
+  - Hiện tại: "🔄 Cập nhật từ thiết bị khác" — generic
+  - Cải thiện: hiện tên người vừa save + thời gian
 
 ---
 
-## ✅ Wave 4 — Done
+## 🔵 Backlog — Nice to Have
 
-- [x] **W4-1** Sidebar thin rail collapse (48px rail ↔ 288px expanded, state persist)
+- [ ] Task description field trong modal edit-task (field `desc` đã có trong data model, chưa có UI)
+- [ ] Keyboard shortcut: `N` để thêm task nhanh từ bất kỳ đâu
+- [ ] Export Excel/CSV từ timeline data
+- [ ] Project archive (ẩn khỏi home grid mà không xóa)
 
 ---
 
@@ -68,56 +87,67 @@ Deploy sau khi hoàn thành Wave 2.
 
 | Item | Lý do bỏ qua |
 |------|-------------|
-| CSS token rename (`--s1` → `--surface-base`...) | Zero user value, rủi ro miss cao trong 3750 dòng |
-| Keyboard drag-drop alternative | Conflict với shortcuts hiện có (Ctrl+Z, K, Esc), edge case ít dùng |
-| Header stats declutter | Stats là thông tin scanning quan trọng — chưa cần thay đổi |
+| CSS token rename (`--s1` → `--surface-base`...) | Zero user value, rủi ro miss cao |
+| Keyboard drag-drop alternative | Conflict với shortcuts hiện có |
+| Header stats declutter | Stats là thông tin scanning quan trọng |
 | Mobile responsive | Desktop-first by design |
-| Google Sheets template URL | Cần tạo real Sheet riêng — outside scope |
-| Phase scope per-block resize | Quá phức tạp, toàn row resize là đủ |
+| Google Sheets template URL | Cần tạo real Sheet riêng |
+| Phase scope per-block resize | Quá phức tạp |
 
 ---
 
-## 📌 Key Decisions (2026-06-03 Grill-me)
+## 📌 Key Decisions
 
 > Chi tiết đầy đủ trong `PROJECT_CONTEXT.md` → mục 11 Design Decisions Log.
 
 | Code | Quyết định |
 |------|-----------|
-| D01 | Sidebar collapse → thin rail 48px, icon list + badge số backlog |
-| D02 | Drag task từ collapsed sidebar → phải expand trước, không có flyout |
-| D03 | Xoá select "Tag" (trùng với tag pills). Giữ pills. Gộp 3 selects còn lại thành 1 row |
-| D04 | Task drag-reorder → insert-before target (không swap) |
-| D05 | Insert-before indicator → gold line ngang phía trên task target |
-| D06 | Scope/Output rows → collapsible, nhớ state riêng từng row trong localStorage |
-| D07 | First-run default → cả 2 rows expanded |
-| D08 | "Hôm nay" label → gắn vào week row sticky, màu gold |
-| D09 | Header stats → giữ nguyên, chưa xử lý |
-| D10 | CSS token rename → skip hoàn toàn |
-| D11 | Keyboard drag-drop → skip, known limitation |
+| D01–D11 | UX decisions từ session 2026-06-03 (xem PROJECT_CONTEXT.md) |
+| D12 | Auth required — không có account không xem được project |
+| D13 | Firestore = source of truth, localStorage = write-through cache |
+| D14 | `_fbSaving` guard tránh onSnapshot echo loop |
+| D15 | Migration tự động không hỏi khi first login |
+| D16 | `_projIndex` in-memory, không persist index riêng |
+| D17 | Collaborator: last-write-wins, invite để Wave 5 |
+| D18 | Security rules: cần deploy trước production |
 
 ---
 
 ## 📝 Session Log
 
-### 2026-06-02 — UX Overhaul
-**Đã làm:**
-- Tags roadmap: bỏ prefix `#` khỏi tag chips
-- Home card: title 24px Crimson Pro, circle SVG progress weeks, bỏ 1 progress bar trùng
-- `assignLanes`: refactor — cùng phase → vertical stack theo `S.tasks` order
-- Team row: thêm grip drag handle, drag để reorder rows
-- Task bars: drag lên task cùng phase+team → swap ⚠️ (W3-1 sẽ đổi thành insert-before)
-- Export PDF: auto-expand scope/output trước capture
-- Deploy: `cc3d12c` → https://project-roadmap-eight.vercel.app
+### 2026-06-07 — Wave 1→4 + Firebase
 
-### 2026-06-03 — Planning + Documentation
-**Đã làm:**
-- Review toàn diện: design critique, accessibility audit (WCAG 2.1 AA), code review
-- Lập danh sách 34 issues phân loại: bug logic, UX, accessibility, code quality
-- Grill-me session: chốt 11 design decisions (D01–D11) với lý do cụ thể
-- Lập Wave 1–4 với thứ tự tối ưu theo ROI
-- Tạo cấu trúc 2-file docs: `PROJECT_CONTEXT.md` (stable) + `WORKING.md` (volatile)
-- Không ship code trong session này
-- Deploy docs: `8399e74`
+**Wave 1 (Bugs):**
+- W1-1: `assignLanes` no-phase greedy packing — tách `noLaneEnds[]` riêng
+- W1-2: Phase sort order — sort keys theo `startWeek` trước assign lanes
+- W1-3: Escape key — reset cả 3 drag states
+- W1-4: localStorage QuotaExceededError → toast thay vì silent fail
 
-**Tiếp tục session sau:**
-- Bắt đầu Wave 1 từ W1-1 (`assignLanes` bug fix)
+**Wave 2 (Polish):**
+- W2-1: `--txt3` contrast `#857d75` → `#9a9490`
+- W2-2: Today line 2px + "Hôm nay" label via `::after`
+- W2-3: Home card `min-height: 240px` + circle number HTML overlay
+- W2-4: ARIA resize handles `role="slider"`
+
+**Wave 3 (Core UX):**
+- W3-1: Task reorder → insert-before + gold line indicator
+- W3-2: Sidebar filter: xoá Tag select, 3 selects thành 1 flex row
+- W3-3: Focus trap trong modal
+- W3-4: Phase Scope + Output rows collapsible, state persist
+
+**Wave 4 (Feature):**
+- W4-1: Sidebar thin rail collapse (48px ↔ 288px, state persist)
+
+**Firebase Integration:**
+- Chuyển `<script>` → `<script type="module">` + Firebase v10 CDN imports
+- Google Sign-In, auth gate, sign-in screen
+- Firestore CRUD: createProject, deleteProject, duplicateProject, renameProject, loadProject
+- `onSnapshot` real-time listener với `_fbSaving` guard
+- Auto-migration localStorage → Firestore khi first login
+- localStorage giữ vai trò cache + offline fallback
+- Firebase config: project `a-roadmap`, region `asia-southeast1`
+- Commit: `033e072`
+
+**Còn pending:**
+- Deploy Firestore security rules (hiện test mode)
+- firebase-tools đang install trên máy user

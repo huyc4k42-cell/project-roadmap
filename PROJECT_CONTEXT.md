@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-03 · Commit app: `cc3d12c` · Commit docs: `8399e74`
+> Cập nhật lần cuối: 2026-06-07 · Commit app: `033e072` · Commit docs: (file này)
 
 ---
 
@@ -10,31 +10,56 @@
 **Tên:** Arthur — Project Roadmap Timeline
 **URL Production:** https://project-roadmap-eight.vercel.app
 **Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap
-**File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~3750 dòng)
+**File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~4100 dòng)
 
 ### Kiến trúc cốt lõi
 - **Single HTML file** — toàn bộ CSS + JS nằm trong 1 file `timeline.html`
-- **Vanilla JS** — không có framework, không có npm, không có build step
-- **localStorage** — toàn bộ dữ liệu lưu local, không có backend
+- **Vanilla JS + ES Module** — `<script type="module">`, Firebase SDK import qua CDN
+- **Firebase Firestore** — source of truth cho project data, real-time sync
+- **Firebase Auth** — Google Sign-In, auth required để xem/sửa projects
+- **localStorage** — cache nhanh (offline fallback) + UI prefs (theme, sidebar, row state)
 - **Hash routing** — `#home` → trang chủ, `#project-{id}` → project detail, `#share-{data}` → read-only share
 
 ### Deploy
 - **Vercel** với `vercel.json` redirect root → `timeline.html`
 - **GitHub** repo `huyc4k42-cell/project-roadmap`, branch `main`
 - Deploy: `vercel deploy --prod` từ thư mục project
+- **Firebase project:** `a-roadmap` (console.firebase.google.com/project/a-roadmap)
+- **Firestore:** asia-southeast1, test mode (cần deploy security rules)
+- **Auth:** Google Sign-In enabled, domain `project-roadmap-eight.vercel.app` authorized
 
 ---
 
 ## 2. Data Model (localStorage)
 
-### Keys
+### Firestore Structure
 ```
-roadmap-index          → JSON array of project index entries
-roadmap-proj-{id}      → JSON object of full project data
+/projects/{projectId}         ← mỗi project = 1 document
+  ownerId: string             ← Firebase Auth uid
+  ownerName: string
+  ownerPhoto: string
+  name: string                ← = cfg.title
+  subtitle: string
+  accent: string              ← màu card stripe
+  updatedAt: number           ← Date.now()
+  stats: { phases, tasks, sched, start, end }
+  cfg: object                 ← project config
+  phases: array
+  teams: array
+  tasks: array
+  tags: array
+  _nextId: number
+```
+
+### localStorage Keys (UI prefs + cache)
+```
+roadmap-proj-{id}      → JSON cache của project data (offline fallback)
 roadmap-state-v1       → LEGACY (old single-project format, tự migrate)
 roadmap-theme          → 'dark' | 'light' | 'system'
 roadmap-row-state      → { scope: 'expanded'|'collapsed', output: 'expanded'|'collapsed' }
+roadmap-sidebar-state  → 'expanded' | 'collapsed'
 ```
+> `roadmap-index` không còn dùng — index lấy từ Firestore query
 
 ### Index Entry (per project)
 ```js
@@ -95,7 +120,31 @@ roadmap-row-state      → { scope: 'expanded'|'collapsed', output: 'expanded'|'
 
 ---
 
-## 3. State Object (runtime)
+## 3. Firebase Runtime State
+
+```js
+let _db          = null;   // Firestore instance
+let _auth        = null;   // Auth instance
+let _gProvider   = null;   // GoogleAuthProvider
+let currentUser  = null;   // Firebase user object (null = chưa đăng nhập)
+let _projIndex   = [];     // in-memory index (synced từ Firestore, không persist)
+let _unsubProj   = null;   // onSnapshot cleanup fn cho current project
+let _fbSaving    = false;  // guard tránh onSnapshot echo khi chính mình save
+```
+
+### Key Firebase Functions
+```js
+fbSignIn()                  // Google popup sign-in
+fbSignOut()                 // sign out + cleanup
+_refreshIndex()             // query Firestore → update _projIndex
+_saveToFirestore(id, data)  // setDoc với _fbSaving guard
+_subscribeToProject(id)     // onSnapshot → real-time collab updates
+_migrateLocalToFirestore()  // first-login: localStorage → Firestore
+```
+
+---
+
+## 4. State Object (runtime)
 
 ```js
 const S = {
@@ -254,6 +303,14 @@ assignLanes(tasks)
 
 ## 8. Features Implemented
 
+### Auth & Cloud Sync
+- [x] **Google Sign-In** — Firebase Auth, popup flow
+- [x] **Sign-in screen** — khi chưa login, home hiện CTA thay vì project list
+- [x] **User avatar + name** — hiện trong home header khi đã login
+- [x] **Auto-migration** — first login tự động migrate localStorage projects lên Firestore
+- [x] **Real-time sync** — `onSnapshot` cập nhật UI khi device khác save
+- [x] **localStorage cache** — offline fallback, write-through khi save
+
 ### Core Timeline
 - [x] Phase bar: drag-to-move, resize handles (left/right), week count badge
 - [x] Team rows: task bars drag-drop từ backlog vào timeline
@@ -261,12 +318,15 @@ assignLanes(tasks)
 - [x] Task resize (left/right handles)
 - [x] Task stacking: lane algorithm, không bao giờ overlap
 - [x] **Team row reorder:** grip handle ở cuối label → drag để đổi thứ tự
-- [x] **Task reorder trong phase:** kéo task bar thả lên task khác cùng phase+team → insert trước
-- [x] Backlog sidebar: task list, search, tag filter pills, filter selects
-- [x] Phase Scope textarea (lưu per phase, resizable height)
-- [x] Output/Checklist per phase (paste multi-line)
-- [x] Today line indicator
+- [x] **Task reorder trong phase:** insert-before với gold line indicator (không swap)
+- [x] Backlog sidebar: task list, search, tag pills, 3 selects (Phase/Nhóm/Trạng thái) — tag select đã xoá
+- [x] **Sidebar collapse rail:** thu gọn thành 48px rail với icon + badge số backlog
+- [x] Phase Scope textarea (lưu per phase, resizable height, **collapsible**)
+- [x] Output/Checklist per phase (paste multi-line, **collapsible**)
+- [x] Row collapse state nhớ qua reload (`roadmap-row-state`)
+- [x] Today line indicator (2px, gold "Hôm nay" label trên week row)
 - [x] Dark/Light/System theme toggle
+- [x] **Modal focus trap** — Tab/Shift+Tab cycle trong modal, auto-focus first input
 - [x] Share roadmap (URL encode + LZ compress)
 - [x] Export PDF (html2canvas + jsPDF, tự expand scope/output trước capture)
 - [x] Week picker calendar (click month → chọn range)
@@ -343,11 +403,13 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 
 ```
 [Claude] Project Roadmap/
-├── timeline.html          ← FILE DUY NHẤT của app (~3750 dòng)
+├── timeline.html          ← FILE DUY NHẤT của app (~4100 dòng)
 ├── PROJECT_CONTEXT.md     ← file này — technical reference (stable)
 ├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
 ├── vercel.json            ← Vercel config (redirect / → /timeline.html)
 ├── Logo.png               ← Logo source (embedded as base64 trong HTML)
+├── firestore.rules        ← (cần tạo) Firestore security rules
+├── .firebaserc            ← (cần tạo sau firebase init) project alias
 ├── .vercel/
 │   └── project.json       ← projectId + orgId (đừng xóa)
 └── .claude/
@@ -359,6 +421,17 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 ## 11. Design Decisions Log
 
 > Append-only. Không xóa entry cũ — dùng để trace lý do đằng sau các quyết định.
+
+### [2026-06-07] Firebase Integration
+| # | Quyết định |
+|---|-----------|
+| D12 | Auth required — không có account không xem được project (trừ read-only share link) |
+| D13 | Storage: Firestore là source of truth, localStorage là write-through cache (offline fallback) |
+| D14 | Real-time: `onSnapshot` + `_fbSaving` guard để tránh echo loop khi chính mình save |
+| D15 | Migration: first login tự detect localStorage projects → migrate lên Firestore, không hỏi |
+| D16 | `_projIndex` in-memory array thay cho `localStorage roadmap-index` — không persist index riêng |
+| D17 | Collaborator: hiện tại chỉ owner (last-write-wins). Invite/share role để sau. |
+| D18 | Security rules: hiện test mode. Cần deploy rules trước khi production. |
 
 ### [2026-06-03] UX Overhaul — Grill-me Session
 | # | Quyết định |
@@ -405,3 +478,30 @@ vercel deploy --prod
 
 **Vercel project ID:** `prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx`
 **Team ID:** `team_P9FfhTlhYVKuixkXkc9Ge26j`
+
+### Firebase Deployment (security rules)
+```bash
+# Cần firebase-tools đã install + login
+firebase login
+firebase init firestore   # chọn project a-roadmap
+firebase deploy --only firestore:rules
+```
+
+**Firebase project:** `a-roadmap`
+**Firestore region:** `asia-southeast1`
+**Auth domain:** `project-roadmap-eight.vercel.app` (đã authorized)
+
+### Firestore Security Rules (production-ready)
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null
+        && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null
+        && request.resource.data.ownerId == request.auth.uid;
+    }
+  }
+}
+```
