@@ -33,6 +33,9 @@
 [data-theme="light"] .mbg{background:rgba(0,0,0,.45)}
 [data-theme="light"] .ctx{box-shadow:0 8px 24px rgba(0,0,0,.18)}
 
+/* ── COLLAB BADGE (home card) ── */
+.proj-collab-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gold);background:var(--goldB);border:1px solid var(--goldD);border-radius:4px;padding:2px 8px;margin-bottom:4px;font-weight:500}
+
 /* ── THEME TOGGLE ── */
 .theme-btns{display:flex;gap:5px}
 .theme-btn{flex:1;padding:8px 4px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--bd2);color:var(--txt2);background:var(--s2);font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
@@ -561,10 +564,10 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
 <script type="module">
 import { initializeApp }                                          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut,
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut,
          onAuthStateChanged }                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, deleteDoc,
-         collection, query, where, getDocs, onSnapshot }         from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, updateDoc,
+         collection, query, where, getDocs, onSnapshot, arrayUnion } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 /* ══════════════════════════════
    LOGO (embedded SVG)
 ══════════════════════════════ */
@@ -591,6 +594,12 @@ let currentUser  = null;   // Firebase Auth user object
 let _projIndex   = [];     // in-memory project list (synced from Firestore)
 let _unsubProj   = null;   // onSnapshot cleanup fn for current project
 let _fbSaving    = false;  // guard: ignore onSnapshot triggered by our own save
+
+/* Collaboration state (per loaded project) */
+let _projCollaborators = [];  // UIDs of collaborators for current project
+let _projInviteToken   = '';  // invite token (owner generates, others use to join)
+let _projOwnerId       = '';  // ownerId of current project
+let _pendingInvite     = null; // { projectId, token } — invite accepted before sign-in
 
 /* ══════════════════════════════
    ICONS (Lucide-style SVG paths)
@@ -3200,8 +3209,8 @@ function readCachedProject(id) {
 
 /* ── Firebase Auth ── */
 async function fbSignIn() {
-  try { await signInWithPopup(_auth, _gProvider); }
-  catch(e) { if (e.code !== 'auth/popup-closed-by-user') showToast('Đăng nhập thất bại: ' + e.message, 4000); }
+  try { await signInWithRedirect(_auth, _gProvider); }
+  catch(e) { showToast('Đăng nhập thất bại: ' + e.message, 4000); }
 }
 async function fbSignOut() {
   _unsubProj?.(); _unsubProj = null;
@@ -3219,6 +3228,9 @@ function _payload(id, data, accent) {
     name: data.cfg.title, subtitle: data.cfg.subtitle||'',
     accent: accent || _projIndex.find(p=>p.id===id)?.accent || '#D0A052',
     updatedAt: Date.now(),
+    lastEditedBy: { uid: currentUser.uid, name: currentUser.displayName||currentUser.email||'' },
+    collaborators: _projCollaborators,
+    inviteToken: _projInviteToken,
     stats: { phases:data.phases.length, tasks:data.tasks.length,
       sched:data.tasks.filter(t=>t.startWeek!==null).length, start:data.cfg.start, end:data.cfg.end },
     cfg:data.cfg, phases:data.phases, teams:data.teams, tasks:data.tasks, tags:data.tags, _nextId:data._nextId,
@@ -3979,6 +3991,11 @@ function initFirebase() {
     _auth = getAuth(app);
     _gProvider = new GoogleAuthProvider();
     _gProvider.setCustomParameters({ prompt: 'select_account' });
+
+    getRedirectResult(_auth).catch(e => {
+      if (e?.code !== 'auth/cancelled-popup-request')
+        showToast('Đăng nhập thất bại: ' + e.message, 4000);
+    });
 
     onAuthStateChanged(_auth, async user => {
       currentUser = user;
