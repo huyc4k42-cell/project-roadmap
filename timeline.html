@@ -429,21 +429,33 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 /* ── Auth / Sign-in screen ── */
 .auth-screen{position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden}
 .auth-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.auth-radial{position:absolute;inset:0;background:radial-gradient(ellipse 75% 75% at center,rgba(8,8,8,.92) 0%,rgba(8,8,8,.4) 60%,transparent 100%);pointer-events:none}
-.auth-vignette{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,8,8,.7) 0%,transparent 30%,transparent 70%,rgba(8,8,8,.7) 100%);pointer-events:none}
-.auth-content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:28px;text-align:center;padding:0 32px;max-width:400px;width:100%}
-.auth-logo{height:52px;width:auto;opacity:.96;flex-shrink:0}
+/* Radial mask: darkest at center (content area), fades out toward edges */
+.auth-radial{position:absolute;inset:0;background:radial-gradient(ellipse 55% 65% at center,rgba(8,8,8,.96) 0%,rgba(8,8,8,.7) 45%,rgba(8,8,8,.15) 80%,transparent 100%);pointer-events:none}
+.auth-vignette{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,8,8,.82) 0%,transparent 18%,transparent 82%,rgba(8,8,8,.82) 100%);pointer-events:none}
+/* Logo strip at top */
+.auth-logo-wrap{position:absolute;top:32px;left:50%;transform:translateX(-50%);z-index:12;display:flex;flex-direction:column;align-items:center}
+.auth-logo-bg{position:absolute;inset:-24px -64px;background:rgba(8,8,8,.72);filter:blur(22px);border-radius:50%;pointer-events:none}
+.auth-logo{position:relative;height:44px;width:auto;opacity:.95}
 [data-theme="light"] .auth-logo{filter:brightness(.52)}
-.auth-divider{width:1px;height:36px;background:linear-gradient(to bottom,transparent,var(--bd2),transparent)}
-.auth-sub{font-size:14px;color:var(--txt2);max-width:300px;line-height:1.75;margin:0}
-.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 28px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.11);border-radius:100px;color:var(--txt);font-size:14px;font-weight:500;cursor:pointer;transition:background .18s,border-color .18s,transform .12s;letter-spacing:.01em}
-.auth-google-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.24);transform:translateY(-1px)}
+/* Content block */
+.auth-content{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;padding:0 32px;max-width:420px;width:100%}
+.auth-title{font-family:'Crimson Pro',Georgia,serif;font-size:40px;font-weight:600;color:var(--txt);margin:0;line-height:1.12;letter-spacing:-.025em}
+.auth-desc{font-size:14px;color:var(--txt2);max-width:310px;line-height:1.75;margin:0}
+/* Glassmorphism Google button */
+.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 28px;background:rgba(255,255,255,.07);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:100px;color:var(--txt);font-size:14px;font-weight:500;cursor:pointer;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s;letter-spacing:.01em;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.auth-google-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 20px rgba(0,0,0,.4)}
 .auth-google-btn:active{transform:translateY(0)}
+/* Legal text */
+.auth-legal{font-size:11px;color:var(--txt3);max-width:300px;line-height:1.65;margin-top:4px}
+.auth-legal a{color:var(--txt3);text-decoration:underline;text-underline-offset:2px;transition:color .15s}
+.auth-legal a:hover{color:var(--txt2)}
+/* Light theme overrides */
 [data-theme="light"] .auth-screen{background:#f4f1ed}
-[data-theme="light"] .auth-radial{background:radial-gradient(ellipse 75% 75% at center,rgba(244,241,237,.94) 0%,rgba(244,241,237,.4) 60%,transparent 100%)}
-[data-theme="light"] .auth-vignette{background:linear-gradient(to bottom,rgba(244,241,237,.75) 0%,transparent 30%,transparent 70%,rgba(244,241,237,.75) 100%)}
-[data-theme="light"] .auth-google-btn{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.12);color:var(--txt)}
-[data-theme="light"] .auth-google-btn:hover{background:rgba(0,0,0,.09);border-color:rgba(0,0,0,.22)}
+[data-theme="light"] .auth-radial{background:radial-gradient(ellipse 55% 65% at center,rgba(244,241,237,.97) 0%,rgba(244,241,237,.72) 45%,rgba(244,241,237,.15) 80%,transparent 100%)}
+[data-theme="light"] .auth-vignette{background:linear-gradient(to bottom,rgba(244,241,237,.85) 0%,transparent 18%,transparent 82%,rgba(244,241,237,.85) 100%)}
+[data-theme="light"] .auth-logo-bg{background:rgba(244,241,237,.75)}
+[data-theme="light"] .auth-google-btn{background:rgba(0,0,0,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(0,0,0,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+[data-theme="light"] .auth-google-btn:hover{background:rgba(0,0,0,.10);border-color:rgba(0,0,0,.22)}
 .btn-lg{padding:12px 24px;font-size:15px;gap:10px}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--grn);display:inline-block;margin-right:4px;flex-shrink:0}
 .sync-dot.saving{background:var(--gold);animation:pulse .8s infinite}
@@ -1674,10 +1686,17 @@ function buildHome() {
       <canvas id="auth-dot-canvas" class="auth-canvas" aria-hidden="true"></canvas>
       <div class="auth-radial" aria-hidden="true"></div>
       <div class="auth-vignette" aria-hidden="true"></div>
-      <div class="auth-content">
+
+      <!-- Logo pinned top-center with blur strip -->
+      <div class="auth-logo-wrap" aria-hidden="true">
+        <div class="auth-logo-bg"></div>
         <img src="data:image/png;base64,${LOGO_B64}" alt="Arthur" class="auth-logo">
-        <div class="auth-divider" aria-hidden="true"></div>
-        <p class="auth-sub">Đăng nhập để quản lý roadmap và đồng bộ dữ liệu qua nhiều thiết bị.</p>
+      </div>
+
+      <!-- Center content -->
+      <div class="auth-content">
+        <h1 class="auth-title">Turn your roadmap<br>into reality.</h1>
+        <p class="auth-desc">Plan visually, align your team in real time,<br>and ship every milestone on schedule.</p>
         <button class="auth-google-btn" id="home-signin-btn">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -1687,6 +1706,7 @@ function buildHome() {
           </svg>
           Đăng nhập với Google
         </button>
+        <p class="auth-legal">By logging in, you agree to the <a href="#">Policies</a>, <a href="#">Privacy Notice</a>, and <a href="#">Cookie Notice</a>.</p>
       </div>
     </div>`;
   }
@@ -3317,33 +3337,59 @@ function initSignInCanvas() {
   if (!canvas) return;
 
   const ctx  = canvas.getContext('2d');
-  const GRID = 22;    // grid cell size (px)
-  const DOT  = 3.2;   // dot radius (px)
+  const GRID = 16;     // denser grid spacing (px)
+  const DOT  = 1.8;    // dot half-size (px) — smaller than before
+  const CORN = 0.65;   // rounded-square corner radius
+  // Opacity levels matching the shader's u_opacities array
+  const OP_LEVELS = [0.3, 0.3, 0.3, 0.5, 0.5, 0.5, 0.8, 0.8, 0.8, 1.0];
+  const FREQ = 4.5;    // seconds per twinkling cycle (shader's frequency)
+
   let raf, dots = [];
   const t0 = performance.now();
+
+  // Deterministic integer hash → float [0, 1)
+  // Ports the shader's random(vec2) via a simple integer hash
+  function hash(n) {
+    n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
+    n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
+    n = (n ^ (n >>> 16)) >>> 0;
+    return n / 0x100000000;
+  }
+  // Two-component hash, mirrors random(vec2) from shader
+  function hash2(x, y) { return hash(x * 1619 + y * 31337 + 1); }
 
   function buildDots() {
     dots = [];
     const W = canvas.width, H = canvas.height;
-    const cols = Math.ceil(W / GRID) + 1;
-    const rows = Math.ceil(H / GRID) + 1;
-    // Offset so grid is centred
+    const cols = Math.ceil(W / GRID) + 2;
+    const rows = Math.ceil(H / GRID) + 2;
     const ox = (W % GRID) / 2;
     const oy = (H % GRID) / 2;
     const gCX = cols / 2, gCY = rows / 2;
+    const maxDist = Math.sqrt((cols / 2) ** 2 + (rows / 2) ** 2);
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const dist = Math.sqrt((c - gCX) ** 2 + (r - gCY) ** 2);
-        const isGold = Math.random() < 0.30;  // 30% gold, 70% white-gray
+        const dist     = Math.sqrt((c - gCX) ** 2 + (r - gCY) ** 2);
+        const distNorm = Math.min(dist / maxDist, 1.0); // 0=center, 1=corner
+        // Radial opacity mask: near-zero at center, full at edges (quadratic)
+        // Mirrors the shader's radial darkening toward center
+        const edgeMult = 0.04 + 0.96 * (distNorm * distNorm);
+        const isGold   = hash2(c, r) < 0.30;  // 30% gold, 70% white-gray
+        const baseMax  = isGold
+          ? 0.55 + hash(c * 313 + r * 1021 + 5) * 0.45
+          : 0.22 + hash(c * 541 + r * 733  + 7) * 0.43;
         dots.push({
-          x: ox + c * GRID,
-          y: oy + r * GRID,
+          x:          ox + c * GRID,
+          y:          oy + r * GRID,
+          gx: c, gy: r,
           dist,
-          delay:  dist * 0.055 + Math.random() * 0.45,
+          // Delay based on distance from center → reveal radiates outward
+          delay:      dist * 0.042 + hash2(c + 77, r + 77) * 0.55,
           isGold,
-          maxOp:  isGold ? 0.45 + Math.random() * 0.55 : 0.18 + Math.random() * 0.40,
-          phase:  Math.random() * Math.PI * 2,
-          freq:   0.3 + Math.random() * 1.1,
+          maxOp:      baseMax * edgeMult,
+          // showOffset mirrors shader's show_offset = random(st2)
+          showOffset: hash2(c + 13, r + 99),
         });
       }
     }
@@ -3358,7 +3404,6 @@ function initSignInCanvas() {
   window.addEventListener('resize', resize);
 
   function draw() {
-    // Self-terminate when canvas is removed from DOM
     if (!document.getElementById('auth-dot-canvas')) {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', resize);
@@ -3366,20 +3411,29 @@ function initSignInCanvas() {
     }
     const t = (performance.now() - t0) / 1000;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     for (const d of dots) {
       const elapsed = t - d.delay;
       if (elapsed < 0) continue;
-      let op;
-      if (elapsed < 0.22) {
-        op = (elapsed / 0.22) * d.maxOp;          // fade-in
-      } else {
-        const tw = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t * d.freq + d.phase));
-        op = tw * d.maxOp;                         // twinkle
-      }
+
+      // ── Reveal phase: fade in from 0 → 1 over 0.28s ──
+      const reveal = Math.min(elapsed / 0.28, 1.0);
+
+      // ── Twinkling: port of shader's discrete opacity jump logic ──
+      // shader: rand = random(st2 * floor((u_time / frequency) + show_offset + frequency))
+      // Every FREQ seconds each cell picks a new random slot from OP_LEVELS
+      const slot   = Math.floor(t / FREQ + d.showOffset + FREQ);
+      const randV  = hash(d.gx * 1009 + d.gy * 1013 + slot * 7919);
+      const baseOp = OP_LEVELS[Math.min(Math.floor(randV * 10), 9)];
+
+      const op = reveal * baseOp * d.maxOp;
+      if (op < 0.008) continue;
+
       ctx.globalAlpha = op;
       ctx.fillStyle   = d.isGold ? '#D0A052' : '#c8c0b8';
+      // Rounded square — matches app's boxy aesthetic
       ctx.beginPath();
-      ctx.arc(d.x, d.y, DOT, 0, Math.PI * 2);
+      ctx.roundRect(d.x - DOT, d.y - DOT, DOT * 2, DOT * 2, CORN);
       ctx.fill();
     }
     ctx.globalAlpha = 1;
