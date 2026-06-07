@@ -1,0 +1,9 @@
+﻿task_name,phase_name,team_name,start_date,end_date,tags,description
+User Research,Discovery,Product,2026-06-02,2026-06-16,ux;research,Phỏng vấn người dùng
+Competitive Analysis,Discovery,Product,2026-06-16,2026-06-30,research,Phân tích đối thủ
+Wireframes,Design,Design,2026-06-30,2026-07-21,ux,Thiết kế wireframe chính
+Prototype v1,Design,Design,2026-07-21,2026-08-11,ux,Prototype tương tác
+Backend API,Build,Eng,2026-08-11,2026-09-08,tech,Xây dựng REST API
+Frontend,Build,Eng,2026-08-25,2026-09-22,tech,
+Write spec,,,,,,Chưa có lịch - sẽ vào Backlog
+Launch plan,,Product,,,growth,Kế hoạch ra mắt
