@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-07 · Commit app: `033e072` · Commit docs: (file này)
+> Cập nhật lần cuối: 2026-06-07 · Commit app: `e58b021` · Commit docs: (file này)
 
 ---
 
@@ -335,6 +335,20 @@ assignLanes(tasks)
 - [x] Tag system: filter, color palette, drag-drop tag onto task
 - [x] Context menu: right-click task bar / team label
 
+### Sign-in Screen (Auth Gate)
+- [x] **Full-screen canvas animation** — dot matrix, 30% gold + 70% white/gray
+- [x] **Dot shape:** rounded square via `roundRect()` (không phải circle)
+- [x] **Dot config:** GRID=13px, DOT=2.6px half-size, CORN=0.9 corner radius
+- [x] **Twinkling:** port GLSL shader logic — jump qua `OP_LEVELS=[0.3…1.0]` mỗi 4.5s
+- [x] **Reveal animation:** dots hiện ra từ center ra rìa (delay = dist * 0.042)
+- [x] **Radial opacity mask:** `edgeMult = 0.04 + 0.96*(distNorm²)` — tối center, sáng rìa
+- [x] **CSS radial overlay:** `ellipse 44% 16% at 50% 40%` — chỉ phủ text area
+- [x] **Logo** pinned top-center + dark blur strip (`auth-logo-bg`)
+- [x] **Title:** "Turn your roadmap into reality." (Crimson Pro 40px serif)
+- [x] **Glassmorphism button:** `backdrop-filter:blur(14px)` + `rgba(255,255,255,.04)`
+- [x] **Legal text:** "By logging in, you agree to Policies, Privacy Notice, Cookie Notice."
+- [x] Self-terminating RAF loop khi canvas bị remove khỏi DOM
+
 ### Multi-Project Home Screen
 - [x] Project cards grid: title 24px Crimson Pro, accent stripe 4px
 - [x] Card stats: phases / tasks / sched% / time bar / circle week progress
@@ -405,9 +419,11 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 
 ```
 [Claude] Project Roadmap/
-├── timeline.html          ← FILE DUY NHẤT của app (~4100 dòng)
+├── timeline.html          ← FILE DUY NHẤT của app (~4200 dòng)
 ├── PROJECT_CONTEXT.md     ← file này — technical reference (stable)
 ├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
+├── SESSION_CONTEXT.md     ← ⚠️ OBSOLETE — file cũ từ giai đoạn pre-Firebase, bỏ qua
+├── roadmap-template.csv   ← CSV mẫu cho tính năng Import CSV
 ├── vercel.json            ← Vercel config (redirect / → /timeline.html)
 ├── Logo.png               ← Logo source (embedded as base64 trong HTML)
 ├── firestore.rules        ← Firestore security rules (đã deploy 2026-06-07)
@@ -435,6 +451,15 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 | D16 | `_projIndex` in-memory array thay cho `localStorage roadmap-index` — không persist index riêng |
 | D17 | Collaborator: hiện tại chỉ owner (last-write-wins). Invite/share role để sau. |
 | D18 | ✅ Security rules: đã deploy lên production 2026-06-07. Owner-only read/write. |
+
+### [2026-06-07] Sign-in Screen Redesign
+| # | Quyết định |
+|---|-----------|
+| D19 | Sign-in screen = full-screen standalone, không dùng home header — auth là entry point độc lập |
+| D20 | Canvas 2D thay vì WebGL/Three.js — đủ cho effect này, zero dependency thêm vào |
+| D21 | Twinkling: port discrete jump logic từ GLSL shader (OP_LEVELS array mỗi 4.5s) thay vì sin liên tục — đúng với ref |
+| D22 | CSS radial mask chỉ phủ text area (`44% 16% at 50% 40%`), button để dots thấy qua glass blur |
+| D23 | Dot shape: `roundRect()` thay vì `arc()` — phù hợp aesthetic boxy của app |
 
 ### [2026-06-03] UX Overhaul — Grill-me Session
 | # | Quyết định |
@@ -466,6 +491,7 @@ Khi gặp lỗi, kiểm tra theo thứ tự:
 7. **Context menu lệch?** → `.proj-ctx` dùng `top: calc(100% + 4px)` (không phải `bottom`)
 8. **Drag state bị stuck?** → Kiểm tra `S.ui.dragData`, `S.ui.teamDragId`, `S.ui.phaseDragId` — Escape phải reset hết
 9. **Lane overlap?** → `assignLanes()` — phase tasks dùng sequential lanes, no-phase dùng greedy. Xem bug note mục 7.
+10. **Sign-in canvas không chạy?** → Kiểm tra `document.getElementById('auth-dot-canvas')` tồn tại, `initSignInCanvas()` được gọi trong `bindHome()`, và `currentUser === null`.
 
 ---
 
