@@ -1,11 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /* ── Projects: authenticated owner only ── */
     match /projects/{projectId} {
       allow read, write: if request.auth != null
         && resource.data.ownerId == request.auth.uid;
       allow create: if request.auth != null
         && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    /* ── Waitlist: public create, no read/update/delete ── */
+    match /waitlist/{email} {
+      allow create: if request.resource.data.keys().hasAll(['email','joinedAt','source'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254;
+      allow read, update, delete: if false;
     }
   }
 }

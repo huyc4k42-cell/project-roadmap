@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Visual project planning that keeps your team aligned. Build phases, place tasks, share with one link.">
+<meta property="og:title" content="Arthur - Visual Project Roadmap">
+<meta property="og:description" content="Plan visually. Stay aligned. Ship on time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aroadmap.cloud">
+<title>Arthur - Visual Project Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--s1:#111111;--s2:#1b1b1b;--s3:#262626;--s4:#303030;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.11);--bd3:rgba(255,255,255,.18);
+  --txt:#ede9e4;--txt2:#b2aaa0;--txt3:#857d75;
+  --gold:#D0A052;--goldL:#e8c07a;--goldD:rgba(208,160,82,.18);--goldB:rgba(208,160,82,.07);
+  --max-w:1200px;--px:clamp(1.5rem,5vw,5rem);--py:clamp(5rem,10vh,8rem);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.6}
+img{display:block;max-width:100%}
+a{text-decoration:none;color:inherit}
+*:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}
+
+/* ── NAV ── */
+#nav{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:200;width:min(calc(100% - 2rem),920px);pointer-events:none}
+.nav-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 10px 10px 20px;
+  background:rgba(10,10,10,.55);
+  backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid var(--bd2);border-radius:100px;
+  transition:background .4s cubic-bezier(.16,1,.3,1),border-color .4s;
+  pointer-events:all;
+}
+#nav.scrolled .nav-inner{background:rgba(8,8,8,.92);border-color:var(--bd)}
+.nav-logo img{height:30px;width:auto;display:block}
+.nav-links{display:flex;gap:2rem;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links a{font-size:13.5px;font-weight:500;color:var(--txt2);transition:color .2s;letter-spacing:.01em}
+.nav-links a:hover{color:var(--txt)}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--gold);color:#080808;
+  font-size:13px;font-weight:600;padding:9px 18px;
+  border-radius:100px;white-space:nowrap;letter-spacing:.01em;
+  transition:background .2s,transform .15s cubic-bezier(.16,1,.3,1);
+}
+.nav-cta:hover{background:var(--goldL);transform:translateY(-1px)}
+.nav-cta:active{transform:scale(.97)}
+.nav-cta-arr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;background:rgba(0,0,0,.12);border-radius:50%;font-size:11px;
+  transition:transform .2s cubic-bezier(.16,1,.3,1);
+}
+.nav-cta:hover .nav-cta-arr{transform:translate(2px,-2px)}
+.nav-mobile-btn{
+  display:none;background:none;
+  border:1px solid var(--bd2);color:var(--txt);cursor:pointer;
+  padding:8px 16px;border-radius:100px;font-size:13px;font-weight:500;
+  font-family:inherit;transition:border-color .2s;
+}
+.nav-mobile-btn:hover{border-color:var(--bd3)}
+
+/* ── MOBILE DRAWER ── */
+#mobile-drawer{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(8,8,8,.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+  opacity:0;pointer-events:none;transition:opacity .3s cubic-bezier(.16,1,.3,1);
+}
+#mobile-drawer.open{opacity:1;pointer-events:all}
+.drawer-link{
+  font-family:'Crimson Pro',Georgia,serif;font-size:2.75rem;font-weight:600;
+  color:var(--txt2);transition:color .2s;
+}
+.drawer-link:hover{color:var(--gold)}
+.drawer-close{
+  position:absolute;top:24px;right:24px;background:none;
+  border:1px solid var(--bd2);color:var(--txt);cursor:pointer;
+  width:40px;height:40px;border-radius:50%;font-size:18px;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:border-color .2s;
+}
+.drawer-close:hover{border-color:var(--bd3)}
+
+/* ── HERO ── */
+#hero{position:relative;min-height:100dvh;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hero::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 65% 55% at 50% 50%,rgba(8,8,8,.78) 0%,transparent 100%);
+}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 var(--px);width:100%;max-width:var(--max-w);margin:0 auto}
+.hero-headline{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(3rem,6.5vw,5.5rem);
+  font-weight:600;line-height:1.12;letter-spacing:-.01em;
+  margin-bottom:1.5rem;
+}
+/* Grid trick: cycling wrapper always as wide as longest word ("aligned") */
+.cycling-wrap{display:inline-grid;vertical-align:baseline}
+.cycling-wrap>*{grid-area:1/1}
+.cycling-ghost{visibility:hidden;font-style:italic}
+.cycling-word{color:var(--gold);font-style:italic}
+@keyframes wordIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes wordOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-10px)}}
+.cycling-word{animation:wordIn .35s cubic-bezier(.16,1,.3,1) both}
+.cycling-word.out{animation:wordOut .28s cubic-bezier(.7,0,1,1) forwards}
+
+.hero-sub{
+  font-size:clamp(1rem,1.8vw,1.125rem);color:var(--txt2);
+  max-width:460px;margin:0 auto 2.5rem;line-height:1.75;
+}
+.hero-ctas{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;align-items:center}
+.btn-gold{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold);color:#080808;
+  font-size:15px;font-weight:600;padding:14px 28px;
+  border-radius:100px;white-space:nowrap;letter-spacing:.01em;
+  transition:background .2s,transform .15s cubic-bezier(.16,1,.3,1);
+}
+.btn-gold:hover{background:var(--goldL);transform:translateY(-2px)}
+.btn-gold:active{transform:scale(.97)}
+.btn-arr{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;background:rgba(0,0,0,.12);border-radius:50%;font-size:12px;
+  transition:transform .2s cubic-bezier(.16,1,.3,1);flex-shrink:0;
+}
+.btn-gold:hover .btn-arr{transform:translate(2px,-2px)}
+.btn-text{
+  display:inline-flex;align-items:center;font-size:15px;font-weight:500;
+  color:var(--txt2);padding:14px 4px;transition:color .2s;
+}
+.btn-text:hover{color:var(--txt)}
+
+/* ── PROBLEM ── */
+#problem{padding:var(--py) var(--px)}
+.problem-inner{max-width:var(--max-w);margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:4rem;align-items:start}
+.problem-left h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(1.875rem,3.5vw,2.75rem);
+  font-weight:600;line-height:1.25;letter-spacing:-.01em;
+}
+.problem-items{display:flex;flex-direction:column}
+.problem-item{display:grid;grid-template-columns:2.25rem 1fr;gap:1rem;padding:1.75rem 0;border-bottom:1px solid var(--bd)}
+.problem-item:first-child{border-top:1px solid var(--bd)}
+.problem-n{font-size:11px;font-weight:600;color:var(--txt3);padding-top:3px;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.problem-t{font-size:1rem;color:var(--txt2);line-height:1.7}
+.problem-t strong{color:var(--txt);font-weight:500}
+
+/* ── DEMO ── */
+#demo{padding:var(--py) var(--px)}
+.demo-hdr{text-align:center;max-width:var(--max-w);margin:0 auto 4rem}
+.demo-hdr h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(2rem,4vw,3.25rem);
+  font-weight:600;letter-spacing:-.01em;margin-bottom:.75rem;
+}
+.demo-hdr p{font-size:1rem;color:var(--txt2);max-width:380px;margin:0 auto}
+.demo-wrap{max-width:1100px;margin:0 auto}
+.demo-frame{
+  border-radius:20px;overflow:hidden;
+  border:1px solid var(--bd2);
+  box-shadow:0 32px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.025);
+  will-change:transform;transform-origin:top center;transform:scale(.8);
+}
+/* browser chrome */
+.demo-chrome{
+  background:var(--s2);padding:10px 16px;
+  border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:12px;
+}
+.chrome-dots{display:flex;gap:5px;flex-shrink:0}
+.chrome-dot{width:9px;height:9px;border-radius:50%;background:var(--s4)}
+.chrome-bar{
+  flex:1;max-width:260px;margin:0 auto;height:24px;
+  background:var(--s3);border-radius:4px;
+  display:flex;align-items:center;padding:0 10px;gap:5px;
+}
+.chrome-lock{width:8px;height:10px;opacity:.35;flex-shrink:0}
+.chrome-url{font-size:11px;color:var(--txt3)}
+.demo-screenshot{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;object-position:top left;background:var(--s1)}
+.demo-ph{
+  width:100%;aspect-ratio:16/9;background:var(--s1);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
+  display:none;
+}
+.demo-ph p{font-size:13px;color:var(--txt3);text-align:center;line-height:1.6;max-width:320px}
+.demo-ph-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--goldB);border:1px solid var(--goldD);color:var(--gold);
+  font-size:13px;font-weight:500;padding:8px 18px;border-radius:100px;
+  font-family:inherit;cursor:pointer;transition:background .2s;
+}
+.demo-ph-btn:hover{background:var(--goldD)}
+
+/* ── FEATURES ── */
+#features{padding:var(--py) var(--px)}
+.features-inner{max-width:var(--max-w);margin:0 auto}
+.features-hdr{margin-bottom:3.5rem}
+.features-hdr h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(2rem,4vw,3.25rem);
+  font-weight:600;letter-spacing:-.01em;max-width:520px;
+}
+.features-grid{
+  display:grid;grid-template-columns:1.4fr 1fr;grid-auto-flow:dense;
+  gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:14px;overflow:hidden;
+}
+.f-card{background:var(--bg);padding:2.5rem;transition:background .3s cubic-bezier(.16,1,.3,1)}
+.f-card:hover{background:var(--s1)}
+.f-card--accent{background:var(--goldB)}
+.f-card--accent:hover{background:rgba(208,160,82,.1)}
+.f-icon{
+  width:44px;height:44px;border:1px solid var(--bd2);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;color:var(--txt3);
+}
+.f-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5}
+.f-card--accent .f-icon{border-color:var(--goldD);color:var(--gold)}
+.f-title{font-family:'Crimson Pro',Georgia,serif;font-size:1.375rem;font-weight:600;margin-bottom:.5rem;line-height:1.3}
+.f-desc{font-size:.9375rem;color:var(--txt2);line-height:1.7}
+
+/* ── HOW IT WORKS ── */
+#how{padding:var(--py) var(--px);background:var(--s1)}
+.how-inner{max-width:var(--max-w);margin:0 auto}
+.how-hdr{margin-bottom:4rem}
+.how-hdr h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(2rem,4vw,3.25rem);
+  font-weight:600;letter-spacing:-.01em;max-width:480px;
+}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);position:relative}
+.how-steps::before{
+  content:'';position:absolute;top:21px;
+  left:calc(100%/6);right:calc(100%/6);
+  height:1px;background:var(--bd2);
+}
+.how-step{padding:0 2.5rem 0 0}
+.how-step:last-child{padding-right:0}
+.step-n{
+  width:44px;height:44px;border:1px solid var(--bd2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:600;color:var(--txt3);margin-bottom:1.5rem;
+  background:var(--s1);position:relative;z-index:1;
+}
+.step-title{font-family:'Crimson Pro',Georgia,serif;font-size:1.375rem;font-weight:600;margin-bottom:.5rem;line-height:1.3}
+.step-desc{font-size:.9375rem;color:var(--txt2);line-height:1.7}
+
+/* ── BETA WALL ── */
+#beta{padding:var(--py) var(--px)}
+.beta-inner{max-width:560px;margin:0 auto;text-align:center}
+.beta-badge{
+  display:inline-block;font-size:10.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--gold);
+  background:var(--goldB);border:1px solid var(--goldD);
+  border-radius:100px;padding:5px 14px;margin-bottom:1.5rem;
+}
+.beta-inner h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(2rem,4vw,3rem);font-weight:600;
+  letter-spacing:-.01em;margin-bottom:.75rem;
+}
+.beta-inner>p{color:var(--txt2);font-size:1rem;margin-bottom:2rem;line-height:1.7}
+.waitlist-form{
+  display:flex;max-width:400px;margin:0 auto;
+  border:1px solid var(--bd2);border-radius:100px;overflow:hidden;
+  background:var(--s1);transition:border-color .2s,box-shadow .2s;
+}
+.waitlist-form:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldD)}
+.waitlist-input{
+  flex:1;background:transparent;border:none;outline:none;
+  padding:13px 20px;font-size:14px;color:var(--txt);font-family:inherit;min-width:0;
+}
+.waitlist-input::placeholder{color:var(--txt3)}
+.waitlist-btn{
+  background:var(--gold);color:#080808;border:none;
+  padding:9px 18px;margin:4px;border-radius:100px;
+  font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  font-family:inherit;transition:background .2s,transform .15s;
+}
+.waitlist-btn:hover{background:var(--goldL)}
+.waitlist-btn:active{transform:scale(.97)}
+.waitlist-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.waitlist-note{font-size:13px;color:var(--txt3);margin-top:1rem}
+.waitlist-note a{color:var(--txt2);text-decoration:underline;text-underline-offset:3px}
+#waitlist-success{display:none;flex-direction:column;align-items:center;gap:.5rem}
+#waitlist-success p{color:var(--gold);font-size:1.0625rem}
+#waitlist-success small{color:var(--txt3);font-size:13px}
+
+/* ── FINAL CTA ── */
+#cta-final{padding:var(--py) var(--px);background:var(--s1);text-align:center}
+.cta-final-inner{max-width:var(--max-w);margin:0 auto}
+.cta-final-inner h2{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(2.5rem,5.5vw,4.5rem);font-weight:600;
+  letter-spacing:-.01em;margin-bottom:2.5rem;line-height:1.15;
+}
+
+/* ── FOOTER ── */
+footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
+.footer-inner{
+  max-width:var(--max-w);margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+}
+.footer-logo img{height:26px;width:auto;opacity:.6;transition:opacity .2s}
+.footer-logo:hover img{opacity:.9}
+.footer-links{display:flex;gap:2rem}
+.footer-links a{font-size:13px;color:var(--txt3);transition:color .2s}
+.footer-links a:hover{color:var(--txt2)}
+.footer-legal{font-size:13px;color:var(--txt3)}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .nav-links,.nav-cta{display:none}
+  .nav-mobile-btn{display:block}
+  .problem-inner{grid-template-columns:1fr;gap:2.5rem}
+  .features-grid{grid-template-columns:1fr}
+  .how-steps{grid-template-columns:1fr;gap:2.5rem}
+  .how-steps::before{display:none}
+  .how-step{padding-right:0}
+  .footer-inner{flex-direction:column;align-items:flex-start;gap:1.5rem}
+  .cycling-wrap{min-width:5rem}
+}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .cycling-word{animation:none}
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo" aria-label="Arthur — home">
+      <img src="Logo.png" alt="Arthur">
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+    </div>
+    <a href="/app" class="nav-cta">
+      Start free
+      <span class="nav-cta-arr" aria-hidden="true">&#x2197;</span>
+    </a>
+    <button class="nav-mobile-btn" id="mobile-btn" aria-expanded="false" aria-controls="mobile-drawer">Menu</button>
+  </div>
+</nav>
+
+<!-- ── MOBILE DRAWER ── -->
+<div id="mobile-drawer" role="dialog" aria-label="Mobile navigation" aria-hidden="true">
+  <button class="drawer-close" id="drawer-close" aria-label="Close menu">&#x2715;</button>
+  <a href="#features" class="drawer-link">Features</a>
+  <a href="#how" class="drawer-link">How it works</a>
+  <a href="/app" class="drawer-link" style="color:var(--gold)">Start free</a>
+</div>
+
+<!-- ── HERO ── -->
+<section id="hero" aria-labelledby="hero-headline">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-content">
+    <h1 class="hero-headline" id="hero-headline">
+      Your roadmap,<br>
+      finally <span class="cycling-wrap" aria-live="polite" aria-atomic="true"><span class="cycling-word" id="cycling-word">clear</span><span class="cycling-ghost" aria-hidden="true">aligned</span></span>
+    </h1>
+    <p class="hero-sub">Visual project planning that keeps teams aligned, without the spreadsheet chaos.</p>
+    <div class="hero-ctas">
+      <a href="/app" class="btn-gold">
+        Start free
+        <span class="btn-arr" aria-hidden="true">&#x2197;</span>
+      </a>
+      <a href="#demo" class="btn-text">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROBLEM ── -->
+<section id="problem" aria-label="The problem with current tools">
+  <div class="problem-inner">
+    <div class="problem-left">
+      <h2 class="reveal">Planning tools built for someone else's workflow.</h2>
+    </div>
+    <div class="problem-items">
+      <div class="problem-item reveal">
+        <span class="problem-n">01</span>
+        <p class="problem-t"><strong>Spreadsheets show cells, not timelines.</strong> You can't see the shape of work.</p>
+      </div>
+      <div class="problem-item reveal rd1">
+        <span class="problem-n">02</span>
+        <p class="problem-t"><strong>Slide decks go stale</strong> the moment a date changes.</p>
+      </div>
+      <div class="problem-item reveal rd2">
+        <span class="problem-n">03</span>
+        <p class="problem-t"><strong>Complex PM tools</strong> bury the roadmap under tickets and boards.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRODUCT DEMO ── -->
+<section id="demo" aria-label="Product demo">
+  <div class="demo-hdr">
+    <h2 class="reveal">See the whole picture.</h2>
+    <p class="reveal rd1">One view. All your phases, teams, and tasks, exactly where they belong.</p>
+  </div>
+  <div class="demo-wrap reveal rd1">
+    <div class="demo-frame" id="demo-frame">
+      <div class="demo-chrome" aria-hidden="true">
+        <div class="chrome-dots">
+          <div class="chrome-dot"></div>
+          <div class="chrome-dot"></div>
+          <div class="chrome-dot"></div>
+        </div>
+        <div class="chrome-bar">
+          <svg class="chrome-lock" viewBox="0 0 8 10" fill="currentColor">
+            <path d="M4 0C2.9 0 2 .9 2 2v1H.5C.2 3 0 3.2 0 3.5v6C0 9.8.2 10 .5 10h7c.3 0 .5-.2.5-.5v-6C8 3.2 7.8 3 7.5 3H6V2C6 .9 5.1 0 4 0zm0 1c.6 0 1 .4 1 1v1H3V2c0-.6.4-1 1-1z"/>
+          </svg>
+          <span class="chrome-url">aroadmap.cloud/app</span>
+        </div>
+      </div>
+      <!-- Replace screenshot.png with a 1400x900 capture of the app in dark mode -->
+      <img
+        src="screenshot.png"
+        alt="Arthur roadmap - visual timeline showing phases and team tasks"
+        class="demo-screenshot"
+        id="demo-img"
+        onerror="this.style.display='none';document.getElementById('demo-ph').style.display='flex'"
+        loading="eager"
+      >
+      <div class="demo-ph" id="demo-ph" aria-hidden="true">
+        <p>Add <strong style="color:var(--txt2)">screenshot.png</strong> to the project root to show the app here. Recommended size: 1400 x 900 px.</p>
+        <a href="/app" class="demo-ph-btn">Open the app &#x2197;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section id="features" aria-label="Features">
+  <div class="features-inner">
+    <div class="features-hdr">
+      <h2 class="reveal">Everything you need.<br>Nothing you don't.</h2>
+    </div>
+    <div class="features-grid reveal rd1">
+      <div class="f-card">
+        <div class="f-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="11" height="4" rx="1"/><rect x="3" y="17" width="15" height="4" rx="1"/></svg>
+        </div>
+        <h3 class="f-title">See the whole picture</h3>
+        <p class="f-desc">Visual Gantt timeline, phases and team lanes in one view. No more guessing where work sits on the calendar.</p>
+      </div>
+      <div class="f-card">
+        <div class="f-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <h3 class="f-title">Built for momentum</h3>
+        <p class="f-desc">Drag tasks, resize phases, ship without blockers. Everything snaps into place as fast as you can think.</p>
+      </div>
+      <div class="f-card">
+        <div class="f-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+        </div>
+        <h3 class="f-title">Yours, instantly</h3>
+        <p class="f-desc">Sign in with Google, data saved to the cloud automatically. No setup, no configuration, no friction.</p>
+      </div>
+      <div class="f-card f-card--accent">
+        <div class="f-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        </div>
+        <h3 class="f-title">Share without sharing access</h3>
+        <p class="f-desc">One compressed link. Anyone can view your roadmap without an account. No login required for viewers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how" aria-label="How it works">
+  <div class="how-inner">
+    <div class="how-hdr">
+      <h2 class="reveal">From blank to brilliant,<br>in three moves.</h2>
+    </div>
+    <div class="how-steps">
+      <div class="how-step reveal">
+        <div class="step-n" aria-label="Step 1">1</div>
+        <h3 class="step-title">Build your roadmap</h3>
+        <p class="step-desc">Create phases, set the timeline, break work into clear chapters with start and end dates.</p>
+      </div>
+      <div class="how-step reveal rd1">
+        <div class="step-n" aria-label="Step 2">2</div>
+        <h3 class="step-title">Place your tasks</h3>
+        <p class="step-desc">Drag tasks onto the timeline. See everything in one visual view, exactly where it belongs.</p>
+      </div>
+      <div class="how-step reveal rd2">
+        <div class="step-n" aria-label="Step 3">3</div>
+        <h3 class="step-title">Share the picture</h3>
+        <p class="step-desc">One compressed link. Anyone can view your roadmap, no account or login required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── BETA WALL ── -->
+<section id="beta" aria-label="Early access">
+  <div class="beta-inner">
+    <span class="beta-badge">Early Access</span>
+    <h2 class="reveal">Get early access.</h2>
+    <p class="reveal rd1">Be among the first to plan smarter. Free, always.</p>
+    <form id="waitlist-form" class="waitlist-form reveal rd2" novalidate aria-label="Join the waitlist">
+      <input
+        type="email"
+        id="waitlist-email"
+        class="waitlist-input"
+        placeholder="your@email.com"
+        autocomplete="email"
+        required
+        aria-label="Email address"
+        aria-required="true"
+      >
+      <button type="submit" class="waitlist-btn" id="waitlist-btn">Join waitlist</button>
+    </form>
+    <p class="waitlist-note reveal rd3">Or <a href="/app">start using it right now</a>. No waitlist required.</p>
+    <div id="waitlist-success" aria-live="polite" role="status">
+      <p>You're on the list.</p>
+      <small>We'll reach out when something exciting ships.</small>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section id="cta-final" aria-label="Call to action">
+  <div class="cta-final-inner">
+    <h2 class="reveal">Your roadmap<br>is waiting.</h2>
+    <a href="/app" class="btn-gold reveal rd1" style="font-size:16px;padding:16px 32px">
+      Start free, no account needed
+      <span class="btn-arr" aria-hidden="true">&#x2197;</span>
+    </a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <a href="/" class="footer-logo" aria-label="Arthur home">
+      <img src="Logo.png" alt="Arthur">
+    </a>
+    <div class="footer-links">
+      <a href="/app">Launch app</a>
+      <a href="mailto:huy.c4k42@gmail.com">Contact</a>
+    </div>
+    <p class="footer-legal">Free to use. Built with care.</p>
+  </div>
+</footer>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+/* ── FIREBASE (same project as timeline.html) ──
+   IMPORTANT: Add this rule to Firestore Security Rules before going live:
+   match /waitlist/{email} {
+     allow create: if true;
+     allow read, update, delete: if false;
+   }
+*/
+const fbApp = initializeApp({
+  apiKey:            'AIzaSyBvJRmMGM94Gl4qxHcxAuHGIQdMjvdRm-4',
+  authDomain:        'a-roadmap.firebaseapp.com',
+  projectId:         'a-roadmap',
+  storageBucket:     'a-roadmap.firebasestorage.app',
+  messagingSenderId: '587173505646',
+  appId:             '1:587173505646:web:f7eae8acdc15e96397147f',
+}, 'landing');
+const db = getFirestore(fbApp);
+
+/* ── GSAP ── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── NAV SCROLL STATE (IntersectionObserver — no scroll listener) ── */
+const nav = document.getElementById('nav');
+const sentinel = document.createElement('div');
+sentinel.style.cssText = 'position:absolute;top:100px;left:0;width:1px;height:1px;pointer-events:none;';
+document.body.prepend(sentinel);
+new IntersectionObserver(entries => {
+  nav.classList.toggle('scrolled', !entries[0].isIntersecting);
+}, { threshold: 1 }).observe(sentinel);
+
+/* ── MOBILE DRAWER ── */
+const mobileBtn   = document.getElementById('mobile-btn');
+const drawer      = document.getElementById('mobile-drawer');
+const drawerClose = document.getElementById('drawer-close');
+
+function openDrawer() {
+  drawer.classList.add('open');
+  drawer.setAttribute('aria-hidden', 'false');
+  mobileBtn.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden', 'true');
+  mobileBtn.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+mobileBtn.addEventListener('click', openDrawer);
+drawerClose.addEventListener('click', closeDrawer);
+drawer.querySelectorAll('.drawer-link').forEach(l => l.addEventListener('click', closeDrawer));
+
+/* ── HERO CANVAS (ported from timeline.html sign-in) ── */
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d');
+  const GRID = 13, DOT = 2.6, CORN = 0.9, FREQ = 4.5;
+  const OP = [.3,.3,.3,.5,.5,.5,.8,.8,.8,1.0];
+  let raf, dots = [];
+  const t0 = performance.now();
+
+  function hash(n) {
+    n = Math.imul(n ^ (n>>>16), 0x45d9f3b)|0;
+    n = Math.imul(n ^ (n>>>16), 0x45d9f3b)|0;
+    return ((n ^ (n>>>16))>>>0) / 0x100000000;
+  }
+  function h2(x,y){ return hash(x*1619 + y*31337 + 1); }
+
+  function buildDots() {
+    dots = [];
+    const W = canvas.width, H = canvas.height;
+    const cols = Math.ceil(W/GRID)+2, rows = Math.ceil(H/GRID)+2;
+    const ox = (W%GRID)/2, oy = (H%GRID)/2;
+    const cx = cols/2, cy = rows/2;
+    const md = Math.sqrt(cx**2 + cy**2);
+    for (let r=0; r<rows; r++) {
+      for (let c=0; c<cols; c++) {
+        const d  = Math.sqrt((c-cx)**2+(r-cy)**2);
+        const dn = Math.min(d/md,1);
+        const em = 0.04 + 0.96*(dn*dn);
+        const g  = h2(c,r)<.30;
+        const bm = g ? .55+hash(c*313+r*1021+5)*.45 : .22+hash(c*541+r*733+7)*.43;
+        dots.push({
+          x:ox+c*GRID, y:oy+r*GRID, gx:c, gy:r,
+          delay: d*.042+h2(c+77,r+77)*.55,
+          gold:g, maxOp:bm*em, so:h2(c+13,r+99)
+        });
+      }
+    }
+  }
+
+  function resize() {
+    canvas.width  = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    buildDots();
+  }
+  resize();
+  let rTimer;
+  window.addEventListener('resize', () => { clearTimeout(rTimer); rTimer = setTimeout(resize,150); });
+
+  function draw() {
+    const t = (performance.now()-t0)/1000;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for (const d of dots) {
+      const el = t - d.delay;
+      if (el<0) continue;
+      const rev  = Math.min(el/0.28,1);
+      const slot = Math.floor(t/FREQ + d.so + FREQ);
+      const rv   = hash(d.gx*1009 + d.gy*1013 + slot*7919);
+      const bop  = OP[Math.min(Math.floor(rv*10),9)];
+      const op   = rev * bop * d.maxOp;
+      if (op<.008) continue;
+      ctx.globalAlpha = op;
+      ctx.fillStyle   = d.gold ? '#D0A052' : '#c8c0b8';
+      ctx.beginPath();
+      ctx.roundRect(d.x-DOT, d.y-DOT, DOT*2, DOT*2, CORN);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    raf = requestAnimationFrame(draw);
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf); else draw();
+  });
+  draw();
+})();
+
+/* ── TEXT CYCLING ── */
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const words = ['clear','aligned','alive','shipped'];
+  let i = 0;
+  const el = document.getElementById('cycling-word');
+  if (!el) return;
+
+  function cycle() {
+    el.classList.add('out');
+    setTimeout(() => {
+      i = (i+1) % words.length;
+      el.textContent = words[i];
+      el.classList.remove('out');
+      /* re-trigger enter animation */
+      el.style.animation = 'none';
+      void el.offsetHeight;
+      el.style.animation = '';
+    }, 260);
+  }
+  setInterval(cycle, 2500);
+})();
+
+/* ── GSAP CONTAINER-SCROLL (demo section) ── */
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const frame = document.getElementById('demo-frame');
+  if (!frame) return;
+
+  gsap.to(frame, {
+    scale: 1,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#demo',
+      start: 'top 85%',
+      end: 'center 55%',
+      scrub: 1.4,
+      invalidateOnRefresh: true,
+    }
+  });
+})();
+
+/* ── GSAP STAGGER for features ── */
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cards = document.querySelectorAll('.f-card');
+  if (!cards.length) return;
+
+  gsap.fromTo(cards,
+    { opacity: 0, y: 28 },
+    {
+      opacity: 1, y: 0,
+      stagger: 0.1,
+      duration: 0.65,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '.features-grid',
+        start: 'top 80%',
+        once: true,
+      }
+    }
+  );
+  /* Remove CSS reveal class so GSAP drives it */
+  document.querySelector('.features-grid')?.classList.remove('reveal','rd1');
+})();
+
+/* ── INTERSECTION OBSERVER REVEALS ── */
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    return;
+  }
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+
+/* ── FIREBASE EMAIL CAPTURE ── */
+const wForm = document.getElementById('waitlist-form');
+const wBtn  = document.getElementById('waitlist-btn');
+const wOk   = document.getElementById('waitlist-success');
+const wNote = document.querySelector('.waitlist-note');
+
+if (wForm) {
+  wForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const inp   = document.getElementById('waitlist-email');
+    const email = inp.value.trim().toLowerCase();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!valid) {
+      inp.style.outline = '1px solid #e05757';
+      setTimeout(() => { inp.style.outline = ''; }, 2200);
+      inp.focus();
+      return;
+    }
+
+    wBtn.disabled    = true;
+    wBtn.textContent = 'Joining...';
+
+    try {
+      await setDoc(doc(db, 'waitlist', email), {
+        email,
+        joinedAt: serverTimestamp(),
+        source: 'landing-page',
+      });
+      wForm.style.display = 'none';
+      if (wNote) wNote.style.display = 'none';
+      wOk.style.display = 'flex';
+    } catch (err) {
+      console.error('Waitlist:', err);
+      wBtn.disabled    = false;
+      wBtn.textContent = 'Join waitlist';
+      let errEl = document.createElement('p');
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.cssText = 'color:#e05757;font-size:13px;margin-top:.75rem;text-align:center';
+      wForm.after(errEl);
+      setTimeout(() => errEl.remove(), 4000);
+    }
+  });
+}
+</script>
+</body>
+</html>
