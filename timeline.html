@@ -429,8 +429,8 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 /* ── Auth / Sign-in screen ── */
 .auth-screen{position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden}
 .auth-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* Radial mask: darkest at center (content area), fades out toward edges */
-.auth-radial{position:absolute;inset:0;background:radial-gradient(ellipse 55% 65% at center,rgba(8,8,8,.96) 0%,rgba(8,8,8,.7) 45%,rgba(8,8,8,.15) 80%,transparent 100%);pointer-events:none}
+/* Radial mask: narrow band covering ONLY title+desc area (slightly above center) */
+.auth-radial{position:absolute;inset:0;background:radial-gradient(ellipse 44% 16% at 50% 40%,rgba(8,8,8,.94) 0%,rgba(8,8,8,.60) 55%,transparent 100%);pointer-events:none}
 .auth-vignette{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(8,8,8,.82) 0%,transparent 18%,transparent 82%,rgba(8,8,8,.82) 100%);pointer-events:none}
 /* Logo strip at top */
 .auth-logo-wrap{position:absolute;top:32px;left:50%;transform:translateX(-50%);z-index:12;display:flex;flex-direction:column;align-items:center}
@@ -442,8 +442,8 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .auth-title{font-family:'Crimson Pro',Georgia,serif;font-size:40px;font-weight:600;color:var(--txt);margin:0;line-height:1.12;letter-spacing:-.025em}
 .auth-desc{font-size:14px;color:var(--txt2);max-width:310px;line-height:1.75;margin:0}
 /* Glassmorphism Google button */
-.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 28px;background:rgba(255,255,255,.07);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:100px;color:var(--txt);font-size:14px;font-weight:500;cursor:pointer;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s;letter-spacing:.01em;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
-.auth-google-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 4px 20px rgba(0,0,0,.4)}
+.auth-google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px 28px;background:rgba(255,255,255,.04);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);border-radius:100px;color:var(--txt);font-size:14px;font-weight:500;cursor:pointer;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s;letter-spacing:.01em;box-shadow:inset 0 1px 0 rgba(255,255,255,.09)}
+.auth-google-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.28);transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 4px 20px rgba(0,0,0,.35)}
 .auth-google-btn:active{transform:translateY(0)}
 /* Legal text */
 .auth-legal{font-size:11px;color:var(--txt3);max-width:300px;line-height:1.65;margin-top:4px}
@@ -451,7 +451,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .auth-legal a:hover{color:var(--txt2)}
 /* Light theme overrides */
 [data-theme="light"] .auth-screen{background:#f4f1ed}
-[data-theme="light"] .auth-radial{background:radial-gradient(ellipse 55% 65% at center,rgba(244,241,237,.97) 0%,rgba(244,241,237,.72) 45%,rgba(244,241,237,.15) 80%,transparent 100%)}
+[data-theme="light"] .auth-radial{background:radial-gradient(ellipse 44% 16% at 50% 40%,rgba(244,241,237,.95) 0%,rgba(244,241,237,.62) 55%,transparent 100%)}
 [data-theme="light"] .auth-vignette{background:linear-gradient(to bottom,rgba(244,241,237,.85) 0%,transparent 18%,transparent 82%,rgba(244,241,237,.85) 100%)}
 [data-theme="light"] .auth-logo-bg{background:rgba(244,241,237,.75)}
 [data-theme="light"] .auth-google-btn{background:rgba(0,0,0,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(0,0,0,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
