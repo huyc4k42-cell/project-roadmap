@@ -153,51 +153,75 @@ a{text-decoration:none;color:inherit}
 .problem-t{font-size:1rem;color:var(--txt2);line-height:1.7}
 .problem-t strong{color:var(--txt);font-weight:500}
 
-/* ── DEMO ── */
-#demo{padding:var(--py) var(--px)}
-.demo-hdr{text-align:center;max-width:var(--max-w);margin:0 auto 4rem}
+/* ── DEMO (container-scroll) ── */
+#demo{
+  padding:clamp(5rem,10vh,9rem) var(--px) clamp(8rem,18vh,15rem);
+  overflow:hidden;
+}
+.demo-perspective{perspective:1200px;max-width:1060px;margin:0 auto}
+.demo-hdr{
+  text-align:center;position:relative;z-index:2;
+  padding-bottom:2rem;
+}
+.demo-eyebrow{
+  font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.25rem;
+}
 .demo-hdr h2{
   font-family:'Crimson Pro',Georgia,serif;
-  font-size:clamp(2rem,4vw,3.25rem);
-  font-weight:600;letter-spacing:-.01em;margin-bottom:.75rem;
+  font-size:clamp(3rem,6.5vw,5.5rem);
+  font-weight:600;letter-spacing:-.02em;line-height:1.06;
+  color:var(--txt);
 }
-.demo-hdr p{font-size:1rem;color:var(--txt2);max-width:380px;margin:0 auto}
-.demo-wrap{max-width:1100px;margin:0 auto}
-.demo-frame{
+/* device card */
+.demo-device-wrap{
+  margin:-1.5rem auto 0;
+  width:100%;
+  will-change:transform;
+  transform-origin:50% 0%;
+  /* shadow replicating framer demo */
+  filter:drop-shadow(0 0px 0px rgba(0,0,0,.3))
+         drop-shadow(0 9px 20px rgba(0,0,0,.42))
+         drop-shadow(0 37px 37px rgba(0,0,0,.34))
+         drop-shadow(0 84px 50px rgba(0,0,0,.20))
+         drop-shadow(0 149px 60px rgba(0,0,0,.06));
+}
+.demo-device{
   border-radius:20px;overflow:hidden;
-  border:1px solid var(--bd2);
-  box-shadow:0 32px 80px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.025);
-  will-change:transform;transform-origin:top center;transform:scale(.8);
+  border:3px solid #3a3a3a;
+  background:#1d1d1d;
 }
-/* browser chrome */
-.demo-chrome{
-  background:var(--s2);padding:10px 16px;
-  border-bottom:1px solid var(--bd);
+/* macOS traffic-light chrome */
+.device-top{
+  background:#252525;padding:11px 16px;
+  border-bottom:1px solid rgba(255,255,255,.07);
   display:flex;align-items:center;gap:12px;
 }
-.chrome-dots{display:flex;gap:5px;flex-shrink:0}
-.chrome-dot{width:9px;height:9px;border-radius:50%;background:var(--s4)}
-.chrome-bar{
-  flex:1;max-width:260px;margin:0 auto;height:24px;
-  background:var(--s3);border-radius:4px;
+.device-dots{display:flex;gap:6px;flex-shrink:0}
+.device-dot{width:10px;height:10px;border-radius:50%}
+.device-dot:nth-child(1){background:#ff5f57}
+.device-dot:nth-child(2){background:#febc2e}
+.device-dot:nth-child(3){background:#28c840}
+.device-bar{
+  flex:1;max-width:280px;margin:0 auto;height:26px;
+  background:#191919;border-radius:6px;
   display:flex;align-items:center;padding:0 10px;gap:5px;
 }
-.chrome-lock{width:8px;height:10px;opacity:.35;flex-shrink:0}
-.chrome-url{font-size:11px;color:var(--txt3)}
-.demo-screenshot{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;object-position:top left;background:var(--s1)}
-.demo-ph{
+.device-lock{width:8px;height:10px;opacity:.3;flex-shrink:0}
+.device-url{font-size:11.5px;color:var(--txt3);letter-spacing:.01em}
+.device-screen{
+  width:100%;aspect-ratio:16/9;overflow:hidden;
+  background:var(--s1);
+}
+.device-screen img{
+  width:100%;height:100%;
+  object-fit:cover;object-position:top left;display:block;
+}
+.device-ph{
   width:100%;aspect-ratio:16/9;background:var(--s1);
-  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
-  display:none;
+  display:none;align-items:center;justify-content:center;
 }
-.demo-ph p{font-size:13px;color:var(--txt3);text-align:center;line-height:1.6;max-width:320px}
-.demo-ph-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  background:var(--goldB);border:1px solid var(--goldD);color:var(--gold);
-  font-size:13px;font-weight:500;padding:8px 18px;border-radius:100px;
-  font-family:inherit;cursor:pointer;transition:background .2s;
-}
-.demo-ph-btn:hover{background:var(--goldD)}
+.device-ph p{font-size:13px;color:var(--txt3);text-align:center;line-height:1.7;max-width:300px}
 
 /* ── FEATURES ── */
 #features{padding:var(--py) var(--px)}
@@ -412,37 +436,40 @@ footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
 
 <!-- ── PRODUCT DEMO ── -->
 <section id="demo" aria-label="Product demo">
-  <div class="demo-hdr">
-    <h2 class="reveal">See the whole picture.</h2>
-    <p class="reveal rd1">One view. All your phases, teams, and tasks, exactly where they belong.</p>
-  </div>
-  <div class="demo-wrap reveal rd1">
-    <div class="demo-frame" id="demo-frame">
-      <div class="demo-chrome" aria-hidden="true">
-        <div class="chrome-dots">
-          <div class="chrome-dot"></div>
-          <div class="chrome-dot"></div>
-          <div class="chrome-dot"></div>
+  <div class="demo-perspective">
+    <!-- text header -->
+    <div class="demo-hdr" id="demo-hdr">
+      <p class="demo-eyebrow reveal">One view exactly where they belong</p>
+      <h2 class="reveal rd1">See the whole picture.</h2>
+    </div>
+    <!-- device card -->
+    <div class="demo-device-wrap" id="demo-device-wrap">
+      <div class="demo-device">
+        <div class="device-top" aria-hidden="true">
+          <div class="device-dots">
+            <div class="device-dot"></div>
+            <div class="device-dot"></div>
+            <div class="device-dot"></div>
+          </div>
+          <div class="device-bar">
+            <svg class="device-lock" viewBox="0 0 8 10" fill="currentColor">
+              <path d="M4 0C2.9 0 2 .9 2 2v1H.5C.2 3 0 3.2 0 3.5v6C0 9.8.2 10 .5 10h7c.3 0 .5-.2.5-.5v-6C8 3.2 7.8 3 7.5 3H6V2C6 .9 5.1 0 4 0zm0 1c.6 0 1 .4 1 1v1H3V2c0-.6.4-1 1-1z"/>
+            </svg>
+            <span class="device-url">aroadmap.cloud/app</span>
+          </div>
         </div>
-        <div class="chrome-bar">
-          <svg class="chrome-lock" viewBox="0 0 8 10" fill="currentColor">
-            <path d="M4 0C2.9 0 2 .9 2 2v1H.5C.2 3 0 3.2 0 3.5v6C0 9.8.2 10 .5 10h7c.3 0 .5-.2.5-.5v-6C8 3.2 7.8 3 7.5 3H6V2C6 .9 5.1 0 4 0zm0 1c.6 0 1 .4 1 1v1H3V2c0-.6.4-1 1-1z"/>
-          </svg>
-          <span class="chrome-url">aroadmap.cloud/app</span>
+        <div class="device-screen">
+          <img
+            src="screenshot.png"
+            alt="Arthur roadmap — visual timeline with phases and team tasks"
+            id="demo-img"
+            loading="eager"
+            onerror="this.style.display='none';document.getElementById('device-ph').style.display='flex'"
+          >
+          <div class="device-ph" id="device-ph" aria-hidden="true">
+            <p>screenshot.png not found</p>
+          </div>
         </div>
-      </div>
-      <!-- Replace screenshot.png with a 1400x900 capture of the app in dark mode -->
-      <img
-        src="screenshot.png"
-        alt="Arthur roadmap - visual timeline showing phases and team tasks"
-        class="demo-screenshot"
-        id="demo-img"
-        onerror="this.style.display='none';document.getElementById('demo-ph').style.display='flex'"
-        loading="eager"
-      >
-      <div class="demo-ph" id="demo-ph" aria-hidden="true">
-        <p>Add <strong style="color:var(--txt2)">screenshot.png</strong> to the project root to show the app here. Recommended size: 1400 x 900 px.</p>
-        <a href="/app" class="demo-ph-btn">Open the app &#x2197;</a>
       </div>
     </div>
   </div>
@@ -726,21 +753,40 @@ drawer.querySelectorAll('.drawer-link').forEach(l => l.addEventListener('click',
 
 /* ── GSAP CONTAINER-SCROLL (demo section) ── */
 (function() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const frame = document.getElementById('demo-frame');
-  if (!frame) return;
+  const deviceWrap = document.getElementById('demo-device-wrap');
+  const demoHdr    = document.getElementById('demo-hdr');
+  if (!deviceWrap) return;
 
-  gsap.to(frame, {
-    scale: 1,
-    ease: 'none',
+  /* set initial 3-D state — GSAP owns the transform from here */
+  gsap.set(deviceWrap, {
+    rotateX: 20,
+    scale: 1.05,
+    transformOrigin: '50% 0%',
+    transformPerspective: 1200,
+  });
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gsap.set(deviceWrap, { rotateX: 0, scale: 1 });
+    return;
+  }
+
+  const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#demo',
-      start: 'top 85%',
-      end: 'center 55%',
-      scrub: 1.4,
+      start: 'top 72%',
+      end: 'top 8%',
+      scrub: 1.8,
       invalidateOnRefresh: true,
     }
   });
+
+  /* device: tilt flattens, slight scale-down */
+  tl.to(deviceWrap, { rotateX: 0, scale: 1, ease: 'none' }, 0);
+
+  /* header: drifts upward so device "covers" it */
+  if (demoHdr) {
+    tl.to(demoHdr, { y: -72, ease: 'none' }, 0);
+  }
 })();
 
 /* ── GSAP STAGGER for features ── */
