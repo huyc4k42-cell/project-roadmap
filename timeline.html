@@ -254,6 +254,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .tb-top{display:flex;align-items:center;gap:4px;min-width:0;width:100%}
 .tb-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;line-height:1.35}
 .tb-nm.wrap{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tb.tb-done{opacity:.45}
+.tb.tb-done .tb-nm{text-decoration:line-through}
 .tb-dur{font-size:11px;opacity:.7;flex-shrink:0}
 .tb-tags{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;margin-top:4px;max-width:100%}
 .tb-tag{font-size:10px;background:rgba(255,255,255,.18);padding:1px 5px;border-radius:3px;white-space:nowrap;color:rgba(255,255,255,.9);flex-shrink:0}
@@ -527,10 +529,11 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .bc-cur:hover ~ .edit-pen,.bc-cur-wrap:hover .edit-pen{opacity:1}
 .bc-cur-wrap{display:flex;align-items:center;gap:5px;min-width:0;cursor:pointer}
 /* Home empty */
-.home-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px;text-align:center}
-.home-empty-ico{width:56px;height:56px;border-radius:50%;background:var(--goldD);display:flex;align-items:center;justify-content:center;color:var(--gold)}
-.home-empty-title{font-family:'Crimson Pro',Georgia,serif;font-size:24px;font-weight:600;color:var(--txt)}
-.home-empty-sub{font-size:13px;color:var(--txt2);max-width:360px;line-height:1.7}
+.home-empty{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.home-empty-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.home-empty-center{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px;text-align:center}
+.home-empty-title{font-family:'Crimson Pro',Georgia,serif;font-size:28px;font-weight:600;color:var(--txt);letter-spacing:-.3px}
+.home-empty-sub{font-size:13px;color:var(--txt2);max-width:340px;line-height:1.7;margin-bottom:6px}
 /* export overlay */
 .exp-ol{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:10px;color:var(--txt2);font-size:12px}
 .exp-spin{width:26px;height:26px;border:2px solid var(--bd2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
@@ -1262,16 +1265,11 @@ function buildSidebar() {
     </div>
   </div>
   <div class="filter-bar">
-    <select class="fi-sel" id="f-phase" aria-label="Lọc phase">
-      <option value="">Phase: Tất cả</option>${phOpts}
+    <select class="fi-sel" id="f-phase" aria-label="Filter by phase">
+      <option value="">All phases</option>${phOpts}
     </select>
-    <select class="fi-sel" id="f-team" aria-label="Lọc nhóm">
-      <option value="">Nhóm: Tất cả</option>${tmOpts}
-    </select>
-    <select class="fi-sel" id="f-status" aria-label="Lọc trạng thái">
-      <option value="backlog"${f.status==='backlog'||!f.status?' selected':''}>Backlog</option>
-      <option value="scheduled"${f.status==='scheduled'?' selected':''}>Đã xếp</option>
-      <option value="">Tất cả</option>
+    <select class="fi-sel" id="f-team" aria-label="Filter by team">
+      <option value="">All teams</option>${tmOpts}
     </select>
   </div>
   <div class="task-list" id="task-list">${taskCards}</div>
@@ -1546,8 +1544,10 @@ function renderRAF() {
 
 /* ── Multi-lane algorithm ── */
 function assignLanes(tasks) {
+  // D47: row height = max(lanes per phase group) — not cumulative sum.
+  // Tasks from different phases share the same lane indices since they occupy
+  // different x-columns and never visually conflict.
   const result = {};
-  const laneH  = [];
 
   // Group tasks by phaseId; null-phase tasks handled separately
   const byPhase = {};
@@ -1560,54 +1560,65 @@ function assignLanes(tasks) {
       noPhase.push(t);
     }
   }
-  // Within each phase, preserve S.tasks insertion order
-  for (const k of Object.keys(byPhase)) {
-    byPhase[k].sort((a, b) => S.tasks.indexOf(a) - S.tasks.indexOf(b));
-  }
 
-  // Sort phase keys by visual startWeek order (left→right)
-  const sortedPhaseKeys = Object.keys(byPhase).sort((a, b) => {
-    const pa = S.phases.find(p => p.id === +a);
-    const pb = S.phases.find(p => p.id === +b);
-    return (pa?.startWeek ?? 0) - (pb?.startWeek ?? 0);
-  });
-
-  // Assign phase-grouped tasks: each gets its own sequential lane (vertical stacking)
-  let nextLane = 0;
-  for (const k of sortedPhaseKeys) {
-    const phaseTasks = byPhase[k];
-    for (const t of phaseTasks) {
-      result[t.id] = nextLane;
-      laneH[nextLane] = taskBarH(t);
-      nextLane++;
+  // For each phase group: greedy time-based packing → each group gets its own
+  // lane count. Lane indices start from 0 within EVERY group (they can reuse
+  // the same lane slots since tasks live in non-overlapping week columns).
+  const phaseGroupMaxLanes = [];
+  for (const phaseTasks of Object.values(byPhase)) {
+    const sorted = [...phaseTasks].sort((a, b) => (a.startWeek ?? 0) - (b.startWeek ?? 0));
+    const laneEnds = []; // laneEnds[i] = last week occupied in lane i
+    for (const t of sorted) {
+      const sw = t.startWeek ?? 0;
+      let placed = false;
+      for (let i = 0; i < laneEnds.length; i++) {
+        if (sw > laneEnds[i]) {
+          laneEnds[i] = sw + t.dur - 1;
+          result[t.id] = i;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        result[t.id] = laneEnds.length;
+        laneEnds.push(sw + t.dur - 1);
+      }
     }
+    phaseGroupMaxLanes.push(laneEnds.length);
   }
 
-  // No-phase tasks: greedy side-by-side packing in their own lane pool
-  const noLaneEnds = []; // separate from phase lanes
-  const sorted = [...noPhase].sort((a, b) => a.startWeek - b.startWeek);
-  for (const t of sorted) {
-    const h = taskBarH(t);
+  // No-phase tasks: greedy packing in their own lane pool (also from 0)
+  const noLaneEnds = [];
+  const sortedNoPhase = [...noPhase].sort((a, b) => (a.startWeek ?? 0) - (b.startWeek ?? 0));
+  for (const t of sortedNoPhase) {
+    const sw = t.startWeek ?? 0;
     let placed = false;
     for (let i = 0; i < noLaneEnds.length; i++) {
-      if (t.startWeek > noLaneEnds[i]) {
-        noLaneEnds[i] = t.startWeek + t.dur - 1;
-        const globalLane = nextLane + i;
-        laneH[globalLane] = Math.max(laneH[globalLane] || 0, h);
-        result[t.id] = globalLane;
+      if (sw > noLaneEnds[i]) {
+        noLaneEnds[i] = sw + t.dur - 1;
+        result[t.id] = i;
         placed = true;
         break;
       }
     }
     if (!placed) {
-      const globalLane = nextLane + noLaneEnds.length;
-      noLaneEnds.push(t.startWeek + t.dur - 1);
-      laneH[globalLane] = h;
-      result[t.id] = globalLane;
+      result[t.id] = noLaneEnds.length;
+      noLaneEnds.push(sw + t.dur - 1);
     }
   }
+  const noPhaseLanes = noLaneEnds.length;
 
-  return { assignments: result, numLanes: Math.max(laneH.length, 1), laneH: laneH.length ? laneH : [34] };
+  // Global lane count = max across all phase groups + no-phase group
+  const numLanes = Math.max(...phaseGroupMaxLanes, noPhaseLanes, 1);
+
+  // Build laneH: max height of any task assigned to that lane index
+  const laneH = Array.from({ length: numLanes }, () => 34);
+  for (const t of tasks) {
+    const lane = result[t.id] ?? 0;
+    if (lane < numLanes) laneH[lane] = Math.max(laneH[lane], taskBarH(t));
+  }
+
+  return { assignments: result, numLanes, laneH };
 }
 
 function buildTeamRow(tm, tw, twFrac) {
@@ -1646,9 +1657,9 @@ function buildTeamRow(tm, tw, twFrac) {
     const tagsHtml = t.tags?.length
       ? `<div class="tb-tags">${t.tags.slice(0,4).map(tg=>`<span class="tb-tag">${esc(tg)}</span>`).join('')}</div>`
       : '';
-    return `<div class="tb" draggable="true" data-task-id="${t.id}"
+    return `<div class="tb${t.done?' tb-done':''}" draggable="true" data-task-id="${t.id}"
       style="left:${left}px;top:${top}px;width:${width}px;height:${barH}px;background:${color}cc;border-left:3px solid ${color}"
-      title="${esc(t.name)}${ph?' · '+esc(ph.name):''}">
+      title="${esc(t.name)}${ph?' · '+esc(ph.name):''}${t.done?' (done)':''}">
       <div class="tb-lh" data-resize-left="${t.id}" aria-label="Kéo để thay đổi ngày bắt đầu" role="slider" aria-orientation="horizontal"></div>
       <div class="tb-top">
         <span class="tb-nm${longTitle?' wrap':''}">${esc(t.name)}</span>
@@ -1732,15 +1743,18 @@ function buildHome() {
     return `<div class="home">
       ${buildHomeHdr(0)}
       <div class="home-empty">
-        <div class="home-empty-ico" aria-hidden="true">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        <canvas id="home-empty-canvas" class="home-empty-canvas" aria-hidden="true"></canvas>
+        <div class="home-empty-center">
+          <div class="home-empty-title">Your roadmap starts here.</div>
+          <div class="home-empty-sub">Plan visually, align your team, and ship every milestone on schedule.</div>
+          <div class="empty-actions">
+            <button class="empty-btn empty-btn-primary" id="home-new-btn" style="display:flex;align-items:center;gap:6px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Project
+            </button>
+            <button class="empty-btn empty-btn-sec" id="home-view-sample-btn">View Sample →</button>
+          </div>
         </div>
-        <div class="home-empty-title">Chưa có project nào</div>
-        <div class="home-empty-sub">Tạo project đầu tiên để bắt đầu xây dựng roadmap của bạn.</div>
-        <button class="empty-btn empty-btn-primary" id="home-new-btn" style="margin-top:4px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Tạo Project mới
-        </button>
       </div>
       ${modal}
     </div>`;
@@ -1895,6 +1909,8 @@ function buildHomeModal(accentSwatches) {
 function bindHome() {
   /* Sign-in canvas animation */
   initSignInCanvas();
+  /* Home empty state canvas */
+  initHomeEmptyCanvas();
 
   /* Auth buttons */
   q('#home-signin-btn')?.addEventListener('click', fbSignIn);
@@ -1916,6 +1932,9 @@ function bindHome() {
   const openNew = () => { S.ui.modal = {type:'new-project', data:{}}; renderHome(); };
   q('#home-new-btn')?.addEventListener('click', openNew);
   q('#home-new-hdr-btn')?.addEventListener('click', openNew);
+
+  /* View sample */
+  q('#home-view-sample-btn')?.addEventListener('click', loadSampleProject);
 
   /* Import CSV button */
   q('#home-import-btn')?.addEventListener('click', () => openImportModal(null));
@@ -2086,6 +2105,8 @@ function buildModal() {
         <select class="fi" id="m-phase">
           <option value="">— Chưa gán phase —</option>${phOpts}
         </select></div>
+      <div class="fg"><label>Notes</label>
+        <textarea class="fi" id="m-desc" rows="3" placeholder="Add context, links, or details…">${esc(t.desc||'')}</textarea></div>
       <div class="fg"><label>Tags</label>
         <div class="tag-opts" id="tag-opts">${tagOpts}</div></div>
       <div class="mdl-btns">
@@ -2252,7 +2273,6 @@ function bind() {
   /* Filter selects */
   q('#f-phase')?.addEventListener('change', e => { S.ui.filter.phase = e.target.value; render(); });
   q('#f-team')?.addEventListener('change',  e => { S.ui.filter.team  = e.target.value; render(); });
-  q('#f-status')?.addEventListener('change',e => { S.ui.filter.status= e.target.value; render(); });
 
   /* Add tag */
   q('#tf-add-btn')?.addEventListener('click', () => {
@@ -2313,9 +2333,10 @@ function bind() {
       e.preventDefault();
       const t = taskById(taskId);
       openCtx(e.clientX, e.clientY, [
-        {l:'Sửa task', icon:'edit', a:`edit-task:${t.id}`},
+        {l:'Edit task', icon:'edit', a:`edit-task:${t.id}`},
+        {l: t.done ? 'Mark as active' : 'Mark as done', icon:'zap', a:`toggle-done:${t.id}`},
         '---',
-        {l:'Xóa task', icon:'zap', a:`del-task:${t.id}`, d:true},
+        {l:'Delete task', icon:'zap', a:`del-task:${t.id}`, d:true},
       ]);
     });
   });
@@ -2343,9 +2364,18 @@ function bind() {
 
   /* Task bars */
   qAll('.tb').forEach(el => {
+    // Single click → toggle done; double-click → open edit modal
     el.addEventListener('click', e => {
-      if (e.target.classList.contains('tb-rh')) return;
+      if (e.target.closest('.tb-lh,.tb-rh')) return;
       if (S.ui.dragData) return;
+      const t = taskById(+el.dataset.taskId);
+      if (!t || S.ui.readonly) return;
+      pushHistory();
+      t.done = !t.done;
+      render(false);
+    });
+    el.addEventListener('dblclick', e => {
+      if (e.target.closest('.tb-lh,.tb-rh')) return;
       const t = taskById(+el.dataset.taskId);
       if (t) openModal('edit-task', t);
     });
@@ -2360,10 +2390,11 @@ function bind() {
       e.preventDefault();
       const t = taskById(+el.dataset.taskId);
       openCtx(e.clientX, e.clientY, [
-        {l:'Sửa task', icon:'edit', a:`edit-task:${t.id}`},
-        {l:'Đưa về backlog', icon:'layers', a:`unschedule:${t.id}`},
+        {l:'Edit task', icon:'edit', a:`edit-task:${t.id}`},
+        {l: t.done ? 'Mark as active' : 'Mark as done', icon:'zap', a:`toggle-done:${t.id}`},
+        {l:'Send to backlog', icon:'layers', a:`unschedule:${t.id}`},
         '---',
-        {l:'Xóa task', icon:'zap', a:`del-task:${t.id}`, d:true},
+        {l:'Delete task', icon:'zap', a:`del-task:${t.id}`, d:true},
       ]);
     });
   });
@@ -2804,9 +2835,10 @@ function handleAction(action) {
   closeCtx();
   const [cmd, id] = action.split(':');
   const nid = +id;
-  if (cmd === 'edit-task')  openModal('edit-task',  taskById(nid));
-  if (cmd === 'del-task')   { delTask(nid); render(); }
-  if (cmd === 'unschedule') { const t = taskById(nid); if(t) t.startWeek=null; render(); }
+  if (cmd === 'edit-task')    openModal('edit-task',  taskById(nid));
+  if (cmd === 'del-task')    { delTask(nid); render(); }
+  if (cmd === 'toggle-done') { const t = taskById(nid); if(t) { pushHistory(); t.done = !t.done; render(); } }
+  if (cmd === 'unschedule')  { const t = taskById(nid); if(t) t.startWeek=null; render(); }
   if (cmd === 'edit-team')  openModal('edit-team',  S.teams.find(t=>t.id===nid));
   if (cmd === 'del-team')   { delTeam(nid); render(); }
   if (cmd === 'edit-phase') openModal('edit-phase', phaseById(nid));
@@ -2842,13 +2874,14 @@ function saveTask() {
   const dur    = Math.max(1, +q('#m-dur')?.value || 2);
   const phaseId= +q('#m-phase')?.value || null;
   const tags   = [...qAll('.to.sel')].map(el => el.dataset.tag);
+  const desc   = q('#m-desc')?.value.trim() || '';
   if (!name) { shakeErr(q('#m-name')); return; }
 
   if (S.ui.modal.type === 'edit-task') {
     const t = taskById(S.ui.modal.data.id);
-    Object.assign(t, {name, teamId, dur, phaseId, tags});
+    Object.assign(t, {name, teamId, dur, phaseId, tags, desc});
   } else {
-    S.tasks.push({id:nextId(), name, teamId, dur, phaseId, tags, startWeek:null});
+    S.tasks.push({id:nextId(), name, teamId, dur, phaseId, tags, desc, startWeek:null});
   }
   closeModal();
 }
@@ -3445,6 +3478,99 @@ function initSignInCanvas() {
     raf = requestAnimationFrame(draw);
   }
   draw();
+}
+
+/* ── Home empty state: static dot matrix background ── */
+function initHomeEmptyCanvas() {
+  const canvas = document.getElementById('home-empty-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const GRID = 22, DOT = 2.2, CORN = 0.6;
+
+  // Deterministic hash (same approach as sign-in canvas)
+  function hash(n) {
+    n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
+    n = Math.imul(n ^ (n >>> 16), 0x45d9f3b) | 0;
+    return ((n ^ (n >>> 16)) >>> 0) / 0x100000000;
+  }
+  function hash2(x, y) { return hash(x * 1619 + y * 31337 + 1); }
+
+  function draw() {
+    const parent = canvas.parentElement;
+    canvas.width  = parent?.offsetWidth  || window.innerWidth;
+    canvas.height = parent?.offsetHeight || window.innerHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cols = Math.ceil(canvas.width  / GRID) + 2;
+    const rows = Math.ceil(canvas.height / GRID) + 2;
+    const ox = (canvas.width  % GRID) / 2;
+    const oy = (canvas.height % GRID) / 2;
+    const cx = cols / 2, cy = rows / 2;
+    const maxD = Math.sqrt(cx * cx + cy * cy);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const dist = Math.sqrt((c - cx) ** 2 + (r - cy) ** 2);
+        const edge = 0.05 + 0.95 * ((dist / maxD) ** 2); // fade toward center
+        const h = hash2(c, r);
+        const isGold = h < 0.25;
+        const baseOp = isGold
+          ? 0.40 + hash(c * 313 + r * 1021 + 5) * 0.45
+          : 0.15 + hash(c * 541 + r * 733  + 7) * 0.30;
+        const op = baseOp * edge * 0.22; // 0.22 = overall scale for ~0.15 max
+        if (op < 0.006) continue;
+        ctx.globalAlpha = op;
+        ctx.fillStyle   = isGold ? '#D0A052' : '#c8c0b8';
+        ctx.beginPath();
+        ctx.roundRect(ox + c * GRID - DOT, oy + r * GRID - DOT, DOT * 2, DOT * 2, CORN);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  draw();
+  const ro = new ResizeObserver(draw);
+  ro.observe(canvas.parentElement || canvas);
+}
+
+/* ── Sample project for "View Sample →" button ── */
+function loadSampleProject() {
+  if (typeof LZString === 'undefined') return;
+  const now = new Date();
+  const sy = now.getFullYear(), sm = now.getMonth();
+  const startD = new Date(sy, sm, 1);
+  const endD   = new Date(sy, sm + 6, 0);
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+  const data = {
+    cfg: { title:'Product Launch Q3', subtitle:'Sample · explore Aroadmap', start:fmt(startD), end:fmt(endD), scopeRowHeight:100 },
+    phases: [
+      { id:1, name:'Discovery',   startWeek:1,  endWeek:4,  color:'#7c3aed' },
+      { id:2, name:'Design',      startWeek:5,  endWeek:9,  color:'#1d4ed8' },
+      { id:3, name:'Engineering', startWeek:9,  endWeek:16, color:'#047857' },
+      { id:4, name:'Launch',      startWeek:17, endWeek:20, color:'#D0A052' },
+    ],
+    teams: [
+      { id:1, name:'Product',     icon:'📋', color:'#7c3aed' },
+      { id:2, name:'Design',      icon:'🎨', color:'#1d4ed8' },
+      { id:3, name:'Engineering', icon:'⚙️', color:'#047857' },
+    ],
+    tasks: [
+      { id:1,  name:'User Interviews',    teamId:1, phaseId:1, startWeek:1,  dur:2, tags:['research'] },
+      { id:2,  name:'Competitive Analysis', teamId:1, phaseId:1, startWeek:3, dur:2, tags:['research'] },
+      { id:3,  name:'Wireframes',         teamId:2, phaseId:2, startWeek:5,  dur:2, tags:['UX'] },
+      { id:4,  name:'Design System',      teamId:2, phaseId:2, startWeek:5,  dur:4, tags:['UX'] },
+      { id:5,  name:'User Testing',       teamId:2, phaseId:2, startWeek:7,  dur:2, tags:['research'] },
+      { id:6,  name:'API Development',    teamId:3, phaseId:3, startWeek:9,  dur:6, tags:['tech'] },
+      { id:7,  name:'Frontend',           teamId:3, phaseId:3, startWeek:11, dur:6, tags:['tech'] },
+      { id:8,  name:'QA & Testing',       teamId:3, phaseId:3, startWeek:15, dur:2, tags:['tech'] },
+      { id:9,  name:'Launch Plan',        teamId:1, phaseId:4, startWeek:17, dur:2, tags:['growth'] },
+      { id:10, name:'Marketing Rollout',  teamId:1, phaseId:4, startWeek:19, dur:2, tags:['growth'] },
+    ],
+    tags: ['research','UX','tech','growth','tracking'],
+    _nextId: 11,
+  };
+  const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+  location.hash = '#v1=' + compressed;
 }
 
 /* ── Migration: localStorage → Firestore (first login) ── */
