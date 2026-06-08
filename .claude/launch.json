@@ -2,13 +2,19 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "timeline",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "3333"],
+      "name": "vite-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 3333
     },
     {
-      "name": "landing",
+      "name": "timeline-legacy",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3334"],
+      "port": 3334
+    },
+    {
+      "name": "landing-legacy",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "3335"],
       "port": 3335

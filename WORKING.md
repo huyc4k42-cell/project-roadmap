@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-08 · Session: Big Update Planning
+> Cập nhật lần cuối: 2026-06-09 · Session: Vite Migration B6
 
 ---
 
@@ -193,6 +193,39 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 |------|-------|
 | `01bfd1d` | feat: add screenshot.png (1400×900px dark-mode timeline) |
 | `a8cb16a` | feat: ContainerScroll — macOS device mock, 3D tilt, gold eyebrow |
+
+---
+
+---
+
+## 🔧 Vite + ES Modules Migration — Branch `feat/vite-migration`
+
+> Song song với BIG UPDATE trên `main`. Không ảnh hưởng production.
+
+| Phase | Mô tả | Done | Commit |
+|-------|-------|------|--------|
+| B1 | Vite infra setup (vite.config.js, app.html, npm, tsconfig) | ✅ | — |
+| B2 | CSS split (base, layout, sidebar, timeline, modals, home, main.css) | ✅ | `fe8554d` |
+| B3 | JS foundations (constants, utils, theme, date, state, storage) | ✅ | `cb7aabe` |
+| B4 | Firebase + persistence (firebase.js, persistence.js) | ✅ | `574c267` |
+| B5 | Feature modules (algorithms, weekpicker, canvas) | ✅ | `067a7a9` |
+| B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
+| B7 | Events + drag-drop + import + export | ✅ | `7313aea` |
+| B8 | Router + main.js entry + full wiring | ✅ | `7f48ebb` |
+| B9 | Static analysis + bug fixes | ✅ | `479faeb` |
+
+**Tổng tiến độ: 9/9 phases ✅ — sẵn sàng manual test + deploy**
+
+**Cần làm để deploy:**
+1. `npm run dev` → mở http://localhost:3333/app — test thủ công các flows chính
+2. Nếu pass: `git checkout main && git merge feat/vite-migration`
+3. Update `vercel.json` routing nếu cần (app.html → /app)
+4. `git push origin main` → Vercel auto-deploy
+
+**B9 bug fixes đã xử lý:**
+- `createProject` nav callback double-prefix bug (`#project-#project-...`)
+- Import CSV button `null` → `undefined` (fallback to currentProjId)
+- Default `S.cfg.scopeRowHeight = 100` cho share view
 
 ---
 

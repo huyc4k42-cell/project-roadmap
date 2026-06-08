@@ -1,0 +1,20 @@
+{
+  "name": "aroadmap",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3333 --open /app.html",
+    "build": "vite build",
+    "preview": "vite preview --port 3334"
+  },
+  "dependencies": {
+    "firebase": "^10.12.2",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "lz-string": "^1.5.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
