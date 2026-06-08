@@ -38,9 +38,9 @@ a{text-decoration:none;color:inherit}
   border:1px solid var(--bd2);border-radius:10px;
   transition:background .4s cubic-bezier(.16,1,.3,1),border-color .4s;
   pointer-events:all;
-  position:relative;overflow:hidden;
+  position:relative;
 }
-/* L1: nav spotlight — cursor-following glow */
+/* L1: nav spotlight — cursor-following glow (no overflow:hidden needed — gradient fades to transparent) */
 .nav-inner::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:radial-gradient(180px circle at var(--mouse-x,50%) var(--mouse-y,50%),rgba(208,160,82,.22),transparent 70%);
@@ -53,26 +53,31 @@ a{text-decoration:none;color:inherit}
 .nav-links{display:flex;gap:2rem;position:absolute;left:50%;transform:translateX(-50%);align-items:center}
 .nav-links a{font-size:13.5px;font-weight:500;color:var(--txt2);transition:color .2s;letter-spacing:.01em}
 .nav-links a:hover{color:var(--txt)}
-/* L2: features dropdown */
+/* L2: features dropdown — hover triggered */
 .nav-feat-wrap{position:relative}
 .nav-feat-btn{
-  display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;
-  font-size:13.5px;font-weight:500;color:var(--txt2);font-family:inherit;padding:0;
+  display:flex;align-items:center;gap:5px;background:none;border:none;cursor:default;
+  font-size:13.5px;font-weight:500;color:var(--txt2);font-family:inherit;padding:4px 0;
   transition:color .2s;letter-spacing:.01em;
 }
-.nav-feat-btn:hover,.nav-feat-btn.active{color:var(--txt)}
 .nav-feat-btn svg{transition:transform .2s;flex-shrink:0}
-.nav-feat-btn.active svg{transform:rotate(180deg)}
+/* hover states driven by parent hover */
+.nav-feat-wrap:hover .nav-feat-btn{color:var(--txt)}
+.nav-feat-wrap:hover .nav-feat-btn svg{transform:rotate(180deg)}
 .feat-dd{
-  position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%);
+  position:absolute;top:calc(100% + 14px);left:50%;
+  transform:translateX(-50%) translateY(-8px);
   width:600px;background:rgba(14,14,14,.97);border:1px solid var(--bd2);
   border-radius:8px;padding:6px;
   display:grid;grid-template-columns:repeat(3,1fr);gap:2px;
-  opacity:0;pointer-events:none;transform:translateX(-50%) translateY(-6px);
-  transition:opacity .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1);
+  opacity:0;pointer-events:none;
+  transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  z-index:400;
 }
-.feat-dd.open{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+/* invisible bridge so mouse can move from button → dropdown without losing hover */
+.feat-dd::before{content:'';position:absolute;inset:-14px -30px 0;z-index:-1}
+.nav-feat-wrap:hover .feat-dd{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
 .feat-dd-card{
   padding:16px;border-radius:6px;cursor:default;
   transition:background .18s;border:1px solid transparent;
@@ -726,19 +731,13 @@ gsap.registerPlugin(ScrollTrigger);
   ni.addEventListener('mouseleave', () => ni.classList.remove('spotlight'));
 })();
 
-/* ── L2: FEATURES DROPDOWN ── */
+/* ── L2: FEATURES DROPDOWN — hover via CSS, no JS needed ── */
+/* aria-expanded update for screen readers on focus */
 (function() {
-  const trigger = document.getElementById('feat-trigger');
-  const dd      = document.getElementById('feat-dd');
-  if (!trigger || !dd) return;
-
-  function open()  { dd.classList.add('open'); trigger.classList.add('active'); trigger.setAttribute('aria-expanded','true'); dd.setAttribute('aria-hidden','false'); }
-  function close() { dd.classList.remove('open'); trigger.classList.remove('active'); trigger.setAttribute('aria-expanded','false'); dd.setAttribute('aria-hidden','true'); }
-  function toggle() { dd.classList.contains('open') ? close() : open(); }
-
-  trigger.addEventListener('click', e => { e.stopPropagation(); toggle(); });
-  document.addEventListener('click', e => { if (!e.target.closest('#nav-feat-wrap')) close(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  const wrap = document.getElementById('nav-feat-wrap');
+  if (!wrap) return;
+  wrap.addEventListener('mouseenter', () => wrap.querySelector('[aria-haspopup]')?.setAttribute('aria-expanded','true'));
+  wrap.addEventListener('mouseleave', () => wrap.querySelector('[aria-haspopup]')?.setAttribute('aria-expanded','false'));
 })();
 
 /* ── NAV SCROLL STATE (IntersectionObserver — no scroll listener) ── */
