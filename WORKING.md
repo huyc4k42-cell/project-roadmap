@@ -211,18 +211,28 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 | B5 | Feature modules (algorithms, weekpicker, canvas) | ✅ | `067a7a9` |
 | B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
 | B7 | Events + drag-drop + import + export | ✅ | `7313aea` |
-| B8 | Router + main.js entry + full wiring | ☐ | — |
+| B8 | Router + main.js entry + full wiring | ✅ | `7f48ebb` |
 | B9 | Full testing + deploy to production | ☐ | — |
 
-**Tổng tiến độ: 7/9 phases ✅**
+**Tổng tiến độ: 8/9 phases ✅**
 
-**B8 cần làm:**
-- `src/app/router.js` — hash routing + loadProject + loadFromHash + renderHome/render dispatch
-- `src/app/main.js` — final entry point: initFirebase → migrateOldData → router(), wire ALL inject hooks
-  - setBindDeps, setBindModalDeps, setBindHomeDeps, setResizeDeps, setImportDeps
-  - setShareURLFn (render/modals), setLoadIndexFn (render/modals), setBindModal (render/modals)
-  - setBindHome (render/home), setLoadIndex (render/home)
-  - setBind (render/index)
+**B9 — Testing checklist:**
+- [ ] `npm run dev` — app loads, shows home/project view
+- [ ] Firebase sign-in / sign-out
+- [ ] Create, open, edit, delete project
+- [ ] Add/edit/delete task, phase, team
+- [ ] Drag task → timeline, drag task bar → sidebar (unschedule)
+- [ ] Phase resize, task bar resize (left/right)
+- [ ] CSV import (upload file, preview, confirm)
+- [ ] Share URL (#v1=...) read-only view
+- [ ] Export PDF
+- [ ] Undo/Redo (Ctrl+Z / Ctrl+Y)
+- [ ] Keyboard shortcuts (n/p/t, Ctrl+K)
+- [ ] Theme toggle
+- [ ] Import modal from home screen
+- [ ] loadSampleProject (home empty state button)
+- [ ] loadSampleData (project empty state button)
+- Then: push branch, merge to main, Vercel deploy
 
 ---
 
