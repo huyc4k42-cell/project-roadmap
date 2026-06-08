@@ -1,4 +1,13 @@
 /* ── MAIN — entry point: wires all inject hooks, boots Firebase, starts router ── */
+
+/* CSS — Vite handles these as side-effect imports */
+import '../styles/base.css';
+import '../styles/layout.css';
+import '../styles/sidebar.css';
+import '../styles/timeline.css';
+import '../styles/modals.css';
+import '../styles/home.css';
+import '../styles/main.css';
 import { initFirebase, fbSignIn, fbSignOut } from './firebase.js';
 import { S, undo as _undo, redo as _redo }   from './state.js';
 import { PROJ_PFX }                           from './constants.js';
