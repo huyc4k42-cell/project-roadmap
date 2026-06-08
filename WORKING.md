@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-08 · Session: Big Update Planning
+> Cập nhật lần cuối: 2026-06-09 · Session: Vite Migration B6
 
 ---
 
@@ -193,6 +193,42 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 |------|-------|
 | `01bfd1d` | feat: add screenshot.png (1400×900px dark-mode timeline) |
 | `a8cb16a` | feat: ContainerScroll — macOS device mock, 3D tilt, gold eyebrow |
+
+---
+
+---
+
+## 🔧 Vite + ES Modules Migration — Branch `feat/vite-migration`
+
+> Song song với BIG UPDATE trên `main`. Không ảnh hưởng production.
+
+| Phase | Mô tả | Done | Commit |
+|-------|-------|------|--------|
+| B1 | Vite infra setup (vite.config.js, app.html, npm, tsconfig) | ✅ | — |
+| B2 | CSS split (base, layout, sidebar, timeline, modals, home, main.css) | ✅ | `fe8554d` |
+| B3 | JS foundations (constants, utils, theme, date, state, storage) | ✅ | `cb7aabe` |
+| B4 | Firebase + persistence (firebase.js, persistence.js) | ✅ | `574c267` |
+| B5 | Feature modules (algorithms, weekpicker, canvas) | ✅ | `067a7a9` |
+| B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
+| B7 | Events + drag-drop + import + export | ☐ | — |
+| B8 | Router + main.js entry + full wiring | ☐ | — |
+| B9 | Full testing + deploy to production | ☐ | — |
+
+**Tổng tiến độ: 6/9 phases ✅**
+
+**B7 cần làm:**
+- `src/app/events/bind.js` — bind() toàn bộ project view events
+- `src/app/events/bindHome.js` — bindHome() home screen events
+- `src/app/events/drag.js` — drag-drop task/phase/team
+- `src/app/events/resize.js` — task bar + phase resize + scope height
+- `src/app/import/csv.js` — CSV parse, validate, confirm import
+- `src/app/export/pdf.js` — html2canvas + jspdf export
+- `src/app/share.js` — buildShareURL(), loadFromHash()
+
+**B8 cần làm:**
+- `src/app/router.js` — hash routing, router()
+- Wire tất cả inject hooks (setBindModal, setBind, setLoadIndex, etc.)
+- Update `src/app/main.js` — initFirebase → migrateOldData → router
 
 ---
 
