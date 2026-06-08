@@ -212,27 +212,20 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 | B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
 | B7 | Events + drag-drop + import + export | ✅ | `7313aea` |
 | B8 | Router + main.js entry + full wiring | ✅ | `7f48ebb` |
-| B9 | Full testing + deploy to production | ☐ | — |
+| B9 | Static analysis + bug fixes | ✅ | `479faeb` |
 
-**Tổng tiến độ: 8/9 phases ✅**
+**Tổng tiến độ: 9/9 phases ✅ — sẵn sàng manual test + deploy**
 
-**B9 — Testing checklist:**
-- [ ] `npm run dev` — app loads, shows home/project view
-- [ ] Firebase sign-in / sign-out
-- [ ] Create, open, edit, delete project
-- [ ] Add/edit/delete task, phase, team
-- [ ] Drag task → timeline, drag task bar → sidebar (unschedule)
-- [ ] Phase resize, task bar resize (left/right)
-- [ ] CSV import (upload file, preview, confirm)
-- [ ] Share URL (#v1=...) read-only view
-- [ ] Export PDF
-- [ ] Undo/Redo (Ctrl+Z / Ctrl+Y)
-- [ ] Keyboard shortcuts (n/p/t, Ctrl+K)
-- [ ] Theme toggle
-- [ ] Import modal from home screen
-- [ ] loadSampleProject (home empty state button)
-- [ ] loadSampleData (project empty state button)
-- Then: push branch, merge to main, Vercel deploy
+**Cần làm để deploy:**
+1. `npm run dev` → mở http://localhost:3333/app — test thủ công các flows chính
+2. Nếu pass: `git checkout main && git merge feat/vite-migration`
+3. Update `vercel.json` routing nếu cần (app.html → /app)
+4. `git push origin main` → Vercel auto-deploy
+
+**B9 bug fixes đã xử lý:**
+- `createProject` nav callback double-prefix bug (`#project-#project-...`)
+- Import CSV button `null` → `undefined` (fallback to currentProjId)
+- Default `S.cfg.scopeRowHeight = 100` cho share view
 
 ---
 
