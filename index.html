@@ -383,27 +383,27 @@ a{text-decoration:none;color:inherit}
 }
 .cta-sub{font-size:1.0625rem;color:var(--txt2);margin-bottom:2.5rem;line-height:1.7}
 
-/* ── FOOTER (L5: flickering wordmark) ── */
-@keyframes flicker{
-  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1}
-  20%,24%,55%{opacity:.15}
-}
-footer{padding:5rem var(--px) 3.5rem;border-top:1px solid var(--bd)}
-.footer-flicker{max-width:var(--max-w);margin:0 auto;text-align:center}
-.flic-brand{
-  font-family:'Crimson Pro',Georgia,serif;
-  font-size:clamp(4rem,10vw,8rem);font-weight:600;letter-spacing:-.03em;
-  color:var(--txt);line-height:1;display:block;margin-bottom:1.75rem;
-  text-decoration:none;
-}
-.flic-brand span{display:inline-block;animation:flicker calc(3s + var(--fd,0s)) var(--fd,0s) infinite}
+/* ── FOOTER (dot-matrix "A ROADMAP" canvas) ── */
+footer{border-top:1px solid var(--bd);padding-top:2.75rem}
 .flic-links{
+  max-width:var(--max-w);margin:0 auto;padding:0 var(--px) 2rem;
   display:flex;gap:.75rem;justify-content:center;align-items:center;
   font-size:13px;color:var(--txt3);flex-wrap:wrap;
 }
 .flic-links a{color:var(--txt3);transition:color .2s}
 .flic-links a:hover{color:var(--txt2)}
 .flic-sep{opacity:.4}
+.footer-canvas-wrap{
+  position:relative;width:100%;
+  height:clamp(180px,22vw,260px);
+  overflow:hidden;
+}
+.footer-canvas-fade{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,var(--bg) 0%,transparent 62%);
+  pointer-events:none;z-index:1;
+}
+#footer-canvas{display:block;position:absolute;inset:0;width:100%;height:100%}
 
 /* ── REVEAL ANIMATIONS ── */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
@@ -674,19 +674,18 @@ footer{padding:5rem var(--px) 3.5rem;border-top:1px solid var(--bd)}
   </div>
 </section>
 
-<!-- ── FOOTER (L5: flickering wordmark) ── -->
+<!-- ── FOOTER (dot-matrix "A ROADMAP") ── -->
 <footer>
-  <div class="footer-flicker">
-    <a href="/" class="flic-brand" aria-label="Aroadmap — home">
-      <span style="--fd:0s">A</span><span style="--fd:.35s">r</span><span style="--fd:.8s">o</span><span style="--fd:1.2s">a</span><span style="--fd:.55s">d</span><span style="--fd:1.6s">m</span><span style="--fd:.18s">a</span><span style="--fd:1s">p</span>
-    </a>
-    <div class="flic-links">
-      <a href="#">Privacy</a>
-      <span class="flic-sep">·</span>
-      <a href="#">Terms</a>
-      <span class="flic-sep">·</span>
-      <span>© 2026 Aroadmap</span>
-    </div>
+  <div class="flic-links">
+    <a href="#">Privacy</a>
+    <span class="flic-sep">·</span>
+    <a href="#">Terms</a>
+    <span class="flic-sep">·</span>
+    <span>© 2026 Aroadmap</span>
+  </div>
+  <div class="footer-canvas-wrap">
+    <div class="footer-canvas-fade"></div>
+    <canvas id="footer-canvas"></canvas>
   </div>
 </footer>
 
@@ -943,6 +942,129 @@ drawer.querySelectorAll('.drawer-link').forEach(l => l.addEventListener('click',
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+
+/* ── FOOTER CANVAS (flickering dot-matrix "A ROADMAP") ── */
+(function() {
+  const canvas = document.getElementById('footer-canvas');
+  if (!canvas) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const ctx = canvas.getContext('2d');
+  const STEP = 5; // squareSize(2) + gap(3)
+  const SZ   = 2; // dot size logical px
+
+  // gold, warm-white, gray — matches app palette
+  const C = [
+    [208,160,82],   // gold  #D0A052
+    [237,233,228],  // warm white  #ede9e4
+    [178,170,160],  // gray  #b2aaa0
+  ];
+
+  let cols, rows, opacities, colorSel, isText, raf, dpr = 1;
+
+  function setup() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.parentElement.clientWidth;
+    const h = canvas.parentElement.clientHeight;
+    canvas.width  = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+
+    cols = Math.ceil(w / STEP) + 1;
+    rows = Math.ceil(h / STEP) + 1;
+    const n = cols * rows;
+
+    opacities = new Float32Array(n);
+    colorSel  = new Uint8Array(n); // 0=gold 1=white 2=gray
+    isText    = new Uint8Array(n);
+
+    for (let i = 0; i < n; i++) {
+      const r = Math.random();
+      colorSel[i] = r < 0.30 ? 0 : r < 0.62 ? 1 : 2;
+      opacities[i] = Math.random() * 0.11;
+    }
+
+    // offscreen canvas → detect which dots fall inside "A ROADMAP" text
+    const off = document.createElement('canvas');
+    off.width  = w * dpr;
+    off.height = h * dpr;
+    const mctx = off.getContext('2d');
+    const fs = Math.max(48, Math.min(w * 0.115, 108)) * dpr;
+    mctx.fillStyle = '#fff';
+    mctx.font = `700 ${fs}px 'Crimson Pro', Georgia, serif`;
+    mctx.textAlign = 'center';
+    mctx.textBaseline = 'middle';
+    try { mctx.letterSpacing = Math.round(fs * 0.055) + 'px'; } catch(e) {}
+    mctx.fillText('A ROADMAP', off.width / 2, off.height / 2);
+
+    const pixels = mctx.getImageData(0, 0, off.width, off.height).data;
+
+    for (let ci = 0; ci < cols; ci++) {
+      for (let ri = 0; ri < rows; ri++) {
+        const idx = ci * rows + ri;
+        const px = Math.round((ci * STEP + SZ * 0.5) * dpr);
+        const py = Math.round((ri * STEP + SZ * 0.5) * dpr);
+        let hit = false;
+        outer: for (let dy = -1; dy <= 1; dy++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            const sx = px + dx, sy = py + dy;
+            if (sx < 0 || sx >= off.width || sy < 0 || sy >= off.height) continue;
+            if (pixels[(sy * off.width + sx) * 4] > 28) { hit = true; break outer; }
+          }
+        }
+        if (hit) {
+          isText[idx]    = 1;
+          colorSel[idx]  = 0; // text dots → gold
+          opacities[idx] = 0.68 + Math.random() * 0.32;
+        }
+      }
+    }
+  }
+
+  function update() {
+    for (let i = 0, n = opacities.length; i < n; i++) {
+      if (isText[i]) {
+        if (Math.random() < 0.0035) opacities[i] = 0.62 + Math.random() * 0.38;
+      } else {
+        if (Math.random() < 0.0022) opacities[i] = Math.random() * 0.13;
+      }
+    }
+  }
+
+  function draw() {
+    update();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const szD = SZ * dpr;
+    for (let ci = 0; ci < cols; ci++) {
+      for (let ri = 0; ri < rows; ri++) {
+        const idx = ci * rows + ri;
+        const op = opacities[idx];
+        if (op < 0.01) continue;
+        const [r, g, b] = C[colorSel[idx]];
+        ctx.fillStyle = `rgba(${r},${g},${b},${op.toFixed(2)})`;
+        ctx.fillRect(ci * STEP * dpr, ri * STEP * dpr, szD, szD);
+      }
+    }
+    raf = requestAnimationFrame(draw);
+  }
+
+  async function init() {
+    await document.fonts.ready;
+    setup();
+    draw();
+    let rTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(rTimer);
+      rTimer = setTimeout(() => { cancelAnimationFrame(raf); setup(); draw(); }, 150);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancelAnimationFrame(raf); else draw();
+    });
+  }
+
+  init();
 })();
 
 /* ── FIREBASE EMAIL CAPTURE ── */
