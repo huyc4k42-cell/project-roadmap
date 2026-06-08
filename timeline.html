@@ -315,6 +315,10 @@ button.stat:hover{background:var(--s3)}
 .mbg:focus{outline:none}
 @keyframes fdin{from{opacity:0}to{opacity:1}}
 .mdl{background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);width:460px;max-width:93vw;padding:24px;max-height:88vh;overflow-y:auto;animation:sup .18s ease}
+.mdl-cfg{width:760px}
+.cfg-grid{display:grid;grid-template-columns:1fr 280px;gap:24px}
+.cfg-right{display:flex;flex-direction:column;justify-content:space-between;min-height:200px}
+.cfg-right-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:auto;padding-top:12px;border-top:1px solid var(--bd)}
 @keyframes sup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .mdl h3{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;margin-bottom:18px;color:var(--txt)}
 .mdl-sep{height:1px;background:var(--bd);margin:14px 0}
@@ -585,6 +589,7 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 </head>
 <body>
 <div id="app"></div>
+<div id="modal-root"></div>
 <div id="err-live" aria-live="assertive" aria-atomic="true" class="sr-only"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -858,7 +863,7 @@ function wkpClick(monStr) {
 
 function wkpRefresh() {
   const el = q('.wkp');
-  if (!el) { render(); return; }
+  if (!el) { renderModal(); return; }
   const tmp = document.createElement('div');
   tmp.innerHTML = buildWkPicker();
   el.replaceWith(tmp.firstElementChild);
@@ -1183,8 +1188,7 @@ ${ro ? `<div class="ro-banner">
   ${buildSidebar()}
   ${buildTimeline()}
 </div>
-${S.ui.modal ? (S.ui.modal.type === 'import' ? buildImportModal() : buildModal()) : ''}
-${S.ui.ctx   ? buildCtx()   : ''}`;
+${S.ui.ctx ? buildCtx() : ''}`;
 }
 
 /* ── Sidebar ── */
@@ -2040,32 +2044,25 @@ function buildModal() {
   }
 
   if (type === 'cfg') {
-    return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="Cài đặt Roadmap">
-      <h3>${svgIcon('settings',14)} Cài đặt Roadmap</h3>
-      <div class="fg"><label>Tên dự án</label>
-        <input class="fi" id="m-cfg-title" value="${esc(S.cfg.title)}"/></div>
-      <div class="fg"><label>Subtitle</label>
-        <input class="fi" id="m-cfg-sub" value="${esc(S.cfg.subtitle)}"/></div>
-      <div class="fg"><label>Thời gian Roadmap</label>${buildWkPicker()}</div>
-      <div class="mdl-sep"></div>
-      <div class="fg"><label>Giao diện</label>
-        <div class="theme-btns">
-          ${[
-            ['dark',   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`, 'Tối'],
-            ['light',  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="6.34" y2="6.34"/><line x1="17.66" y1="17.66" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="6.34" y2="17.66"/><line x1="17.66" y1="6.34" x2="19.78" y2="4.22"/></svg>`, 'Sáng'],
-            ['system', `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>`, 'Hệ thống'],
-          ].map(([val, icon, lbl]) =>
-            `<button class="theme-btn${getCurrentThemePref()===val?' on':''}" data-theme-set="${val}">${icon} ${lbl}</button>`
-          ).join('')}
+    return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl mdl-cfg" role="dialog" aria-modal="true" aria-label="Project Settings">
+      <h3>${svgIcon('settings',14)} Project Settings</h3>
+      <div class="cfg-grid">
+        <div class="cfg-left">
+          <div class="fg"><label>Project name</label>
+            <input class="fi" id="m-cfg-title" value="${esc(S.cfg.title)}" placeholder="e.g. Product Roadmap Q3"/></div>
+          <div class="fg"><label>Subtitle</label>
+            <input class="fi" id="m-cfg-sub" value="${esc(S.cfg.subtitle)}" placeholder="Short description…"/></div>
+          <div class="fg"><label>Timeline range</label>${buildWkPicker()}</div>
         </div>
-      </div>
-      <div class="mdl-sep"></div>
-      <div class="fg"><label>Dữ liệu</label>
-        <button class="bsm b-dng" id="m-reset" style="width:100%;justify-content:center">Xóa toàn bộ dữ liệu (reset)</button>
-      </div>
-      <div class="mdl-btns">
-        <button class="bsm b-sec" id="m-cancel">Hủy</button>
-        <button class="bsm b-primary" id="m-save">Lưu</button>
+        <div class="cfg-right">
+          <div class="fg"><label>Data</label>
+            <button class="bsm b-dng" id="m-reset" style="width:100%;justify-content:center;margin-top:2px">Reset all data</button>
+          </div>
+          <div class="cfg-right-actions">
+            <button class="bsm b-sec" id="m-cancel">Cancel</button>
+            <button class="bsm b-primary" id="m-save">Save</button>
+          </div>
+        </div>
       </div>
     </div></div>`;
   }
@@ -2712,10 +2709,6 @@ function bind() {
     render(true);
   });
 
-  /* Modal */
-  if (S.ui.modal?.type === 'import') { bindImportModal(); }
-  else { bindModal(); }
-
   /* Global close — remove before re-adding to prevent accumulation */
   document.removeEventListener('click', onDocClick);
   document.addEventListener('click', onDocClick, {once:true});
@@ -2926,6 +2919,16 @@ function delTag(name) {
 /* ══════════════════════════════
    MODAL / CTX HELPERS
 ══════════════════════════════ */
+/* Render modal into #modal-root (outside #app — prevents jitter when render() fires) */
+function renderModal() {
+  const root = document.getElementById('modal-root');
+  if (!root) return;
+  if (!S.ui.modal) { root.innerHTML = ''; return; }
+  root.innerHTML = S.ui.modal.type === 'import' ? buildImportModal() : buildModal();
+  if (S.ui.modal.type === 'import') bindImportModal();
+  else bindModal();
+}
+
 function openModal(type, data=null) {
   S.ui.modal = {type, data};
   if (type === 'cfg') {
@@ -2937,11 +2940,13 @@ function openModal(type, data=null) {
     wkp.step = 'start';
     wkp.showMonthSel = false;
   }
-  render();
+  renderModal();
 }
 
 function closeModal() {
   S.ui.modal = null;
+  const root = document.getElementById('modal-root');
+  if (root) root.innerHTML = '';
   render();
 }
 
@@ -3700,7 +3705,17 @@ function showToast(msg, dur = 3000) {
 }
 
 function rerender() {
-  if (currentProjId) render(); else renderHome();
+  if (currentProjId) {
+    // In project view: update #modal-root separately so it's stable during render()
+    if (S.ui.modal) renderModal();
+    else {
+      const root = document.getElementById('modal-root');
+      if (root) root.innerHTML = '';
+    }
+    render();
+  } else {
+    renderHome(); // Home includes modal HTML inline
+  }
 }
 
 /* ── Entry point ── */
@@ -3723,7 +3738,8 @@ function openImportModal(fromProjId) {
     cfgEnd: null,
     structError: null,
   };
-  rerender();
+  // Project context: render into #modal-root; Home context: renderHome() includes it inline
+  if (currentProjId) renderModal(); else renderHome();
 }
 
 /* ── Build Import Modal HTML ── */
