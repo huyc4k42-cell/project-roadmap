@@ -13,14 +13,15 @@
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Commit mới nhất: `a8cb16a` — đang live tại https://aroadmap.cloud
+- ✅ Commit mới nhất: `a20d444` — đang live tại https://aroadmap.cloud
 - ✅ Landing page `index.html` live tại https://aroadmap.cloud
-- ✅ App tại https://aroadmap.cloud/app
+- ✅ App tại https://aroadmap.cloud/app (Vite build → `app.html`)
 - ✅ Firebase Auth + Firestore + Security rules đã deploy
 - ✅ Custom domain `aroadmap.cloud` live
 - ✅ GitHub → Vercel auto-deploy
-- 🔄 **BIG UPDATE đang triển khai** — xem checklist bên dưới
-- 📁 `timeline.html` — App chính (~4200 dòng)
+- ✅ **Vite + ES Modules migration DONE** — merged `feat/vite-migration` → `main` 2026-06-09
+- 📁 `app.html` — App entry point (Vite, 54 ES modules trong `src/`)
+- 📁 `timeline.html` — **DEPRECATED** (giữ lại as backup)
 - 📁 `index.html` — Landing page (~874 dòng)
 
 ---
@@ -170,6 +171,28 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 
 ## 📝 Session Log
 
+### 2026-06-09 — Vite Migration B7–B9 + Merge
+
+**Hoàn thành trong session này:**
+- B7: bindModal, resize, bind, bindHome — events layer hoàn chỉnh
+- B8: router.js + main.js final wiring — full dependency injection
+- B9: Browser testing (share URL view, readonly mode, search, Ctrl+K, keyboard nav)
+- Bug fixes: CSS imports, CDN libs, mixed-import warnings, createProject nav prefix, top-level await
+- Merged `feat/vite-migration` → `main` — pushed `a20d444` → Vercel auto-deploy
+
+**Tests passed (B9):**
+- ✅ CSS loading (7 stylesheets, dark theme `--bg #080808`)
+- ✅ Home sign-in screen (dot matrix canvas, Google button)
+- ✅ Share URL `#v1=...` read-only project view
+- ✅ Readonly mode blocks modal on task bar click
+- ✅ Backlog task renders (`t.dur` field)
+- ✅ Search filter + Escape to clear
+- ✅ Ctrl+K focuses search input
+- ✅ 0 JS errors in console
+- ✅ Clean build: 54 modules, 0 warnings
+
+---
+
 ### 2026-06-08 — Big Update Planning Session
 
 **Quy trình đã hoàn thành:**
@@ -198,9 +221,9 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 
 ---
 
-## 🔧 Vite + ES Modules Migration — Branch `feat/vite-migration`
+## 🔧 Vite + ES Modules Migration — ✅ SHIPPED 2026-06-09
 
-> Song song với BIG UPDATE trên `main`. Không ảnh hưởng production.
+> Đã merge `feat/vite-migration` → `main`, push lên Vercel. Commit: `a20d444`
 
 | Phase | Mô tả | Done | Commit |
 |-------|-------|------|--------|
@@ -212,15 +235,15 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 | B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
 | B7 | Events + drag-drop + import + export | ✅ | `7313aea` |
 | B8 | Router + main.js entry + full wiring | ✅ | `7f48ebb` |
-| B9 | Static analysis + bug fixes | ✅ | `479faeb` |
+| B9 | Browser tests + CDN libs + CSS imports + vercel.json fix | ✅ | `0a77ff4` |
+| **Merge** | feat/vite-migration → main, deployed | ✅ | `a20d444` |
 
-**Tổng tiến độ: 9/9 phases ✅ — sẵn sàng manual test + deploy**
-
-**Cần làm để deploy:**
-1. `npm run dev` → mở http://localhost:3333/app — test thủ công các flows chính
-2. Nếu pass: `git checkout main && git merge feat/vite-migration`
-3. Update `vercel.json` routing nếu cần (app.html → /app)
-4. `git push origin main` → Vercel auto-deploy
+**Kiến trúc mới:**
+- 54 ES modules, 0 circular deps, dependency injection pattern
+- `src/app/` — state, firebase, persistence, render/, events/, import/, export/, share
+- `src/styles/` — 7 scoped CSS files
+- CDN: lz-string, html2canvas, jspdf via `window.*` (không npm)
+- Build: `npm run build` → `dist/` (554 kB app bundle, 47 kB CSS gzip 9 kB)
 
 **B9 bug fixes đã xử lý:**
 - `createProject` nav callback double-prefix bug (`#project-#project-...`)
