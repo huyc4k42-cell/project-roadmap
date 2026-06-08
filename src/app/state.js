@@ -71,3 +71,35 @@ export function resetHistory() {
   _history = [];
   _histIdx = -1;
 }
+
+/* ── Phase helpers ── */
+export function pushPhasesAfter(phaseId, minStart) {
+  const sorted = [...S.phases].sort((a, b) => a.startWeek - b.startWeek);
+  const idx = sorted.findIndex(p => p.id === phaseId);
+  let cursor = minStart;
+  for (let i = idx + 1; i < sorted.length; i++) {
+    const ph = S.phases.find(p => p.id === sorted[i].id);
+    if (ph && ph.startWeek < cursor) {
+      const span = ph.endWeek - ph.startWeek;
+      ph.startWeek = cursor;
+      ph.endWeek   = cursor + span;
+      cursor       = ph.endWeek + 1;
+    }
+  }
+}
+
+export function swapPhases(idA, idB) {
+  const a = phaseById(idA), b = phaseById(idB);
+  if (!a || !b) return;
+  [a.startWeek, b.startWeek] = [b.startWeek, a.startWeek];
+  [a.endWeek,   b.endWeek  ] = [b.endWeek,   a.endWeek  ];
+}
+
+export function reorderTeam(dragId, targetId) {
+  pushHistory();
+  const fromIdx = S.teams.findIndex(t => t.id === dragId);
+  const toIdx   = S.teams.findIndex(t => t.id === targetId);
+  if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+  const [team] = S.teams.splice(fromIdx, 1);
+  S.teams.splice(toIdx, 0, team);
+}
