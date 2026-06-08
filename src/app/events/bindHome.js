@@ -251,7 +251,7 @@ export function bindHome() {
     if (type === 'new-project') {
       const accent = q('.proj-accent-swatch.sel')?.dataset.acc || '#D0A052';
       S.ui.modal = null;
-      _createProject?.(name, sub, accent, id => { location.hash = '#project-' + id; });
+      _createProject?.(name, sub, accent, hash => { location.hash = hash; });
     } else if (type === 'rename-project') {
       const id     = S.ui.modal.data.id;
       const accent = q('.proj-accent-swatch.sel')?.dataset.acc || S.ui.modal.data.accent || '#D0A052';

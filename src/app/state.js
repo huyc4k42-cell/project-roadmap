@@ -3,10 +3,11 @@ import { HISTORY_MAX } from './constants.js';
 
 export let S = {
   cfg: {
-    title:    'Project Roadmap',
-    subtitle: '',
-    start:    '2025-06-02',
-    end:      '2025-11-30',
+    title:          'Project Roadmap',
+    subtitle:       '',
+    start:          '2025-06-02',
+    end:            '2025-11-30',
+    scopeRowHeight: 100,
   },
   phases: [],
   teams:  [],

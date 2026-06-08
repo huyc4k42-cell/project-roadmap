@@ -151,7 +151,7 @@ export function bind() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       q('#add-new-menu')?.classList.remove('open');
-      if (btn.dataset.add === 'import-csv') { _openImport?.(/* currentProjId injected via closure */null); return; }
+      if (btn.dataset.add === 'import-csv') { _openImport?.(); return; }
       const type = btn.dataset.add === 'phase' ? 'add-phase' : btn.dataset.add;
       _openModal?.(type);
     });
