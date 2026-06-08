@@ -1,5 +1,7 @@
 .DS_Store
 .vercel
+node_modules/
+dist/
 # Claude Code — ignore local config, track project commands
 .claude/settings.local.json
 .claude/skills/
