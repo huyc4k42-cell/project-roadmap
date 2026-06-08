@@ -203,7 +203,7 @@ button.stat:hover{background:var(--s3)}
 .ph-gap{background:var(--s1);border-right:1px solid var(--bd);cursor:default}
 .ph-gap:hover{filter:none}
 /* Phase resize handles */
-.ph-lh,.ph-rh{position:absolute;top:0;bottom:0;width:7px;cursor:ew-resize;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s;z-index:3}
+.ph-lh,.ph-rh{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s;z-index:3}
 .ph-lh{left:0;border-radius:3px 0 0 3px}
 .ph-rh{right:0;border-radius:0 3px 3px 0}
 .ph-cell:not(.ph-gap):hover .ph-lh,.ph-cell:not(.ph-gap):hover .ph-rh{opacity:1}
@@ -232,7 +232,7 @@ button.stat:hover{background:var(--s3)}
 
 /* Team rows */
 .tm-rows{position:relative}
-.tm-row{display:flex;border-bottom:1px solid var(--bd);position:relative}
+.tm-row{display:flex;border-bottom:1px solid var(--bd);position:relative;min-height:52px}
 .trl{width:var(--tlw);flex-shrink:0;border-right:1px solid var(--bd);background:var(--s1);padding:12px;display:flex;align-items:flex-start;gap:8px;position:sticky;left:0;z-index:5;cursor:context-menu}
 .tm-ico{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin-top:1px}
 .tm-ico svg{width:15px;height:15px;stroke-width:1.5}
@@ -241,6 +241,7 @@ button.stat:hover{background:var(--s3)}
 .trc{width:var(--ww);flex-shrink:0;border-right:1px solid var(--bd);transition:background .1s}
 .trc.dh{background:rgba(208,160,82,.1)!important}
 .trc.ph-bg{background:rgba(255,255,255,.014)}
+.tm-drop-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);opacity:.35;pointer-events:none;letter-spacing:.3px;user-select:none}
 
 /* Task bars */
 .tb{position:absolute;border-radius:5px;display:flex;flex-direction:column;justify-content:center;padding:5px 8px 5px 10px;font-size:13px;font-weight:500;color:rgba(255,255,255,.96);cursor:grab;z-index:3;overflow:hidden;text-shadow:0 1px 3px rgba(0,0,0,.55);transition:box-shadow .15s,opacity .15s;user-select:none;min-height:34px}
@@ -256,9 +257,9 @@ button.stat:hover{background:var(--s3)}
 .tb-tags{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;margin-top:4px;max-width:100%}
 .tb-tag{font-size:10px;background:rgba(255,255,255,.18);padding:1px 5px;border-radius:3px;white-space:nowrap;color:rgba(255,255,255,.9);flex-shrink:0}
 /* Left resize handle */
-.tb-lh{position:absolute;left:0;top:0;bottom:0;width:6px;cursor:ew-resize;border-radius:5px 0 0 5px;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s}
+.tb-lh{position:absolute;left:0;top:0;bottom:0;width:12px;cursor:ew-resize;border-radius:5px 0 0 5px;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s}
 /* Right resize handle */
-.tb-rh{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:ew-resize;border-radius:0 5px 5px 0;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s}
+.tb-rh{position:absolute;right:0;top:0;bottom:0;width:12px;cursor:ew-resize;border-radius:0 5px 5px 0;background:rgba(255,255,255,.18);opacity:0;transition:opacity .15s}
 .tb:hover .tb-lh,.tb:hover .tb-rh{opacity:1}
 
 /* Today line */
@@ -274,7 +275,7 @@ button.stat:hover{background:var(--s3)}
 .scope-row,.output-row{display:flex;border-bottom:1px solid var(--bd);position:relative}
 .scope-row{flex-direction:column}
 .scope-row-inner{display:flex;flex:1}
-.scope-resize-handle{height:5px;cursor:ns-resize;background:transparent;transition:background .15s;flex-shrink:0;position:relative;z-index:6}
+.scope-resize-handle{height:10px;cursor:ns-resize;background:transparent;transition:background .15s;flex-shrink:0;position:relative;z-index:6}
 .scope-resize-handle:hover,.scope-resize-handle.dragging{background:var(--gold);opacity:.5}
 .scope-row.collapsed .scope-row-inner,.output-row.collapsed .row-track{display:none}
 .scope-row.collapsed .scope-resize-handle{display:none}
@@ -287,7 +288,7 @@ button.stat:hover{background:var(--s3)}
 .row-toggle.collapsed{transform:rotate(-90deg)}
 .row-track{display:flex;flex:1}
 .scope-block,.output-block{border-right:1px solid var(--bd);border-left:3px solid;padding:8px;display:flex;flex-direction:column}
-.scope-block{overflow:hidden}
+.scope-block{overflow:visible}
 .scope-block textarea{width:100%;background:transparent;border:none;color:var(--txt);font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.6;flex:1;overflow-y:auto}
 .scope-block textarea::placeholder{color:var(--txt3)}
 .scope-gap,.output-gap{border-right:1px solid rgba(28,28,28,.4);background:var(--s1)}
@@ -1666,6 +1667,7 @@ function buildTeamRow(tm, tw, twFrac) {
   </div>
   <div class="trr" data-team="${tm.id}" style="height:${rowH}px">
     ${cells}${todayLine}${bars}
+    ${tasks.length === 0 ? `<div class="tm-drop-hint">Drop tasks here</div>` : ''}
   </div>
 </div>`;
 }
@@ -2975,11 +2977,18 @@ function onKey(e) {
   }
   if (S.ui.ctx) { if (e.key === 'Escape') { closeCtx(); return; } }
 
-  // Undo / Redo
-  if (ctrl && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
-  if (ctrl && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+  // Skip shortcuts when typing — guard applies to Ctrl+Z/Ctrl+K too
+  // Escape is exempt (handled above); Ctrl+K focus-search is also exempt
+  const inInput = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)
+               || document.activeElement?.isContentEditable;
 
-  // Search shortcut
+  // Undo / Redo — disabled when typing
+  if (!inInput) {
+    if (ctrl && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+    if (ctrl && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+  }
+
+  // Search shortcut — always available (focuses the search field)
   if (ctrl && e.key === 'k') {
     e.preventDefault();
     const inp = q('#sb-search');
@@ -2987,8 +2996,7 @@ function onKey(e) {
     return;
   }
 
-  // Skip if typing in an input/textarea
-  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+  if (inInput) return;
 
   // Creation shortcuts
   if (e.key === 'n' && !ctrl) { e.preventDefault(); openModal('add-task'); }
