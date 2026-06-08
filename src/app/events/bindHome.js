@@ -1,8 +1,13 @@
 /* ── EVENTS / BIND HOME — home-screen event handlers ── */
-import { S, nextId }         from '../state.js';
+import { S, nextId, pushHistory } from '../state.js';
 import { q, qAll }           from '../utils.js';
 import { setTheme, getCurrentThemePref } from '../theme.js';
 import { SHARE_PREFIX }      from '../constants.js';
+import {
+  homeCtxId, homeUserMenuOpen,
+  setHomeCtxId, setHomeUserMenuOpen,
+} from '../render/home.js';
+import { bindImportModal }   from '../import/csv.js';
 
 /* Injected callbacks */
 let _renderHome     = null;
@@ -95,37 +100,35 @@ export function loadSampleProject() {
 
 /* ── loadSampleData — fills current project with demo data (empty-state helper) ── */
 export function loadSampleData(render) {
-  import('../state.js').then(({ S: state, nextId: nid, pushHistory }) => {
-    pushHistory();
-    const base = new Date(); base.setDate(1);
-    state.cfg.start = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`;
-    const end = new Date(base); end.setMonth(end.getMonth() + 4);
-    state.cfg.end = `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-28`;
-    state.phases = [
-      { id: nid(), name: 'Discovery', startWeek: 1,  endWeek: 4,  color: '#1d4ed8', scope: 'Research & define problem space', outputs: [] },
-      { id: nid(), name: 'Design',    startWeek: 5,  endWeek: 10, color: '#7c3aed', scope: 'Wireframes, prototypes, testing',   outputs: [] },
-      { id: nid(), name: 'Build',     startWeek: 11, endWeek: 16, color: '#047857', scope: 'Engineering & QA',                  outputs: [] },
-    ];
-    const [p1, p2, p3] = state.phases;
-    state.teams = [
-      { id: nid(), name: 'Product', icon: 'package', color: '#7c3aed' },
-      { id: nid(), name: 'Design',  icon: 'heart',   color: '#be185d' },
-      { id: nid(), name: 'Eng',     icon: 'code',    color: '#047857' },
-    ];
-    const [t1, t2, t3] = state.teams;
-    state.tasks = [
-      { id: nid(), name: 'User research',        teamId: t1.id, phaseId: p1.id, startWeek: 1,    dur: 2, tags: ['research'] },
-      { id: nid(), name: 'Competitive analysis', teamId: t1.id, phaseId: p1.id, startWeek: 3,    dur: 2, tags: ['research'] },
-      { id: nid(), name: 'Wireframes',           teamId: t2.id, phaseId: p2.id, startWeek: 5,    dur: 3, tags: ['UX'] },
-      { id: nid(), name: 'Prototype v1',         teamId: t2.id, phaseId: p2.id, startWeek: 8,    dur: 3, tags: ['UX'] },
-      { id: nid(), name: 'Backend API',          teamId: t3.id, phaseId: p3.id, startWeek: 11,   dur: 4, tags: ['tech'] },
-      { id: nid(), name: 'Frontend',             teamId: t3.id, phaseId: p3.id, startWeek: 13,   dur: 4, tags: ['tech'] },
-      { id: nid(), name: 'Write spec',           teamId: t1.id, phaseId: null,  startWeek: null, dur: 1, tags: [] },
-      { id: nid(), name: 'Launch plan',          teamId: t1.id, phaseId: null,  startWeek: null, dur: 2, tags: ['growth'] },
-    ];
-    state.tags = ['research', 'UX', 'tech', 'growth', 'tracking'];
-    render?.();
-  });
+  pushHistory();
+  const base = new Date(); base.setDate(1);
+  S.cfg.start = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-01`;
+  const end = new Date(base); end.setMonth(end.getMonth() + 4);
+  S.cfg.end = `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-28`;
+  S.phases = [
+    { id: nextId(), name: 'Discovery', startWeek: 1,  endWeek: 4,  color: '#1d4ed8', scope: 'Research & define problem space', outputs: [] },
+    { id: nextId(), name: 'Design',    startWeek: 5,  endWeek: 10, color: '#7c3aed', scope: 'Wireframes, prototypes, testing',   outputs: [] },
+    { id: nextId(), name: 'Build',     startWeek: 11, endWeek: 16, color: '#047857', scope: 'Engineering & QA',                  outputs: [] },
+  ];
+  const [p1, p2, p3] = S.phases;
+  S.teams = [
+    { id: nextId(), name: 'Product', icon: 'package', color: '#7c3aed' },
+    { id: nextId(), name: 'Design',  icon: 'heart',   color: '#be185d' },
+    { id: nextId(), name: 'Eng',     icon: 'code',    color: '#047857' },
+  ];
+  const [t1, t2, t3] = S.teams;
+  S.tasks = [
+    { id: nextId(), name: 'User research',        teamId: t1.id, phaseId: p1.id, startWeek: 1,    dur: 2, tags: ['research'] },
+    { id: nextId(), name: 'Competitive analysis', teamId: t1.id, phaseId: p1.id, startWeek: 3,    dur: 2, tags: ['research'] },
+    { id: nextId(), name: 'Wireframes',           teamId: t2.id, phaseId: p2.id, startWeek: 5,    dur: 3, tags: ['UX'] },
+    { id: nextId(), name: 'Prototype v1',         teamId: t2.id, phaseId: p2.id, startWeek: 8,    dur: 3, tags: ['UX'] },
+    { id: nextId(), name: 'Backend API',          teamId: t3.id, phaseId: p3.id, startWeek: 11,   dur: 4, tags: ['tech'] },
+    { id: nextId(), name: 'Frontend',             teamId: t3.id, phaseId: p3.id, startWeek: 13,   dur: 4, tags: ['tech'] },
+    { id: nextId(), name: 'Write spec',           teamId: t1.id, phaseId: null,  startWeek: null, dur: 1, tags: [] },
+    { id: nextId(), name: 'Launch plan',          teamId: t1.id, phaseId: null,  startWeek: null, dur: 2, tags: ['growth'] },
+  ];
+  S.tags = ['research', 'UX', 'tech', 'growth', 'tracking'];
+  render?.();
 }
 
 /* ── bindHome ── */
@@ -141,21 +144,17 @@ export function bindHome() {
   /* Avatar dropdown */
   q('#home-avatar-btn')?.addEventListener('click', e => {
     e.stopPropagation();
-    import('../render/home.js').then(m => {
-      m.setHomeUserMenuOpen(!m.homeUserMenuOpen);
-      _renderHome?.();
-    });
+    setHomeUserMenuOpen(!homeUserMenuOpen);
+    _renderHome?.();
   });
-  import('../render/home.js').then(m => {
-    if (m.homeUserMenuOpen) {
-      document.addEventListener('click', e => {
-        if (!e.target.closest('#auth-user-wrap')) {
-          m.setHomeUserMenuOpen(false);
-          _renderHome?.();
-        }
-      }, { once: true });
-    }
-  });
+  if (homeUserMenuOpen) {
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#auth-user-wrap')) {
+        setHomeUserMenuOpen(false);
+        _renderHome?.();
+      }
+    }, { once: true });
+  }
 
   /* New project */
   const openNew = () => { S.ui.modal = { type: 'new-project', data: {} }; _renderHome?.(); };
@@ -180,10 +179,8 @@ export function bindHome() {
   qAll('[data-proj-menu]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      import('../render/home.js').then(m => {
-        m.setHomeCtxId(m.homeCtxId === btn.dataset.projMenu ? null : btn.dataset.projMenu);
-        _renderHome?.();
-      });
+      setHomeCtxId(homeCtxId === btn.dataset.projMenu ? null : btn.dataset.projMenu);
+      _renderHome?.();
     });
   });
 
@@ -195,18 +192,18 @@ export function bindHome() {
     e.stopPropagation();
     const idx = _loadIndex?.() || [];
     const p   = idx.find(x => x.id === b.dataset.projRename);
-    import('../render/home.js').then(m => m.setHomeCtxId(null));
+    setHomeCtxId(null);
     S.ui.modal = { type: 'rename-project', data: { id: p.id, name: p.name, subtitle: p.subtitle || '', accent: p.accent || '#D0A052' } };
     _renderHome?.();
   }));
   qAll('[data-proj-dup]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
-    import('../render/home.js').then(m => m.setHomeCtxId(null));
+    setHomeCtxId(null);
     _duplicateProject?.(b.dataset.projDup, _renderHome);
   }));
   qAll('[data-proj-del]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
-    import('../render/home.js').then(m => m.setHomeCtxId(null));
+    setHomeCtxId(null);
     if (confirm('Xóa project này? Hành động không thể hoàn tác.')) {
       _deleteProject?.(b.dataset.projDel, _renderHome);
     } else {
@@ -215,11 +212,9 @@ export function bindHome() {
   }));
 
   /* Close ctx when clicking outside */
-  import('../render/home.js').then(m => {
-    if (m.homeCtxId) {
-      document.addEventListener('click', () => { m.setHomeCtxId(null); _renderHome?.(); }, { once: true });
-    }
-  });
+  if (homeCtxId) {
+    document.addEventListener('click', () => { setHomeCtxId(null); _renderHome?.(); }, { once: true });
+  }
 
   /* Theme toggle */
   q('#home-theme-btn')?.addEventListener('click', () => {
@@ -269,7 +264,8 @@ export function bindHome() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       S.ui.modal = null;
-      import('../render/home.js').then(m => { m.setHomeCtxId(null); m.setHomeUserMenuOpen(false); });
+      setHomeCtxId(null);
+      setHomeUserMenuOpen(false);
       _renderHome?.();
     }
     if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') {
@@ -278,7 +274,5 @@ export function bindHome() {
   }, { once: true });
 
   /* Import modal bind (runs on top of normal modal bind) */
-  if (S.ui.modal?.type === 'import') {
-    import('../import/csv.js').then(m => m.bindImportModal());
-  }
+  if (S.ui.modal?.type === 'import') bindImportModal();
 }

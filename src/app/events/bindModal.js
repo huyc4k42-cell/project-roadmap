@@ -3,9 +3,10 @@ import { S, nextId, phaseById, taskById, pushHistory } from '../state.js';
 import { q, qAll }                                      from '../utils.js';
 import { PHASE_COLORS, LS_KEY }                         from '../constants.js';
 import { wkp, bindWkPickerEvents, setRenderModal }      from '../weekpicker.js';
-import { parseDate, dateStrYMD }                        from '../date.js';
-import { wkpMonday }                                    from '../date.js';
+import { parseDate, dateStrYMD, wkpMonday }             from '../date.js';
 import { setTheme }                                     from '../theme.js';
+import { renderModal }                                  from '../render/modals.js';
+
 
 /* Injected render callbacks */
 let _render     = null;
@@ -64,9 +65,7 @@ export function bindModal() {
   });
 
   /* Week picker */
-  setRenderModal(() => {
-    import('../render/modals.js').then(m => m.renderModal());
-  });
+  setRenderModal(() => renderModal());
   bindWkPickerEvents();
 
   /* Share — copy link */
@@ -204,14 +203,12 @@ export function delTag(name) {
 
 /* ── openCfgModal helper — sets up wkp state before opening ── */
 export function openCfgModal(openModalFn) {
-  import('../date.js').then(({ parseDate: pd, wkpMonday: wm }) => {
-    const sm     = wm(pd(S.cfg.start));
-    wkp.startMon = sm;
-    wkp.endMon   = wm(pd(S.cfg.end));
-    wkp.yr       = sm.getFullYear();
-    wkp.mo       = sm.getMonth();
-    wkp.step     = 'start';
-    wkp.showMonthSel = false;
-    openModalFn('cfg');
-  });
+  const sm     = wkpMonday(parseDate(S.cfg.start));
+  wkp.startMon = sm;
+  wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
+  wkp.yr       = sm.getFullYear();
+  wkp.mo       = sm.getMonth();
+  wkp.step     = 'start';
+  wkp.showMonthSel = false;
+  openModalFn('cfg');
 }

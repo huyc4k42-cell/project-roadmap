@@ -11,6 +11,10 @@ export let currentProjId       = null;
 export let _projCollaborators  = [];
 export let _projInviteToken    = '';
 
+export function setCurrentProjId(id) { currentProjId = id; }
+export function loadIndex()    { return _projIndex; }
+export function saveIndex(idx) { _projIndex = idx; }
+
 let _unsubProj = null;
 let _fbSaving  = false;
 

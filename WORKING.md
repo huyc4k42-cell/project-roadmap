@@ -210,25 +210,19 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 | B4 | Firebase + persistence (firebase.js, persistence.js) | ✅ | `574c267` |
 | B5 | Feature modules (algorithms, weekpicker, canvas) | ✅ | `067a7a9` |
 | B6 | Render layer (icons, sidebar, timeline, modals, home, render/index) | ✅ | `0be6f46` |
-| B7 | Events + drag-drop + import + export | ☐ | — |
+| B7 | Events + drag-drop + import + export | ✅ | `7313aea` |
 | B8 | Router + main.js entry + full wiring | ☐ | — |
 | B9 | Full testing + deploy to production | ☐ | — |
 
-**Tổng tiến độ: 6/9 phases ✅**
-
-**B7 cần làm:**
-- `src/app/events/bind.js` — bind() toàn bộ project view events
-- `src/app/events/bindHome.js` — bindHome() home screen events
-- `src/app/events/drag.js` — drag-drop task/phase/team
-- `src/app/events/resize.js` — task bar + phase resize + scope height
-- `src/app/import/csv.js` — CSV parse, validate, confirm import
-- `src/app/export/pdf.js` — html2canvas + jspdf export
-- `src/app/share.js` — buildShareURL(), loadFromHash()
+**Tổng tiến độ: 7/9 phases ✅**
 
 **B8 cần làm:**
-- `src/app/router.js` — hash routing, router()
-- Wire tất cả inject hooks (setBindModal, setBind, setLoadIndex, etc.)
-- Update `src/app/main.js` — initFirebase → migrateOldData → router
+- `src/app/router.js` — hash routing + loadProject + loadFromHash + renderHome/render dispatch
+- `src/app/main.js` — final entry point: initFirebase → migrateOldData → router(), wire ALL inject hooks
+  - setBindDeps, setBindModalDeps, setBindHomeDeps, setResizeDeps, setImportDeps
+  - setShareURLFn (render/modals), setLoadIndexFn (render/modals), setBindModal (render/modals)
+  - setBindHome (render/home), setLoadIndex (render/home)
+  - setBind (render/index)
 
 ---
 

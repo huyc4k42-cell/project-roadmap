@@ -7,6 +7,7 @@ import { currentProjId, saveCurrentProject, updateIndexEntry } from '../persiste
 import { LOGO_IMG, svgIcon }           from '../icons.js';
 import { buildSidebar }                from './sidebar.js';
 import { buildTimeline, setWW }        from './timeline.js';
+import { setResizeWW }                 from '../events/resize.js';
 import { buildCtx, renderModal }       from './modals.js';
 import { renderHome }                  from './home.js';
 
@@ -21,7 +22,8 @@ export function setBind(fn) { _bind = fn; }
 export function render(noSave = false) {
   WW = Math.max(60, calcWW(S.cfg));
   document.documentElement.style.setProperty('--ww', WW + 'px');
-  setWW(WW); // propagate to timeline module
+  setWW(WW);       // propagate to timeline module
+  setResizeWW(WW); // propagate to resize module
 
   /* Preserve scroll positions */
   const ta = document.querySelector('.tl-area');

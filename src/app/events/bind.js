@@ -3,6 +3,7 @@ import { S, nextId, taskById, phaseById, pushHistory, swapPhases, reorderTeam } 
 import { q, qAll }               from '../utils.js';
 import { loadRowState, saveRowState, saveSidebarState } from '../storage.js';
 import { setResizeWW }            from './resize.js';
+import { delTask, delTeam, delPhase } from './bindModal.js';
 
 /* ── Injected callbacks ── */
 let _render      = null;
@@ -54,13 +55,13 @@ export function handleAction(action) {
   const [cmd, id] = action.split(':');
   const nid = +id;
   if (cmd === 'edit-task')    _openModal?.('edit-task',  taskById(nid));
-  if (cmd === 'del-task')   { import('./bindModal.js').then(m => { m.delTask(nid); _render?.(); }); }
+  if (cmd === 'del-task')   { delTask(nid);  _render?.(); }
   if (cmd === 'toggle-done') { const t = taskById(nid); if (t) { pushHistory(); t.done = !t.done; _render?.(); } }
   if (cmd === 'unschedule')  { const t = taskById(nid); if (t) { t.startWeek = null; _render?.(); } }
   if (cmd === 'edit-team')   _openModal?.('edit-team',  S.teams.find(t => t.id === nid));
-  if (cmd === 'del-team')  { import('./bindModal.js').then(m => { m.delTeam(nid);  _render?.(); }); }
+  if (cmd === 'del-team')  { delTeam(nid);  _render?.(); }
   if (cmd === 'edit-phase')  _openModal?.('edit-phase', phaseById(nid));
-  if (cmd === 'del-phase') { import('./bindModal.js').then(m => { m.delPhase(nid); _render?.(); }); }
+  if (cmd === 'del-phase') { delPhase(nid); _render?.(); }
 }
 
 /* ── onKey / onDocClick — document-level handlers ── */
