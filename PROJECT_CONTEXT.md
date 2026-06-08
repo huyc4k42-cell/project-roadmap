@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-07 · Commit app: `e58b021` · Commit docs: (file này)
+> Cập nhật lần cuối: 2026-06-08 · Commit app: `a8cb16a` · Commit docs: (file này)
 
 ---
 
@@ -419,21 +419,122 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 
 ```
 [Claude] Project Roadmap/
-├── timeline.html          ← FILE DUY NHẤT của app (~4200 dòng)
+├── timeline.html          ← App chính (~4200 dòng) — serve tại /app
+├── index.html             ← Landing page (~800 dòng) — serve tại /
+├── screenshot.png         ← 1400×900px dark-mode timeline screenshot (dùng trong landing demo)
+├── Logo.png               ← Logo source (embedded as base64 trong HTML)
 ├── PROJECT_CONTEXT.md     ← file này — technical reference (stable)
 ├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
 ├── SESSION_CONTEXT.md     ← ⚠️ OBSOLETE — file cũ từ giai đoạn pre-Firebase, bỏ qua
 ├── roadmap-template.csv   ← CSV mẫu cho tính năng Import CSV
-├── vercel.json            ← Vercel config (redirect / → /timeline.html)
-├── Logo.png               ← Logo source (embedded as base64 trong HTML)
+├── vercel.json            ← Vercel config (/ → index.html, /app → timeline.html)
 ├── firestore.rules        ← Firestore security rules (đã deploy 2026-06-07)
 ├── firebase.json          ← Firebase CLI config (firestore rules pointer)
 ├── .firebaserc            ← project alias: default → a-roadmap
 ├── .vercel/
 │   └── project.json       ← projectId + orgId (đừng xóa)
 └── .claude/
-    └── launch.json        ← Preview server config (port 3333)
+    └── launch.json        ← Preview server configs:
+                              · "timeline": python3 -m http.server 3333
+                              · "landing":  python3 -m http.server 3335
 ```
+
+---
+
+## 10b. Landing Page Architecture (`index.html`)
+
+### Stack
+- **Vanilla HTML/CSS/JS** — không có React, không có build tool
+- **GSAP 3.12.5 + ScrollTrigger** (CDN) — tất cả animation
+- **Firebase JS SDK 10.12.2** (CDN, ES module) — chỉ dùng Firestore để capture waitlist email
+- **Google Fonts** — Crimson Pro (serif) + Inter (sans-serif)
+
+### Sections
+```
+#nav        → floating pill nav, IntersectionObserver scroll state
+#hero       → canvas dot animation (same engine as sign-in screen), hero headline + CTA
+#problem    → 2-col grid: headline + 3 problem items
+#demo       → ContainerScroll 3D tilt section (xem bên dưới)
+#features   → bento-style features grid
+#how        → 3-step horizontal timeline
+#waitlist   → email capture form → Firestore /waitlist/{email}
+footer
+```
+
+### ContainerScroll Animation (`#demo`)
+Replicates Aceternity UI ContainerScroll (framer-motion) bằng GSAP + CSS 3D transforms.
+
+**HTML structure:**
+```html
+<section id="demo">
+  <div class="demo-perspective">              <!-- perspective: set via CSS -->
+    <div class="demo-hdr" id="demo-hdr">     <!-- text header, drifts up on scroll -->
+      <p class="demo-eyebrow">…</p>
+      <h2>See the whole picture.</h2>
+    </div>
+    <div class="demo-device-wrap" id="demo-device-wrap">  <!-- 3D card -->
+      <div class="demo-device">
+        <div class="device-top">             <!-- macOS traffic-light chrome -->
+          <div class="device-dots">…</div>   <!-- red/yellow/green dots -->
+          <div class="device-bar">…</div>    <!-- URL bar -->
+        </div>
+        <div class="device-screen">
+          <img src="screenshot.png">         <!-- 1400×900 app screenshot -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+**GSAP animation (ScrollTrigger scrub):**
+```js
+gsap.set('#demo-device-wrap', {
+  rotateX: 20,           // initial tilt
+  scale: 1.05,           // initial scale-up
+  transformOrigin: '50% 0%',
+  transformPerspective: 1200,
+});
+
+// Timeline animates from entry to completion:
+tl.to('#demo-device-wrap', { rotateX: 0, scale: 1, ease: 'none' }, 0);
+tl.to('#demo-hdr',         { y: -72, ease: 'none' }, 0);  // header drifts up
+
+scrollTrigger: {
+  trigger: '#demo',
+  start: 'top 72%',     // device starts animating when section top hits 72% viewport
+  end: 'top 8%',        // animation complete when section top hits 8% viewport
+  scrub: 1.8,
+}
+```
+
+**Key CSS classes (demo section):**
+```
+.demo-perspective       → perspective container (max-width 1060px)
+.demo-eyebrow           → gold uppercase label "ONE VIEW EXACTLY WHERE THEY BELONG"
+.demo-hdr h2            → serif title "See the whole picture." (~5.5rem)
+.demo-device-wrap       → 3D-animated card wrapper, margin-top:-1.5rem (overlap title)
+.demo-device            → border-radius:20px, border:3px solid #3a3a3a, bg:#1d1d1d
+.device-top             → macOS chrome bar (bg:#252525)
+.device-dot:nth-child(1/2/3) → #ff5f57 / #febc2e / #28c840 (traffic lights)
+.device-screen          → aspect-ratio:16/9, overflow:hidden
+```
+
+### screenshot.png
+- **Size:** 1400×900px, PNG, ~193KB
+- **Content:** App timeline với demo data (Product Launch 2026, 4 phases, 4 teams, 16 tasks)
+- **Capture method:** Preview browser (port 3333) → LZString hash URL → `html2canvas()` → `fetch POST` → Python HTTP server (port 8765) → ghi file
+- **Demo data:** được nén bằng LZString trực tiếp trong browser qua `preview_eval`, load qua share URL `#v1=...` không cần auth
+- **Tái tạo:** Chạy preview server port 3333, navigate `timeline.html`, dùng eval inject hash + html2canvas
+
+### Waitlist / Firebase
+```js
+// index.html dùng Firebase app riêng (named 'landing') để tránh xung đột với app chính
+const fbApp = initializeApp(firebaseConfig, 'landing');
+const db = getFirestore(fbApp);
+// Save: setDoc(doc(db, 'waitlist', email), { email, ts: serverTimestamp(), src: 'landing' })
+```
+Firestore rules cho `/waitlist/{email}`: `allow create: if true; allow read/write/delete: if false;`
 
 ---
 
@@ -451,6 +552,24 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 | D16 | `_projIndex` in-memory array thay cho `localStorage roadmap-index` — không persist index riêng |
 | D17 | Collaborator: hiện tại chỉ owner (last-write-wins). Invite/share role để sau. |
 | D18 | ✅ Security rules: đã deploy lên production 2026-06-07. Owner-only read/write. |
+
+### [2026-06-08] Landing Page — Demo Section Redesign
+| # | Quyết định |
+|---|-----------|
+| D24 | ContainerScroll effect bằng GSAP + CSS 3D (không dùng framer-motion/React) — project là vanilla HTML, zero framework |
+| D25 | macOS traffic-light chrome (#ff5f57/#febc2e/#28c840) thay browser-chrome cũ — cảm giác "product demo" chuyên nghiệp hơn |
+| D26 | `transformPerspective: 1200` đặt trực tiếp trên element qua GSAP (không dùng `perspective` trên parent CSS) — GSAP ownership rõ ràng, tránh conflict |
+| D27 | Negative margin-top `-1.5rem` trên device wrap để device overlap title — tạo depth illusion như framer-motion Card `-mt-12` |
+| D28 | `scrub: 1.8` (cao hơn default 1) — animation mượt, không giật khi scroll nhanh |
+| D29 | screenshot.png: capture qua html2canvas trong preview browser (không dùng Chrome headless CDP) — headless Chrome không chạy được Firebase ES module imports từ CDN |
+
+### [2026-06-08] screenshot.png — Capture Method
+| # | Quyết định |
+|---|-----------|
+| D30 | Dùng LZString share URL (`#v1=...`) để load demo data không cần auth — `loadFromHash()` không require Firebase/currentUser |
+| D31 | Demo data compress trong browser bằng `preview_eval` (không pre-compute ở Python) — tránh encoding mismatch với dấu `+` trong URL |
+| D32 | html2canvas `document.body` thay vì element cụ thể — capture toàn bộ viewport 1400×900 đúng layout |
+| D33 | Ẩn `.ro-banner` bằng CSS inject + click `#stat-sched` để show scheduled tasks trong sidebar trước khi capture |
 
 ### [2026-06-07] Sign-in Screen Redesign
 | # | Quyết định |
