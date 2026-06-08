@@ -115,12 +115,12 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 
 | # | Item | Mô tả kỹ thuật | Done | Hash |
 |---|------|----------------|------|------|
-| L1 | **Nav spotlight effect** | `mousemove` trên `.nav-inner`. CSS custom props `--mouse-x`, `--mouse-y`. Pseudo-element background: `radial-gradient(200px circle at var(--mouse-x) var(--mouse-y), rgba(208,160,82,.25), transparent)`. Remove khi mouse leaves | ☐ | — |
-| L2 | **Features dropdown** | Click "Features" link trong nav → dropdown panel. 3 card: Visual Timeline / Real-time Sync / Share & Export (icon + title + desc). Hover card: gold gradient bg tint. Click outside → close. Vanilla JS, không dùng framework | ☐ | — |
-| L3 | **"Everything you need" rebuild** | Xóa `#features` bento grid hiện tại. Thay bằng features-9 layout: center stat "**73%**" + "more productive" + subtext. 3 pain→solution bordered cards, 3 cột: (1) "Spreadsheets don't show the big picture" → Visual Timeline (2) "Changes get lost between meetings" → Real-time Sync (3) "Stakeholders need progress, not complexity" → One-click Share | ☐ | — |
-| L4 | **CTA section minimal** | Replace `#cta-final`: centered, bg `--s1`. Crimson Pro 4rem "Your roadmap is waiting." + sub "Start building in minutes." + 1 btn-gold "Get Started →". Không có email input | ☐ | — |
-| L5 | **Footer flickering** | Replace footer: "Aroadmap" Crimson Pro ~6rem, mỗi char có CSS `@keyframes flicker` (opacity jumps, random delay). Links nhỏ bên dưới (Privacy · Terms · © 2026 Aroadmap) | ☐ | — |
-| L6 | **Meta + lang fixes** | `index.html`: `og:title` → "Aroadmap — Visual Project Roadmap", `<title>` → "Aroadmap", `alt` → "Aroadmap". `timeline.html`: `lang="vi"→"en"`, `<title>` → "Aroadmap — Timeline" | ☐ | — |
+| L1 | **Nav spotlight effect** | `mousemove` trên `.nav-inner`. CSS custom props `--mouse-x`, `--mouse-y`. Pseudo-element background: `radial-gradient(200px circle at var(--mouse-x) var(--mouse-y), rgba(208,160,82,.25), transparent)`. Remove khi mouse leaves | ✅ | pending |
+| L2 | **Features dropdown** | Click "Features" link trong nav → dropdown panel. 3 card: Visual Timeline / Real-time Sync / Share & Export (icon + title + desc). Hover card: gold gradient bg tint. Click outside → close. Vanilla JS, không dùng framework | ✅ | pending |
+| L3 | **"Everything you need" rebuild** | Xóa `#features` bento grid hiện tại. Thay bằng features-9 layout: center stat "**73%**" + "more productive" + subtext. 3 pain→solution bordered cards, 3 cột: (1) "Spreadsheets don't show the big picture" → Visual Timeline (2) "Changes get lost between meetings" → Real-time Sync (3) "Stakeholders need progress, not complexity" → One-click Share | ✅ | pending |
+| L4 | **CTA section minimal** | Replace `#cta-final`: centered, bg `--s1`. Crimson Pro 4rem "Your roadmap is waiting." + sub "Start building in minutes." + 1 btn-gold "Get Started →". Không có email input | ✅ | pending |
+| L5 | **Footer flickering** | Replace footer: "Aroadmap" Crimson Pro ~6rem, mỗi char có CSS `@keyframes flicker` (opacity jumps, random delay). Links nhỏ bên dưới (Privacy · Terms · © 2026 Aroadmap) | ✅ | pending |
+| L6 | **Meta + lang fixes** | `index.html`: `og:title` → "Aroadmap — Visual Project Roadmap", `<title>` → "Aroadmap", `alt` → "Aroadmap". `timeline.html`: `lang="vi"→"en"`, `<title>` → "Aroadmap — Timeline" | ✅ | 8eea115 |
 
 ---
 
@@ -133,8 +133,8 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 | 3 — Modal Architecture | 4 | 🔄 3/4 done — M3 pending |
 | 4 — Component Redesigns | 6 | ✅ 6/6 done — C1-C3: `5e78c8a`, C4-C6: pending |
 | 5 — New Features | 3 | 🔄 2/3 done — F1+F2 pending commit, F3 skipped |
-| 6 — Landing Page | 6 | 🔄 L6 meta done |
-| **Total** | **27** | **20/27 done** |
+| 6 — Landing Page | 6 | ✅ 6/6 done — pending commit |
+| **Total** | **27** | **26/27 done** |
 
 ---
 

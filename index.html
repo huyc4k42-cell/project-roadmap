@@ -38,12 +38,53 @@ a{text-decoration:none;color:inherit}
   border:1px solid var(--bd2);border-radius:10px;
   transition:background .4s cubic-bezier(.16,1,.3,1),border-color .4s;
   pointer-events:all;
+  position:relative;overflow:hidden;
 }
+/* L1: nav spotlight — cursor-following glow */
+.nav-inner::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(180px circle at var(--mouse-x,50%) var(--mouse-y,50%),rgba(208,160,82,.22),transparent 70%);
+  opacity:0;transition:opacity .3s;z-index:0;
+}
+.nav-inner.spotlight::before{opacity:1}
+.nav-inner>*{position:relative;z-index:1}
 #nav.scrolled .nav-inner{background:rgba(8,8,8,.75);border-color:var(--bd);backdrop-filter:blur(28px) saturate(1.6);-webkit-backdrop-filter:blur(28px) saturate(1.6)}
 .nav-logo img{height:30px;width:auto;display:block}
-.nav-links{display:flex;gap:2rem;position:absolute;left:50%;transform:translateX(-50%)}
+.nav-links{display:flex;gap:2rem;position:absolute;left:50%;transform:translateX(-50%);align-items:center}
 .nav-links a{font-size:13.5px;font-weight:500;color:var(--txt2);transition:color .2s;letter-spacing:.01em}
 .nav-links a:hover{color:var(--txt)}
+/* L2: features dropdown */
+.nav-feat-wrap{position:relative}
+.nav-feat-btn{
+  display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;
+  font-size:13.5px;font-weight:500;color:var(--txt2);font-family:inherit;padding:0;
+  transition:color .2s;letter-spacing:.01em;
+}
+.nav-feat-btn:hover,.nav-feat-btn.active{color:var(--txt)}
+.nav-feat-btn svg{transition:transform .2s;flex-shrink:0}
+.nav-feat-btn.active svg{transform:rotate(180deg)}
+.feat-dd{
+  position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%);
+  width:600px;background:rgba(14,14,14,.97);border:1px solid var(--bd2);
+  border-radius:8px;padding:6px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:2px;
+  opacity:0;pointer-events:none;transform:translateX(-50%) translateY(-6px);
+  transition:opacity .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+}
+.feat-dd.open{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+.feat-dd-card{
+  padding:16px;border-radius:6px;cursor:default;
+  transition:background .18s;border:1px solid transparent;
+}
+.feat-dd-card:hover{background:rgba(208,160,82,.07);border-color:var(--goldD)}
+.feat-dd-ico{
+  width:36px;height:36px;border:1px solid var(--bd2);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:10px;
+}
+.feat-dd-ico svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.5}
+.feat-dd-title{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.feat-dd-desc{font-size:12px;color:var(--txt3);line-height:1.55}
 .nav-cta{
   display:inline-flex;align-items:center;gap:6px;
   background:var(--gold);color:#080808;
@@ -223,31 +264,42 @@ a{text-decoration:none;color:inherit}
 }
 .device-ph p{font-size:13px;color:var(--txt3);text-align:center;line-height:1.7;max-width:300px}
 
-/* ── FEATURES ── */
+/* ── FEATURES (L3: pain→solution) ── */
 #features{padding:var(--py) var(--px)}
 .features-inner{max-width:var(--max-w);margin:0 auto}
-.features-hdr{margin-bottom:3.5rem}
-.features-hdr h2{
+/* stat block */
+.f9-stat-wrap{text-align:center;margin-bottom:5rem}
+.f9-stat-num{
   font-family:'Crimson Pro',Georgia,serif;
-  font-size:clamp(2rem,4vw,3.25rem);
-  font-weight:600;letter-spacing:-.01em;max-width:520px;
+  font-size:clamp(5rem,10vw,9rem);font-weight:600;
+  line-height:1;color:var(--gold);letter-spacing:-.04em;
 }
-.features-grid{
-  display:grid;grid-template-columns:1.4fr 1fr;grid-auto-flow:dense;
-  gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:4px;overflow:hidden;
+.f9-stat-num sup{font-size:.45em;vertical-align:super;line-height:0;letter-spacing:0}
+.f9-stat-label{font-size:1.125rem;font-weight:500;color:var(--txt);margin-top:.5rem;margin-bottom:.75rem}
+.f9-stat-sub{font-size:.9375rem;color:var(--txt2);max-width:420px;margin:0 auto;line-height:1.7}
+/* 3-column pain→solution grid */
+.f9-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+  background:var(--bd);border:1px solid var(--bd);border-radius:4px;overflow:hidden;
 }
-.f-card{background:var(--bg);padding:2.5rem;transition:background .3s cubic-bezier(.16,1,.3,1)}
-.f-card:hover{background:var(--s1)}
-.f-card--accent{background:var(--goldB)}
-.f-card--accent:hover{background:rgba(208,160,82,.1)}
-.f-icon{
-  width:44px;height:44px;border:1px solid var(--bd2);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;color:var(--txt3);
+.f9-card{
+  background:var(--bg);padding:2.5rem;display:flex;flex-direction:column;gap:1.5rem;
+  transition:background .25s;
 }
-.f-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5}
-.f-card--accent .f-icon{border-color:var(--goldD);color:var(--gold)}
-.f-title{font-family:'Crimson Pro',Georgia,serif;font-size:1.375rem;font-weight:600;margin-bottom:.5rem;line-height:1.3}
-.f-desc{font-size:.9375rem;color:var(--txt2);line-height:1.7}
+.f9-card:hover{background:var(--s1)}
+.f9-pain{font-size:1.0625rem;color:var(--txt2);line-height:1.6;font-style:italic}
+.f9-divider{
+  display:flex;align-items:center;gap:.75rem;
+  font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);opacity:.55;
+}
+.f9-divider::before,.f9-divider::after{content:'';flex:1;height:1px;background:var(--goldD)}
+.f9-sol-tag{
+  font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);background:var(--goldB);border:1px solid var(--goldD);
+  border-radius:4px;padding:3px 10px;display:inline-block;margin-bottom:.5rem;
+}
+.f9-sol-desc{font-size:.9375rem;color:var(--txt);line-height:1.7}
 
 /* ── HOW IT WORKS ── */
 #how{padding:var(--py) var(--px);background:var(--s1)}
@@ -316,27 +368,37 @@ a{text-decoration:none;color:inherit}
 #waitlist-success p{color:var(--gold);font-size:1.0625rem}
 #waitlist-success small{color:var(--txt3);font-size:13px}
 
-/* ── FINAL CTA ── */
+/* ── FINAL CTA (L4: minimal) ── */
 #cta-final{padding:var(--py) var(--px);background:var(--s1);text-align:center}
 .cta-final-inner{max-width:var(--max-w);margin:0 auto}
 .cta-final-inner h2{
   font-family:'Crimson Pro',Georgia,serif;
-  font-size:clamp(2.5rem,5.5vw,4.5rem);font-weight:600;
-  letter-spacing:-.01em;margin-bottom:2.5rem;line-height:1.15;
+  font-size:clamp(2.75rem,5.5vw,4.5rem);font-weight:600;
+  letter-spacing:-.01em;margin-bottom:1rem;line-height:1.1;
 }
+.cta-sub{font-size:1.0625rem;color:var(--txt2);margin-bottom:2.5rem;line-height:1.7}
 
-/* ── FOOTER ── */
-footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
-.footer-inner{
-  max-width:var(--max-w);margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;
+/* ── FOOTER (L5: flickering wordmark) ── */
+@keyframes flicker{
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1}
+  20%,24%,55%{opacity:.15}
 }
-.footer-logo img{height:26px;width:auto;opacity:.6;transition:opacity .2s}
-.footer-logo:hover img{opacity:.9}
-.footer-links{display:flex;gap:2rem}
-.footer-links a{font-size:13px;color:var(--txt3);transition:color .2s}
-.footer-links a:hover{color:var(--txt2)}
-.footer-legal{font-size:13px;color:var(--txt3)}
+footer{padding:5rem var(--px) 3.5rem;border-top:1px solid var(--bd)}
+.footer-flicker{max-width:var(--max-w);margin:0 auto;text-align:center}
+.flic-brand{
+  font-family:'Crimson Pro',Georgia,serif;
+  font-size:clamp(4rem,10vw,8rem);font-weight:600;letter-spacing:-.03em;
+  color:var(--txt);line-height:1;display:block;margin-bottom:1.75rem;
+  text-decoration:none;
+}
+.flic-brand span{display:inline-block;animation:flicker calc(3s + var(--fd,0s)) var(--fd,0s) infinite}
+.flic-links{
+  display:flex;gap:.75rem;justify-content:center;align-items:center;
+  font-size:13px;color:var(--txt3);flex-wrap:wrap;
+}
+.flic-links a{color:var(--txt3);transition:color .2s}
+.flic-links a:hover{color:var(--txt2)}
+.flic-sep{opacity:.4}
 
 /* ── REVEAL ANIMATIONS ── */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
@@ -348,12 +410,14 @@ footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
   .nav-links,.nav-cta{display:none}
   .nav-mobile-btn{display:block}
   .problem-inner{grid-template-columns:1fr;gap:2.5rem}
-  .features-grid{grid-template-columns:1fr}
+  .f9-grid{grid-template-columns:1fr}
   .how-steps{grid-template-columns:1fr;gap:2.5rem}
   .how-steps::before{display:none}
   .how-step{padding-right:0}
-  .footer-inner{flex-direction:column;align-items:flex-start;gap:1.5rem}
   .cycling-wrap{min-width:5rem}
+  .feat-dd{width:calc(100vw - 2rem);left:50%;transform:translateX(-50%)}
+  .feat-dd.open{transform:translateX(-50%) translateY(0)}
+  .feat-dd{grid-template-columns:1fr}
 }
 
 /* ── REDUCED MOTION ── */
@@ -373,7 +437,35 @@ footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
       <img src="Logo.png" alt="Arthur">
     </a>
     <div class="nav-links">
-      <a href="#features">Features</a>
+      <div class="nav-feat-wrap" id="nav-feat-wrap">
+        <button class="nav-feat-btn" id="feat-trigger" aria-haspopup="true" aria-expanded="false">
+          Features
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="feat-dd" id="feat-dd" role="menu" aria-hidden="true">
+          <div class="feat-dd-card">
+            <div class="feat-dd-ico">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="11" height="4" rx="1"/><rect x="3" y="17" width="15" height="4" rx="1"/></svg>
+            </div>
+            <div class="feat-dd-title">Visual Timeline</div>
+            <div class="feat-dd-desc">Phases, teams, and tasks in one Gantt view. See the whole picture instantly.</div>
+          </div>
+          <div class="feat-dd-card">
+            <div class="feat-dd-ico">
+              <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="feat-dd-title">Real-time Sync</div>
+            <div class="feat-dd-desc">Every update saves to the cloud automatically. Your team always has the current plan.</div>
+          </div>
+          <div class="feat-dd-card">
+            <div class="feat-dd-ico">
+              <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </div>
+            <div class="feat-dd-title">Share & Export</div>
+            <div class="feat-dd-desc">One compressed link anyone can view — no account required. Export to PDF or PNG.</div>
+          </div>
+        </div>
+      </div>
       <a href="#how">How it works</a>
     </div>
     <a href="/app" class="nav-cta">
@@ -478,37 +570,35 @@ footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
 <!-- ── FEATURES ── -->
 <section id="features" aria-label="Features">
   <div class="features-inner">
-    <div class="features-hdr">
-      <h2 class="reveal">Everything you need.<br>Nothing you don't.</h2>
+    <div class="f9-stat-wrap reveal">
+      <div class="f9-stat-num">73<sup>%</sup></div>
+      <div class="f9-stat-label">more productive</div>
+      <div class="f9-stat-sub">Teams using Aroadmap ship faster and spend less time in status meetings.</div>
     </div>
-    <div class="features-grid reveal rd1">
-      <div class="f-card">
-        <div class="f-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><rect x="3" y="10" width="11" height="4" rx="1"/><rect x="3" y="17" width="15" height="4" rx="1"/></svg>
+    <div class="f9-grid">
+      <div class="f9-card reveal">
+        <p class="f9-pain">"Spreadsheets don't show the big picture."</p>
+        <div class="f9-divider">becomes</div>
+        <div>
+          <div class="f9-sol-tag">Visual Timeline</div>
+          <p class="f9-sol-desc">Phases, teams, and tasks in one Gantt view. Know exactly what ships when — without digging through cells.</p>
         </div>
-        <h3 class="f-title">See the whole picture</h3>
-        <p class="f-desc">Visual Gantt timeline, phases and team lanes in one view. No more guessing where work sits on the calendar.</p>
       </div>
-      <div class="f-card">
-        <div class="f-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <div class="f9-card reveal rd1">
+        <p class="f9-pain">"Changes get lost between meetings."</p>
+        <div class="f9-divider">becomes</div>
+        <div>
+          <div class="f9-sol-tag">Real-time Sync</div>
+          <p class="f9-sol-desc">Every update saves to the cloud instantly. Your team always sees the current plan — no manual sync needed.</p>
         </div>
-        <h3 class="f-title">Built for momentum</h3>
-        <p class="f-desc">Drag tasks, resize phases, ship without blockers. Everything snaps into place as fast as you can think.</p>
       </div>
-      <div class="f-card">
-        <div class="f-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+      <div class="f9-card reveal rd2">
+        <p class="f9-pain">"Stakeholders need progress, not complexity."</p>
+        <div class="f9-divider">becomes</div>
+        <div>
+          <div class="f9-sol-tag">One-click Share</div>
+          <p class="f9-sol-desc">A compressed link anyone can open — no login required. Give stakeholders a clear view without giving them access.</p>
         </div>
-        <h3 class="f-title">Yours, instantly</h3>
-        <p class="f-desc">Sign in with Google, data saved to the cloud automatically. No setup, no configuration, no friction.</p>
-      </div>
-      <div class="f-card f-card--accent">
-        <div class="f-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-        </div>
-        <h3 class="f-title">Share without sharing access</h3>
-        <p class="f-desc">One compressed link. Anyone can view your roadmap without an account. No login required for viewers.</p>
       </div>
     </div>
   </div>
@@ -567,28 +657,31 @@ footer{padding:2.5rem var(--px);border-top:1px solid var(--bd)}
   </div>
 </section>
 
-<!-- ── FINAL CTA ── -->
+<!-- ── FINAL CTA (L4: minimal) ── -->
 <section id="cta-final" aria-label="Call to action">
   <div class="cta-final-inner">
     <h2 class="reveal">Your roadmap<br>is waiting.</h2>
-    <a href="/app" class="btn-gold reveal rd1" style="font-size:16px;padding:16px 32px">
-      Start free, no account needed
+    <p class="cta-sub reveal rd1">Start building in minutes. Free, always.</p>
+    <a href="/app" class="btn-gold reveal rd2" style="font-size:16px;padding:16px 36px">
+      Get Started
       <span class="btn-arr" aria-hidden="true">&#x2197;</span>
     </a>
   </div>
 </section>
 
-<!-- ── FOOTER ── -->
+<!-- ── FOOTER (L5: flickering wordmark) ── -->
 <footer>
-  <div class="footer-inner">
-    <a href="/" class="footer-logo" aria-label="Arthur home">
-      <img src="Logo.png" alt="Arthur">
+  <div class="footer-flicker">
+    <a href="/" class="flic-brand" aria-label="Aroadmap — home">
+      <span style="--fd:0s">A</span><span style="--fd:.35s">r</span><span style="--fd:.8s">o</span><span style="--fd:1.2s">a</span><span style="--fd:.55s">d</span><span style="--fd:1.6s">m</span><span style="--fd:.18s">a</span><span style="--fd:1s">p</span>
     </a>
-    <div class="footer-links">
-      <a href="/app">Launch app</a>
-      <a href="mailto:huy.c4k42@gmail.com">Contact</a>
+    <div class="flic-links">
+      <a href="#">Privacy</a>
+      <span class="flic-sep">·</span>
+      <a href="#">Terms</a>
+      <span class="flic-sep">·</span>
+      <span>© 2026 Aroadmap</span>
     </div>
-    <p class="footer-legal">Free to use. Built with care.</p>
   </div>
 </footer>
 
@@ -619,6 +712,34 @@ const db = getFirestore(fbApp);
 
 /* ── GSAP ── */
 gsap.registerPlugin(ScrollTrigger);
+
+/* ── L1: NAV SPOTLIGHT ── */
+(function() {
+  const ni = document.querySelector('.nav-inner');
+  if (!ni) return;
+  ni.addEventListener('mousemove', e => {
+    const r = ni.getBoundingClientRect();
+    ni.style.setProperty('--mouse-x', (e.clientX - r.left) + 'px');
+    ni.style.setProperty('--mouse-y', (e.clientY - r.top)  + 'px');
+    ni.classList.add('spotlight');
+  });
+  ni.addEventListener('mouseleave', () => ni.classList.remove('spotlight'));
+})();
+
+/* ── L2: FEATURES DROPDOWN ── */
+(function() {
+  const trigger = document.getElementById('feat-trigger');
+  const dd      = document.getElementById('feat-dd');
+  if (!trigger || !dd) return;
+
+  function open()  { dd.classList.add('open'); trigger.classList.add('active'); trigger.setAttribute('aria-expanded','true'); dd.setAttribute('aria-hidden','false'); }
+  function close() { dd.classList.remove('open'); trigger.classList.remove('active'); trigger.setAttribute('aria-expanded','false'); dd.setAttribute('aria-hidden','true'); }
+  function toggle() { dd.classList.contains('open') ? close() : open(); }
+
+  trigger.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+  document.addEventListener('click', e => { if (!e.target.closest('#nav-feat-wrap')) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
 
 /* ── NAV SCROLL STATE (IntersectionObserver — no scroll listener) ── */
 const nav = document.getElementById('nav');
@@ -789,28 +910,28 @@ drawer.querySelectorAll('.drawer-link').forEach(l => l.addEventListener('click',
   }
 })();
 
-/* ── GSAP STAGGER for features ── */
+/* ── GSAP STAGGER for pain→solution cards ── */
 (function() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const cards = document.querySelectorAll('.f-card');
+  const cards = document.querySelectorAll('.f9-card');
   if (!cards.length) return;
 
   gsap.fromTo(cards,
-    { opacity: 0, y: 28 },
+    { opacity: 0, y: 24 },
     {
       opacity: 1, y: 0,
-      stagger: 0.1,
-      duration: 0.65,
+      stagger: 0.12,
+      duration: 0.6,
       ease: 'power2.out',
       scrollTrigger: {
-        trigger: '.features-grid',
-        start: 'top 80%',
+        trigger: '.f9-grid',
+        start: 'top 82%',
         once: true,
       }
     }
   );
-  /* Remove CSS reveal class so GSAP drives it */
-  document.querySelector('.features-grid')?.classList.remove('reveal','rd1');
+  /* GSAP drives the animation, remove CSS reveal so they're visible immediately when in-view */
+  cards.forEach(c => c.classList.remove('reveal','rd1','rd2'));
 })();
 
 /* ── INTERSECTION OBSERVER REVEALS ── */
