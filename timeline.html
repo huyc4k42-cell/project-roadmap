@@ -15,7 +15,7 @@
   --gold:#D0A052;--goldL:#e8c07a;--goldD:rgba(208,160,82,.18);--goldB:rgba(208,160,82,.07);
   --grn:#4caf7d;--red:#e05757;
   --r:4px;--r2:6px;
-  --sb:288px;--tlw:204px;--ww:64px;--hdr:58px;
+  --sb:288px;--tlw:204px;--ww:64px;--hdr:94px;
 }
 /* ── LIGHT THEME ── */
 [data-theme="light"]{
@@ -53,7 +53,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
 
 /* ── HEADER ── */
-.hdr{height:var(--hdr);background:var(--s1);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:14px;flex-shrink:0;z-index:30;position:relative}
+.hdr{background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;z-index:30;position:relative}
+.hdr-row1{height:58px;display:flex;align-items:center;padding:0 18px;gap:14px}
+.hdr-row2{height:36px;background:var(--s2);border-top:1px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:20px}
 .logo{display:flex;align-items:center;flex-shrink:0}
 .logo img{height:36px;width:auto}
 .vsep{width:1px;height:20px;background:var(--bd2);flex-shrink:0}
@@ -61,11 +63,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .hdr-title{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:color .15s;line-height:1.2}
 .hdr-title:hover{color:var(--gold)}
 .hdr-sub{font-size:12px;color:var(--txt2);margin-top:1px}
-.hdr-stats{display:flex;gap:20px;flex-shrink:0}
-.stat{text-align:center}
-.stat-n{font-size:17px;font-weight:700;line-height:1}
+.stat{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r);transition:background .15s;text-align:left;line-height:inherit;background:none;border:none;font-family:inherit;color:inherit;cursor:pointer}
+.stat:hover{background:var(--s3)}
+.stat-n{font-size:13px;font-weight:700;line-height:1}
 .stat-n.gd{color:var(--gold)}.stat-n.gn{color:var(--grn)}.stat-n.mt{color:var(--txt3)}
-.stat-l{font-size:10px;color:var(--txt2);text-transform:uppercase;letter-spacing:.9px;margin-top:3px}
+.stat-l{font-size:11px;color:var(--txt3);letter-spacing:.3px}
 .hdr-btns{display:flex;gap:6px;flex-shrink:0}
 .btn{padding:6px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-gold{background:var(--gold);color:#080808}.btn-gold:hover{background:var(--goldL)}
@@ -181,8 +183,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .empty-btn-primary{background:var(--gold);color:#080808;border:none}.empty-btn-primary:hover{background:var(--goldL)}
 .empty-btn-sec{background:transparent;border:1px solid var(--bd2);color:var(--txt2)}.empty-btn-sec:hover{color:var(--txt);border-color:var(--bd3)}
 /* Stat clickable — reset all button chrome */
-button.stat{background:none;border:none;font-family:inherit;color:inherit;cursor:pointer;padding:4px 8px;border-radius:var(--r);transition:background .15s;text-align:center;line-height:inherit}
-button.stat:hover{background:var(--s3)}
+/* .stat styles now unified — see .stat rule in header section */
 /* Share button class */
 .btn-outline-gold{border:1px solid var(--gold)!important;color:var(--gold)!important}
 
@@ -428,9 +429,18 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 [data-theme="light"] .home-hdr-logo img{filter:brightness(.52)}
 .home-hdr-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px}
 /* Auth UI */
-.auth-user{display:flex;align-items:center;gap:8px}
-.auth-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--bd2);flex-shrink:0}
-.auth-name{font-size:12px;color:var(--txt2);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-user-wrap{position:relative;display:flex;align-items:center}
+.auth-avatar-btn{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;border-radius:50%;transition:opacity .15s}
+.auth-avatar-btn:hover{opacity:.85}
+.auth-avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1.5px solid var(--bd2);flex-shrink:0;display:block}
+.auth-avatar-fallback{background:var(--s3);color:var(--txt);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.auth-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);min-width:200px;z-index:100;box-shadow:0 10px 28px rgba(0,0,0,.5);animation:fdin .1s ease;overflow:hidden}
+.auth-dd-info{padding:12px 14px 10px}
+.auth-dd-label{display:block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);margin-bottom:3px}
+.auth-dd-email{display:block;font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-dd-sep{height:1px;background:var(--bd);margin:0}
+.auth-dd-item{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:var(--txt2);background:none;border:none;cursor:pointer;font-family:inherit;transition:all .1s;text-align:left}
+.auth-dd-item:hover{background:var(--s2);color:var(--txt)}
 /* ── Auth / Sign-in screen ── */
 .auth-screen{position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden}
 .auth-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -474,32 +484,22 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
 .proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
 /* Project card */
-.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:240px}
-.proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-2px)}
-.proj-card-stripe{position:absolute;top:0;left:0;right:0;height:4px;border-radius:var(--r2) var(--r2) 0 0}
-.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:24px;font-weight:600;color:var(--txt);margin-top:12px;margin-bottom:4px;line-height:1.25}
-.proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:16px;line-height:1.5;flex:1}
-/* card body: stats left, circle right */
-.proj-card-body{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
-.proj-card-stats{display:flex;flex-direction:column;gap:10px;flex:1}
-.proj-stat-row{display:flex;gap:18px}
-.proj-stat{display:flex;flex-direction:column;gap:1px}
-.proj-stat-n{font-size:16px;font-weight:700;color:var(--txt);line-height:1}
-.proj-stat-l{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.7px;margin-top:2px}
-/* time bar */
-.proj-time-bar-wrap{margin-top:8px}
-.proj-time-bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px}
-.proj-tl-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden}
-.proj-tl-fill{height:100%;border-radius:2px;min-width:4px;max-width:100%}
-/* circle progress for weeks */
-.proj-circle-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
-.proj-circle-svg{transform:rotate(-90deg)}
-.proj-circle-overlay{position:absolute;top:0;left:0;width:60px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.proj-circle-num{font-size:16px;font-weight:700;color:var(--txt);line-height:1;font-family:'Inter',sans-serif}
-.proj-circle-den{font-size:10px;color:var(--txt2);line-height:1;margin-top:2px;font-family:'Inter',sans-serif}
-.proj-circle-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;text-align:center}
-.proj-card-footer{display:flex;justify-content:space-between;align-items:center}
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:160px;overflow:hidden}
+.proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-4px)}
+.proj-card:hover .proj-card-open-badge{opacity:1;transform:translateY(0)}
+.proj-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
+.proj-card-top{display:flex;justify-content:flex-end;margin-bottom:4px;min-height:28px}
+.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:22px;font-weight:600;color:var(--txt);margin-bottom:4px;line-height:1.25}
+.proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:1.5;flex:1;min-height:18px}
+/* progress bar */
+.proj-card-progress{margin-bottom:14px}
+.proj-progress-bar{height:4px;background:var(--s4);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.proj-progress-fill{height:100%;border-radius:2px;transition:width .3s ease}
+.proj-progress-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);letter-spacing:.2px}
+/* footer */
+.proj-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto}
 .proj-date{font-size:11px;color:var(--txt3)}
+.proj-card-open-badge{font-size:12px;font-weight:500;color:var(--gold);opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
 .proj-menu{position:relative}
 .proj-menu-btn{background:none;border:none;color:var(--txt3);cursor:pointer;padding:5px;border-radius:var(--r);transition:all .15s;display:flex;align-items:center;justify-content:center;line-height:1}
 .proj-menu-btn:hover{color:var(--txt);background:var(--s3)}
@@ -1132,56 +1132,58 @@ ${ro ? `<div class="ro-banner">
   </a>
 </div>` : ''}
 <div class="hdr">
-  ${currentProjId && !ro
-    ? `<div class="breadcrumb">
-        <button class="bc-home" id="btn-back-home" aria-label="Về trang dự án">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-          Dự án
+  <div class="hdr-row1">
+    ${currentProjId && !ro
+      ? `<div class="breadcrumb">
+          <button class="bc-home" id="btn-back-home" aria-label="Back to projects">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            Projects
+          </button>
+          <span class="bc-sep" aria-hidden="true">›</span>
+          <div class="bc-cur-wrap" id="hdr-title-click" role="button" tabindex="0" aria-label="Edit project name">
+            <span class="bc-cur">${esc(S.cfg.title)}</span>
+            <svg class="edit-pen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+         </div>`
+      : `<div class="logo">${LOGO_IMG}</div>
+         <div class="vsep"></div>
+         <div class="hdr-info">
+           <div class="${ro?'':'hdr-title-wrap'}" ${ro?'':'id="hdr-title-click"'}>
+             <div class="hdr-title">${esc(S.cfg.title)}</div>
+             ${ro?'':` <svg class="edit-pen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`}
+           </div>
+           <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
+         </div>`
+    }
+    <div class="hdr-btns">
+      ${ro ? '' : `
+      <button class="btn btn-ghost" id="btn-cfg">${svgIcon('settings',13)} Settings</button>
+      <div class="btn-dd" role="none">
+        <button class="btn btn-ghost" id="btn-add-new" aria-haspopup="menu" aria-expanded="false" aria-controls="add-new-menu">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <span class="bc-sep" aria-hidden="true">›</span>
-        <div class="bc-cur-wrap" id="hdr-title-click" role="button" tabindex="0" aria-label="Đổi tên project">
-          <span class="bc-cur">${esc(S.cfg.title)}</span>
-          <svg class="edit-pen" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <div class="add-dd-menu" id="add-new-menu" role="menu">
+          <button class="add-dd-item" role="menuitem" data-add="phase">${svgIcon('map',13)} Phase</button>
+          <button class="add-dd-item" role="menuitem" data-add="add-task">${svgIcon('edit',13)} Task</button>
+          <button class="add-dd-item" role="menuitem" data-add="add-team">${svgIcon('users',13)} Team</button>
+          <div style="height:1px;background:var(--bd);margin:3px 5px"></div>
+          <button class="add-dd-item" role="menuitem" data-add="import-csv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Import CSV</button>
         </div>
-       </div>`
-    : `<div class="logo">${LOGO_IMG}</div>
-       <div class="vsep"></div>
-       <div class="hdr-info">
-         <div class="${ro?'':'hdr-title-wrap'}" ${ro?'':'id="hdr-title-click"'}>
-           <div class="hdr-title">${esc(S.cfg.title)}</div>
-           ${ro?'':` <svg class="edit-pen" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`}
-         </div>
-         <div class="hdr-sub">${esc(S.cfg.subtitle) || '&nbsp;'}</div>
-       </div>`
-  }
-  <div class="hdr-stats" role="group" aria-label="Thống kê">
-    <button class="stat" id="stat-all" title="Xem tất cả tasks" aria-label="Tổng ${total} tasks"><div class="stat-n gd">${total}</div><div class="stat-l">Tổng</div></button>
-    <button class="stat" id="stat-sched" title="Lọc tasks đã xếp lịch" aria-label="${sched} tasks đã xếp"><div class="stat-n gn">${sched}</div><div class="stat-l">Đã xếp</div></button>
-    <button class="stat" id="stat-back" title="Lọc backlog" aria-label="${unsched} tasks backlog"><div class="stat-n mt">${unsched}</div><div class="stat-l">Backlog</div></button>
-    <div class="stat" aria-label="${tw} tuần"><div class="stat-n" style="color:var(--txt2)">${tw}</div><div class="stat-l">Tuần</div></div>
-  </div>
-  <div class="hdr-btns">
-    ${ro ? '' : `
-    <button class="btn btn-ghost" id="btn-cfg">${svgIcon('settings',13)} Cài đặt</button>
-    <div class="btn-dd" role="none">
-      <button class="btn btn-ghost" id="btn-add-new" aria-haspopup="menu" aria-expanded="false" aria-controls="add-new-menu">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Thêm mới
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-      </button>
-      <div class="add-dd-menu" id="add-new-menu" role="menu">
-        <button class="add-dd-item" role="menuitem" data-add="phase">${svgIcon('map',13)} Phase</button>
-        <button class="add-dd-item" role="menuitem" data-add="add-task">${svgIcon('edit',13)} Task</button>
-        <button class="add-dd-item" role="menuitem" data-add="add-team">${svgIcon('users',13)} Nhóm</button>
-        <div style="height:1px;background:var(--bd);margin:3px 5px"></div>
-        <button class="add-dd-item" role="menuitem" data-add="import-csv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Import CSV</button>
       </div>
+      <button class="btn btn-gold" id="btn-export">${svgIcon('package',13)} Export PDF</button>
+      <button class="btn btn-ghost btn-outline-gold" id="btn-share" aria-label="Share roadmap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>`}
     </div>
-    <button class="btn btn-gold" id="btn-export">${svgIcon('package',13)} Export PDF</button>
-    <button class="btn btn-ghost btn-outline-gold" id="btn-share" aria-label="Chia sẻ roadmap">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      Share
-    </button>`}
+  </div>
+  <div class="hdr-row2" role="group" aria-label="Stats">
+    <button class="stat" id="stat-all" title="Show all tasks" aria-label="${total} total tasks"><span class="stat-n gd">${total}</span><span class="stat-l">Total</span></button>
+    <button class="stat" id="stat-sched" title="Filter scheduled tasks" aria-label="${sched} scheduled tasks"><span class="stat-n gn">${sched}</span><span class="stat-l">Scheduled</span></button>
+    <button class="stat" id="stat-back" title="Filter backlog" aria-label="${unsched} backlog tasks"><span class="stat-n mt">${unsched}</span><span class="stat-l">Backlog</span></button>
+    <div class="stat" aria-label="${tw} weeks"><span class="stat-n" style="color:var(--txt2)">${tw}</span><span class="stat-l">Weeks</span></div>
   </div>
 </div>
 <div class="body ${ro ? 'readonly' : ''}">
@@ -1766,14 +1768,27 @@ function buildHome() {
 
 function buildHomeHdr(count) {
   const authHtml = currentUser
-    ? `<div class="auth-user">
-        ${currentUser.photoURL ? `<img class="auth-avatar" src="${esc(currentUser.photoURL)}" alt="${esc(currentUser.displayName||'')}">` : ''}
-        <span class="auth-name">${esc(currentUser.displayName||currentUser.email||'')}</span>
-        <button class="btn btn-ghost" id="home-signout-btn" title="Đăng xuất">Đăng xuất</button>
+    ? `<div class="auth-user-wrap${homeUserMenuOpen?' open':''}" id="auth-user-wrap">
+        <button class="auth-avatar-btn" id="home-avatar-btn" aria-haspopup="true" aria-expanded="${homeUserMenuOpen}" aria-label="Account menu">
+          ${currentUser.photoURL
+            ? `<img class="auth-avatar" src="${esc(currentUser.photoURL)}" alt="${esc(currentUser.displayName||'')}"/>`
+            : `<div class="auth-avatar auth-avatar-fallback">${(currentUser.displayName||currentUser.email||'?')[0].toUpperCase()}</div>`}
+        </button>
+        ${homeUserMenuOpen ? `<div class="auth-dropdown" id="auth-dropdown" role="menu">
+          <div class="auth-dd-info">
+            <span class="auth-dd-label">Signed in as</span>
+            <span class="auth-dd-email">${esc(currentUser.email||currentUser.displayName||'')}</span>
+          </div>
+          <div class="auth-dd-sep"></div>
+          <button class="auth-dd-item" id="home-signout-btn" role="menuitem">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            Sign Out
+          </button>
+        </div>` : ''}
       </div>`
     : `<button class="btn btn-ghost" id="home-signin-btn">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-        Đăng nhập
+        Sign In
       </button>`;
   return `<header class="home-hdr" role="banner">
     <div class="home-hdr-spacer"></div>
@@ -1796,91 +1811,55 @@ function buildHomeHdr(count) {
 }
 
 function buildProjCard(p) {
-  const today = Date.now();
   const schedPct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
   const accent = p.accent || '#D0A052';
-
-  // Timeline elapsed
-  const startTs = p.stats?.start ? new Date(p.stats.start).getTime() : null;
-  const endTs   = p.stats?.end   ? new Date(p.stats.end).getTime()   : null;
-  const totalWeeks = (startTs && endTs && endTs > startTs) ? Math.round((endTs - startTs) / 604800000) : null;
-  const elapsedMs  = startTs ? Math.max(0, today - startTs) : 0;
-  const elapsedWeeks = totalWeeks ? Math.min(Math.round(elapsedMs / 604800000), totalWeeks) : null;
-  const timePct = (startTs && endTs && endTs > startTs)
-    ? Math.min(100, Math.max(0, Math.round((today - startTs) / (endTs - startTs) * 100)))
-    : null;
-
-  // Circle progress SVG (r=15.9 → circumference ≈ 100)
-  const r = 15.9, circ = 2 * Math.PI * r;
-  const weekPct = totalWeeks ? Math.min(100, Math.round((elapsedWeeks / totalWeeks) * 100)) : 0;
-  const dash = totalWeeks ? (weekPct / 100 * circ).toFixed(1) : 0;
-  const circleHtml = totalWeeks !== null ? `
-    <div class="proj-circle-wrap">
-      <svg class="proj-circle-svg" width="60" height="60" viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="${r}" fill="none" stroke="var(--s4)" stroke-width="2.8"/>
-        <circle cx="18" cy="18" r="${r}" fill="none" stroke="${accent}" stroke-width="2.8"
-          stroke-dasharray="${dash} ${circ.toFixed(1)}" stroke-dashoffset="0" stroke-linecap="round"/>
-      </svg>
-      <div class="proj-circle-overlay">
-        <span class="proj-circle-num">${elapsedWeeks}</span>
-        <span class="proj-circle-den">/ ${totalWeeks}</span>
-      </div>
-      <span class="proj-circle-lbl">Tuần</span>
-    </div>` : '';
+  const phases = p.stats?.phases || 0;
+  const tasks  = p.stats?.tasks  || 0;
 
   const ctxOpen = homeCtxId === p.id;
   return `
 <div class="proj-card" data-proj-id="${p.id}" role="article" aria-label="${esc(p.name)}">
   <div class="proj-card-stripe" style="background:${accent}"></div>
-  <div style="display:flex;justify-content:flex-end">
+  <div class="proj-card-top">
     <div class="proj-menu">
-      <button class="proj-menu-btn" data-proj-menu="${p.id}" aria-label="Tùy chọn project" aria-haspopup="true">
+      <button class="proj-menu-btn" data-proj-menu="${p.id}" aria-label="Project options" aria-haspopup="true">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
       ${ctxOpen ? `<div class="proj-ctx" role="menu">
         <button class="proj-ctx-item" role="menuitem" data-proj-open="${p.id}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Mở
+          Open
         </button>
         <button class="proj-ctx-item" role="menuitem" data-proj-rename="${p.id}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          Đổi tên
+          Rename
         </button>
         <button class="proj-ctx-item" role="menuitem" data-proj-dup="${p.id}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Nhân bản
+          Duplicate
         </button>
         <div class="proj-ctx-sep"></div>
         <button class="proj-ctx-item dng" role="menuitem" data-proj-del="${p.id}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
-          Xóa
+          Delete
         </button>
       </div>` : ''}
     </div>
   </div>
   <div class="proj-card-name">${esc(p.name)}</div>
-  <div class="proj-card-sub">${esc(p.subtitle||'Chưa có mô tả')}</div>
-  <div class="proj-card-body">
-    <div class="proj-card-stats">
-      <div class="proj-stat-row">
-        <div class="proj-stat"><span class="proj-stat-n">${p.stats?.phases||0}</span><span class="proj-stat-l">Phase</span></div>
-        <div class="proj-stat"><span class="proj-stat-n">${p.stats?.tasks||0}</span><span class="proj-stat-l">Tasks</span></div>
-        <div class="proj-stat"><span class="proj-stat-n" style="color:${schedPct>0?'var(--grn)':'var(--txt3)'}">${schedPct}%</span><span class="proj-stat-l">Xếp lịch</span></div>
-      </div>
-      ${timePct !== null ? `
-      <div class="proj-time-bar-wrap">
-        <div class="proj-time-bar-lbl">
-          <span>${p.stats?.start||''}</span>
-          <span style="color:var(--txt2);font-weight:500">${timePct}% đã qua</span>
-          <span>${p.stats?.end||''}</span>
-        </div>
-        <div class="proj-tl-bar"><div class="proj-tl-fill" style="width:${timePct}%;background:${accent}"></div></div>
-      </div>` : ''}
+  <div class="proj-card-sub">${esc(p.subtitle || '')}</div>
+  <div class="proj-card-progress">
+    <div class="proj-progress-bar">
+      <div class="proj-progress-fill" style="width:${schedPct}%;background:${accent}"></div>
     </div>
-    ${circleHtml}
+    <div class="proj-progress-meta">
+      <span>${schedPct}% scheduled</span>
+      <span>${tasks} task${tasks !== 1 ? 's' : ''} · ${phases} phase${phases !== 1 ? 's' : ''}</span>
+    </div>
   </div>
   <div class="proj-card-footer">
     <span class="proj-date">${timeAgo(p.updatedAt)}</span>
+    <span class="proj-card-open-badge">Open →</span>
   </div>
 </div>`;
 }
@@ -1920,6 +1899,18 @@ function bindHome() {
   /* Auth buttons */
   q('#home-signin-btn')?.addEventListener('click', fbSignIn);
   q('#home-signout-btn')?.addEventListener('click', fbSignOut);
+
+  /* Avatar dropdown */
+  q('#home-avatar-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    homeUserMenuOpen = !homeUserMenuOpen;
+    renderHome();
+  });
+  if (homeUserMenuOpen) {
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#auth-user-wrap')) { homeUserMenuOpen = false; renderHome(); }
+    }, {once:true});
+  }
 
   /* New project buttons */
   const openNew = () => { S.ui.modal = {type:'new-project', data:{}}; renderHome(); };
@@ -2012,7 +2003,7 @@ function bindHome() {
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { S.ui.modal=null; homeCtxId=null; renderHome(); }
+    if (e.key === 'Escape') { S.ui.modal=null; homeCtxId=null; homeUserMenuOpen=false; renderHome(); }
     if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') q('#m-save')?.click();
   }, {once:true});
 
@@ -3239,8 +3230,9 @@ const PROJ_PFX          = 'roadmap-proj-';
 const ROW_STATE_KEY     = 'roadmap-row-state';
 const SIDEBAR_STATE_KEY = 'roadmap-sidebar-state';
 const PROJ_ACCENTS  = ['#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#e05757'];
-let   currentProjId = null;
-let   homeCtxId     = null;
+let   currentProjId    = null;
+let   homeCtxId        = null;
+let   homeUserMenuOpen = false;
 
 /* ── UI prefs (localStorage only — no auth needed) ── */
 function loadRowState() {
@@ -3611,6 +3603,7 @@ function timeAgo(ts) {
 async function router() {
   const hash = location.hash;
   homeCtxId = null;
+  homeUserMenuOpen = false;
   if (hash.startsWith(SHARE_PREFIX)) {
     _unsubProj?.(); _unsubProj = null;
     currentProjId = null;
