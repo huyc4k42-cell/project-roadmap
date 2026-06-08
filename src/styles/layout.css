@@ -1,0 +1,58 @@
+/* ── LAYOUT: header, breadcrumb, buttons, main split ── */
+
+/* Layout container */
+.body{height:calc(100vh - var(--hdr));display:flex;overflow:hidden}
+
+/* ── HEADER ── */
+.hdr{background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;z-index:30;position:relative}
+.hdr-row1{height:58px;display:flex;align-items:center;padding:0 18px;gap:14px}
+.hdr-row2{height:36px;background:var(--s2);border-top:1px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:20px}
+.logo{display:flex;align-items:center;flex-shrink:0}
+.logo img{height:36px;width:auto}
+.vsep{width:1px;height:20px;background:var(--bd2);flex-shrink:0}
+.hdr-info{flex:1;min-width:0}
+.hdr-title{font-family:'Crimson Pro',Georgia,serif;font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:color .15s;line-height:1.2}
+.hdr-title:hover{color:var(--gold)}
+.hdr-sub{font-size:12px;color:var(--txt2);margin-top:1px}
+.hdr-btns{display:flex;gap:6px;flex-shrink:0}
+
+/* Stats row */
+.stat{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:var(--r);transition:background .15s;text-align:left;line-height:inherit;background:none;border:none;font-family:inherit;color:inherit;cursor:pointer}
+.stat:hover{background:var(--s3)}
+.stat-n{font-size:13px;font-weight:700;line-height:1}
+.stat-n.gd{color:var(--gold)}.stat-n.gn{color:var(--grn)}.stat-n.mt{color:var(--txt3)}
+.stat-l{font-size:11px;color:var(--txt3);letter-spacing:.3px}
+
+/* Buttons */
+.btn{padding:6px 14px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-gold{background:var(--gold);color:#080808}.btn-gold:hover{background:var(--goldL)}
+.btn-ghost{background:transparent;border:1px solid var(--bd2);color:var(--txt2)}.btn-ghost:hover{color:var(--txt);border-color:var(--bd3)}
+.btn-outline-gold{border:1px solid var(--gold)!important;color:var(--gold)!important}
+
+/* Add-new dropdown */
+.btn-dd{position:relative}
+.add-dd-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:5px;min-width:164px;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.5);display:none;animation:fdin .1s ease}
+.add-dd-menu.open{display:block}
+.add-dd-item{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;font-size:13px;font-weight:500;color:var(--txt2);background:none;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;transition:all .1s;text-align:left;white-space:nowrap}
+.add-dd-item:hover{background:var(--s2);color:var(--txt)}
+
+/* Title edit */
+.hdr-title-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;min-width:0}
+.hdr-title-wrap:hover .hdr-title{color:var(--gold)}
+.hdr-title-wrap:hover .edit-pen{opacity:1}
+.edit-pen{opacity:0;transition:opacity .15s;flex-shrink:0;color:var(--txt3)}
+.fi.err{border-color:var(--red)!important;animation:shake .35s ease}
+
+/* Breadcrumb */
+.breadcrumb{display:flex;align-items:center;gap:7px;min-width:0;flex:1}
+.bc-home{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--txt2);cursor:pointer;background:none;border:none;font-family:inherit;padding:3px 6px;border-radius:var(--r);transition:all .15s;white-space:nowrap;flex-shrink:0}
+.bc-home:hover{color:var(--gold)}
+.bc-sep{color:var(--bd3);font-size:14px;flex-shrink:0}
+.bc-cur{font-family:'Crimson Pro',Georgia,serif;font-size:17px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;transition:color .15s}
+.bc-cur:hover{color:var(--gold)}
+.bc-cur:hover ~ .edit-pen,.bc-cur-wrap:hover .edit-pen{opacity:1}
+.bc-cur-wrap{display:flex;align-items:center;gap:5px;min-width:0;cursor:pointer}
+
+/* Icons */
+.ico-btn{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:16px;padding:0;line-height:1;transition:color .15s;display:inline-flex;align-items:center}
+.ico-btn:hover{color:var(--gold)}
