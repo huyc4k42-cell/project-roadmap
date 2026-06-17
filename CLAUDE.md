@@ -16,10 +16,13 @@
 ## Files chính
 
 ```
-timeline.html   ← App (~4,340 dòng) — served tại /app
+app.html        ← App entry point (Vite, 20 dòng) — served tại /app
+src/app/        ← 54 ES modules: main.js, render/, events/, firebase, state...
+src/styles/     ← 7 CSS files (base, layout, sidebar, timeline, modals, home, main)
 index.html      ← Landing page (~1,120 dòng) — served tại /
-vercel.json     ← Routing config (/ → index.html, /app → timeline.html)
+vercel.json     ← Routing config (/app → app.html)
 firestore.rules ← Firestore security rules (đã deploy)
+timeline.html   ← DEPRECATED — backup của monolith cũ, không chỉnh sửa
 PROJECT_CONTEXT.md  ← Deep technical reference (stable)
 WORKING.md          ← Sprint hiện tại, decisions, backlog (volatile)
 ```
@@ -28,20 +31,20 @@ WORKING.md          ← Sprint hiện tại, decisions, backlog (volatile)
 
 ## Stack
 
-- **Vanilla JS + ES Modules** — zero framework, `<script type="module">`
+- **Vite 5 + ES Modules** — 54 modules trong `src/`, build → `dist/`
 - **Firebase 10.12.2** — Auth (Google Sign-In) + Firestore (asia-southeast1)
-- **Vercel** — static hosting, auto-deploy khi push main
-- **Single HTML file** — toàn bộ CSS + JS trong timeline.html
+- **Vercel** — auto-build Vite + deploy khi push main
+- **CDN:** lz-string, html2canvas, jsPDF via `window.*` (không npm)
 
 ---
 
 ## Deploy
 
 ```bash
-git add timeline.html index.html
+git add src/ app.html index.html
 git commit -m "feat/fix/style: mô tả"
 git push origin main
-# → Vercel tự deploy, live sau ~30s tại aroadmap.cloud
+# → Vercel chạy npm run build → dist/, live sau ~60s tại aroadmap.cloud
 ```
 
 Không cần `vercel deploy --prod`. Không cần `firebase deploy` (trừ khi đổi rules).

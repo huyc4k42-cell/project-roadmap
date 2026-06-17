@@ -251,8 +251,13 @@ export function buildTeamRow(tm, tw, twFrac) {
   <div class="trl" data-team-id="${tm.id}" data-team-ctx="${tm.id}" style="min-height:${rowH}px">
     <div class="tm-ico" style="color:${tm.color || 'var(--gold)'}">${svgIcon(tm.icon || 'layers', 15)}</div>
     <span class="tm-nm">${esc(tm.name)}</span>
-    <div class="team-drag-handle" data-team-drag="${tm.id}" draggable="true" title="Kéo để thay đổi thứ tự nhóm">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+    <div class="trl-actions">
+      <div class="team-drag-handle" data-team-drag="${tm.id}" draggable="true" title="Kéo để thay đổi thứ tự">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+      </div>
+      <button class="trl-edit-btn" data-edit-team="${tm.id}" title="Sửa nhóm">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
     </div>
   </div>
   <div class="trr" data-team="${tm.id}" style="height:${rowH}px">

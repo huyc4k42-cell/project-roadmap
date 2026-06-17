@@ -1,7 +1,37 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-09 · Session: Vite Migration B6
+> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase A done
+
+---
+
+## 🚀 VERSION SPRINT — 2026-06-17
+
+> Kế hoạch đầy đủ: 5 phases, 11 items, ~26h tổng.
+> Mỗi Phase hoàn thành → commit + update WORKING.md.
+
+| Phase | Mô tả | Status | Commit |
+|-------|-------|--------|--------|
+| A — Bug Fixes | task height, team row, icon preview, sidebar rail | ✅ Done | `ddc4975` |
+| B — UX Polish | task modal, tags, team hover buttons, docs | 🔄 In progress | — |
+| C — Features | create project date picker, add phase mini calendar | ☐ | — |
+| D — Onboarding | tooltip system | ☐ | — |
+
+### Phase A — Bug Fixes ✅ `ddc4975`
+| ID | Item | Fix |
+|----|------|-----|
+| A1 | Task overlap / fixed height | `taskBarH()` → 44px fixed, laneH min 44, .tb min-height 44 |
+| A2 | Team row không fill width | `.trr { flex:1; min-width:0 }` |
+| A3 | Icon preview không update | Click icon/color → live update style.color trên `.ig.sel` |
+| A4 | Sidebar rail lỗi hiển thị | Rail button `height:100%`, hover gold tint |
+
+### Phase B — UX Polish 🔄
+| ID | Item | Status |
+|----|------|--------|
+| B1 | Create Task Modal cleanup (bỏ phase selector, default unassigned team) | ☐ |
+| B2 | Tag — không pre-add tag khi tạo project mới | ☐ |
+| B3 | Team row hover — 2 buttons (reorder + edit) | ☐ |
+| B4 | Docs update — CLAUDE.md + PROJECT_CONTEXT.md + WORKING.md | ☐ |
 
 ---
 

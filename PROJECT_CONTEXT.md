@@ -1,24 +1,24 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-08 · Commit app: `a8cb16a` · Commit docs: (file này)
+> Cập nhật lần cuối: 2026-06-17 · Commit app: `ddc4975` (Phase A) · Commit docs: (file này)
 
 ---
 
 ## 1. Tổng quan sản phẩm
 
-**Tên:** Arthur — Project Roadmap Timeline
+**Tên:** Aroadmap
 **URL Production:** https://aroadmap.cloud (primary) · https://www.aroadmap.cloud · https://aroadmap.vercel.app
 **Repo GitHub:** https://github.com/huyc4k42-cell/project-roadmap
-**File duy nhất:** `/Users/arthur/Desktop/[Claude] Project Roadmap/timeline.html` (~4100 dòng)
+**Entry point:** `app.html` (20 dòng) → `src/app/main.js` → 54 ES modules
 
 ### Kiến trúc cốt lõi
-- **Single HTML file** — toàn bộ CSS + JS nằm trong 1 file `timeline.html`
-- **Vanilla JS + ES Module** — `<script type="module">`, Firebase SDK import qua CDN
-- **Firebase Firestore** — source of truth cho project data, real-time sync
-- **Firebase Auth** — Google Sign-In, auth required để xem/sửa projects
+- **Vite 5 + ES Modules** — 54 modules trong `src/app/` + 7 CSS trong `src/styles/`
+- **Firebase 10.12.2** (npm) — Firestore (source of truth) + Auth (Google Sign-In)
+- **CDN libs** — lz-string, html2canvas, jsPDF via `window.*` trong app.html
 - **localStorage** — cache nhanh (offline fallback) + UI prefs (theme, sidebar, row state)
-- **Hash routing** — `#home` → trang chủ, `#project-{id}` → project detail, `#share-{data}` → read-only share
+- **Hash routing** — `#home` → trang chủ, `#project-{id}` → project detail, `#v1=...` → read-only share
+- `timeline.html` — **DEPRECATED** monolith cũ, giữ làm backup, không chỉnh sửa
 
 ### Deploy
 - **Vercel** với `vercel.json` redirect root → `timeline.html`
@@ -419,24 +419,56 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 
 ```
 [Claude] Project Roadmap/
-├── timeline.html          ← App chính (~4200 dòng) — serve tại /app
-├── index.html             ← Landing page (~800 dòng) — serve tại /
-├── screenshot.png         ← 1400×900px dark-mode timeline screenshot (dùng trong landing demo)
-├── Logo.png               ← Logo source (embedded as base64 trong HTML)
-├── PROJECT_CONTEXT.md     ← file này — technical reference (stable)
-├── WORKING.md             ← sprint hiện tại, decisions, backlog (volatile)
-├── SESSION_CONTEXT.md     ← ⚠️ OBSOLETE — file cũ từ giai đoạn pre-Firebase, bỏ qua
-├── roadmap-template.csv   ← CSV mẫu cho tính năng Import CSV
-├── vercel.json            ← Vercel config (/ → index.html, /app → timeline.html)
+├── app.html               ← App entry point (Vite, 20 dòng) — serve tại /app
+├── index.html             ← Landing page (~1120 dòng) — serve tại /
+├── src/
+│   ├── app/
+│   │   ├── main.js        ← entry wiring, router init
+│   │   ├── router.js      ← hash routing (#home, #project-*, #v1=...)
+│   │   ├── state.js       ← S object + mutators
+│   │   ├── firebase.js    ← Auth + Firestore init
+│   │   ├── persistence.js ← createProject, loadProject, saveCurrentProject
+│   │   ├── algorithms.js  ← assignLanes, rowMetrics, reorderTeam
+│   │   ├── constants.js   ← ICONS, PHASE_COLORS, PROJ_ACCENTS, keys
+│   │   ├── date.js        ← weekLabel, calcWW, taskBarH (44px fixed)
+│   │   ├── utils.js       ← q(), qAll(), esc(), tagPalette()
+│   │   ├── theme.js       ← dark/light/system toggle
+│   │   ├── storage.js     ← localStorage helpers
+│   │   ├── weekpicker.js  ← calendar date-range picker (dùng trong cfg modal)
+│   │   ├── canvas.js      ← dot-matrix animation (sign-in + home empty state)
+│   │   ├── share.js       ← buildShareURL, loadFromHash (#v1=...)
+│   │   ├── icons.js       ← svgIcon(), LOGO_IMG, logoUrl
+│   │   ├── render/
+│   │   │   ├── index.js   ← render(), buildApp(), rerender(), WW
+│   │   │   ├── home.js    ← renderHome(), buildHome(), buildHomeHdr()
+│   │   │   ├── timeline.js← buildTimeline(), buildTeamRow(), buildPhaseRow()
+│   │   │   ├── sidebar.js ← buildSidebar(), buildTaskCard()
+│   │   │   └── modals.js  ← buildModal(), renderModal(), openModal(), closeModal()
+│   │   ├── events/
+│   │   │   ├── bind.js    ← bind() — toàn bộ event listeners trong project view
+│   │   │   ├── bindHome.js← bindHome() — home screen events
+│   │   │   ├── bindModal.js← bindModal() — modal CRUD + color/icon picker
+│   │   │   └── resize.js  ← task resize, phase resize, scope row resize
+│   │   ├── import/csv.js  ← CSV import (2-step flow)
+│   │   └── export/pdf.js  ← html2canvas + jsPDF export
+│   ├── styles/
+│   │   ├── main.css       ← CSS variables, animations, base reset
+│   │   ├── base.css       ← global elements (body, scrollbars, modals shell)
+│   │   ├── layout.css     ← header (2-row), breadcrumb, buttons, .body split
+│   │   ├── sidebar.css    ← backlog sidebar, rail collapse, tags, task cards
+│   │   ├── timeline.css   ← phases, weeks, team rows, task bars, scope/output
+│   │   ├── modals.css     ← modal overlay, inputs, icon grid, weekpicker
+│   │   └── home.css       ← home screen, project cards, empty state
+│   └── assets/logo.png
+├── dist/                  ← Vite build output (gitignored, Vercel builds fresh)
+├── vite.config.js         ← Vite config (input: app.html + index.html)
+├── package.json           ← npm scripts: dev (port 3333), build, preview
+├── vercel.json            ← rewrites: /app → app.html
 ├── firestore.rules        ← Firestore security rules (đã deploy 2026-06-07)
-├── firebase.json          ← Firebase CLI config (firestore rules pointer)
-├── .firebaserc            ← project alias: default → a-roadmap
-├── .vercel/
-│   └── project.json       ← projectId + orgId (đừng xóa)
-└── .claude/
-    └── launch.json        ← Preview server configs:
-                              · "timeline": python3 -m http.server 3333
-                              · "landing":  python3 -m http.server 3335
+├── firebase.json + .firebaserc ← Firebase CLI config
+├── timeline.html          ← ⚠️ DEPRECATED — monolith cũ, đừng chỉnh sửa
+├── screenshot.png         ← 1400×900 demo screenshot cho landing page
+└── .claude/launch.json    ← Preview: "vite-app" npm run dev port 3333
 ```
 
 ---

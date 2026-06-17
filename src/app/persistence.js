@@ -112,7 +112,7 @@ export function subscribeToProject(id, rerenderFn) {
 export async function loadProject(id, rerenderFn) {
   S.cfg = { title: 'Project Roadmap', subtitle: '', start: '2025-06-02', end: '2025-11-30', scopeRowHeight: 100 };
   S.phases = []; S.teams = []; S.tasks = [];
-  S.tags = ['tracking', 'UX', 'tech', 'growth', 'research']; S._nextId = 1;
+  S.tags = []; S._nextId = 1;
   S.ui.filter = { phase: '', team: '', tag: '', status: 'backlog', search: '' };
   S.ui.modal = null; S.ui.ctx = null; S.ui.dragData = null;
   S.ui.resizeData = null; S.ui.phaseResize = null; S.ui.phaseDragId = null;
@@ -158,7 +158,7 @@ export async function createProject(name, subtitle, accent, navigateFn) {
   const endD  = new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
   const end   = `${endD.getFullYear()}-${pad(endD.getMonth()+1)}-${pad(endD.getDate())}`;
   const data  = { cfg: { title: name, subtitle: subtitle || '', start, end, scopeRowHeight: 100 },
-                  phases: [], teams: [], tasks: [], tags: ['tracking','UX','tech','growth','research'], _nextId: 1 };
+                  phases: [], teams: [], tasks: [], tags: [], _nextId: 1 };
   cacheProject(id, data);
   if (db && currentUser) { try { await setDoc(_fsDoc(id), _payload(id, data, accent || '#D0A052')); } catch(e) {} }
   _projIndex.unshift({ id, name, subtitle: subtitle || '', accent: accent || '#D0A052', updatedAt: Date.now(), stats: { phases: 0, tasks: 0, sched: 0, start, end } });

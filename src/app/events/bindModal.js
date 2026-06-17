@@ -136,19 +136,18 @@ function saveCfg() {
 
 function saveTask() {
   pushHistory();
-  const name    = q('#m-name')?.value.trim();
-  const teamId  = +q('#m-team')?.value  || null;
-  const dur     = Math.max(1, +q('#m-dur')?.value || 2);
-  const phaseId = +q('#m-phase')?.value || null;
-  const tags    = [...qAll('.to.sel')].map(el => el.dataset.tag);
-  const desc    = q('#m-desc')?.value.trim() || '';
+  const name   = q('#m-name')?.value.trim();
+  const teamId = +q('#m-team')?.value || null;
+  const dur    = Math.max(1, +q('#m-dur')?.value || 2);
+  const tags   = [...qAll('.to.sel')].map(el => el.dataset.tag);
+  const desc   = q('#m-desc')?.value.trim() || '';
   if (!name) { shakeErr(q('#m-name')); return; }
 
   if (S.ui.modal.type === 'edit-task') {
     const t = taskById(S.ui.modal.data.id);
-    Object.assign(t, { name, teamId, dur, phaseId, tags, desc });
+    Object.assign(t, { name, teamId, dur, tags, desc });
   } else {
-    S.tasks.push({ id: nextId(), name, teamId, dur, phaseId, tags, desc, startWeek: null });
+    S.tasks.push({ id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: null });
   }
   _closeModal?.(_render);
 }

@@ -119,8 +119,6 @@ export function buildModal() {
       return `<button class="to${selTags.includes(tg) ? ' sel' : ''}" data-tag="${esc(tg)}"
         style="${selTags.includes(tg) ? `border-color:${fg};color:${fg};background:${bg}` : ''}">${esc(tg)}</button>`;
     }).join('');
-    const phOpts = S.phases.map(p =>
-      `<option value="${p.id}"${t.phaseId === p.id ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
 
     return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="${isEdit ? 'Sửa task' : 'Task mới'}">
       <h3>${svgIcon('edit', 14)} ${isEdit ? 'Sửa task' : 'Task mới'}</h3>
@@ -129,15 +127,12 @@ export function buildModal() {
       <div class="fg-row">
         <div class="fg"><label>Nhóm</label>
           <select class="fi" id="m-team">
+            <option value=""${!t.teamId ? ' selected' : ''}>— Chưa gắn nhóm —</option>
             ${S.teams.map(tm => `<option value="${tm.id}"${tm.id === t.teamId ? ' selected' : ''}>${esc(tm.name)}</option>`).join('')}
           </select></div>
         <div class="fg"><label>Số tuần</label>
           <input class="fi" type="number" id="m-dur" min="1" max="52" value="${t.dur || 2}"/></div>
       </div>
-      <div class="fg"><label>Phase</label>
-        <select class="fi" id="m-phase">
-          <option value="">— Chưa gán phase —</option>${phOpts}
-        </select></div>
       <div class="fg"><label>Notes</label>
         <textarea class="fi" id="m-desc" rows="3" placeholder="Add context, links, or details…">${esc(t.desc || '')}</textarea></div>
       <div class="fg"><label>Tags</label>

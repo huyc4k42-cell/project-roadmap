@@ -494,6 +494,15 @@ export function bind() {
     });
   });
 
+  /* Team hover edit button */
+  qAll('[data-edit-team]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const tm = S.teams.find(t => t.id === +el.dataset.editTeam);
+      if (tm) _openModal?.('edit-team', tm);
+    });
+  });
+
   /* Context menu action items */
   qAll('.ci[data-action]').forEach(el => {
     el.addEventListener('click', () => handleAction(el.dataset.action));
