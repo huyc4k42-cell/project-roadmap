@@ -73,9 +73,6 @@ export function calcWW(cfg) {
   return Math.max(60, Math.floor(available / cols));
 }
 
-export function taskBarH(task) {
-  const titleLen = (task.name || '').length;
-  const hasTags  = task.tags?.length > 0;
-  const longTitle = titleLen > 22;
-  return 12 + (longTitle ? 36 : 20) + (hasTags ? 22 : 0);
+export function taskBarH(_task) {
+  return 44;
 }

@@ -227,7 +227,6 @@ export function buildTeamRow(tm, tw, twFrac) {
     const width = Math.max(t.dur * WW - 3, WW - 3);
     const color = tm.color || '#D0A052';
     const ph    = t.phaseId ? phaseById(t.phaseId) : null;
-    const longTitle = (t.name || '').length > 22;
     const tagsHtml  = t.tags?.length
       ? `<div class="tb-tags">${t.tags.slice(0, 4).map(tg => `<span class="tb-tag">${esc(tg)}</span>`).join('')}</div>`
       : '';
@@ -236,7 +235,7 @@ export function buildTeamRow(tm, tw, twFrac) {
       title="${esc(t.name)}${ph ? ' · ' + esc(ph.name) : ''}${t.done ? ' (done)' : ''}">
       <div class="tb-lh" data-resize-left="${t.id}" aria-label="Kéo để thay đổi ngày bắt đầu" role="slider" aria-orientation="horizontal"></div>
       <div class="tb-top">
-        <span class="tb-nm${longTitle ? ' wrap' : ''}">${esc(t.name)}</span>
+        <span class="tb-nm wrap">${esc(t.name)}</span>
         ${t.dur >= 2 ? `<span class="tb-dur">${t.dur}w</span>` : ''}
       </div>
       ${tagsHtml}

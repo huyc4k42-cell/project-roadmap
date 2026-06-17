@@ -88,14 +88,24 @@ export function bindModal() {
   /* Tag toggles */
   qAll('.to[data-tag]').forEach(el => el.addEventListener('click', () => el.classList.toggle('sel')));
 
-  /* Icon grid */
+  /* Icon grid — select icon + apply current color */
   qAll('.ig[data-icon]').forEach(el => {
-    el.addEventListener('click', () => { qAll('.ig').forEach(i => i.classList.remove('sel')); el.classList.add('sel'); });
+    el.addEventListener('click', () => {
+      const color = q('.co.sel')?.dataset.color || '#D0A052';
+      qAll('.ig').forEach(i => { i.classList.remove('sel'); i.style.color = ''; });
+      el.classList.add('sel');
+      el.style.color = color;
+    });
   });
 
-  /* Color picker */
+  /* Color picker — select color + apply to selected icon */
   qAll('.co[data-color]').forEach(el => {
-    el.addEventListener('click', () => { qAll('.co').forEach(c => c.classList.remove('sel')); el.classList.add('sel'); });
+    el.addEventListener('click', () => {
+      qAll('.co').forEach(c => c.classList.remove('sel'));
+      el.classList.add('sel');
+      const selIcon = q('.ig.sel');
+      if (selIcon) selIcon.style.color = el.dataset.color;
+    });
   });
 }
 

@@ -60,7 +60,7 @@ export function assignLanes(tasks) {
   }
 
   const numLanes = Math.max(...phaseGroupMaxLanes, noLaneEnds.length, 1);
-  const laneH    = Array.from({ length: numLanes }, () => 34);
+  const laneH    = Array.from({ length: numLanes }, () => 44);
   for (const t of tasks) {
     const lane = result[t.id] ?? 0;
     if (lane < numLanes) laneH[lane] = Math.max(laneH[lane], taskBarH(t));
