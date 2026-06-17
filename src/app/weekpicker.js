@@ -9,6 +9,8 @@ export let wkp = {
   startMon: null, endMon: null,
   step: 'start',
   showMonthSel: false,
+  phaseMode: false,
+  cfgStart: null,
 };
 
 export function wkpNav(dir) {
@@ -83,10 +85,20 @@ export function buildWkPicker() {
 
   let footer = '';
   if (startTs && endTs) {
-    const totalWks = Math.round((endTs - startTs) / (7 * 86400000)) + 1;
+    const endSun = new Date(endTs + 6 * 86400000);
+    let f1;
+    if (wkp.phaseMode && wkp.cfgStart) {
+      const cfgTs  = wkp.cfgStart.getTime();
+      const sw     = Math.round((startTs - cfgTs) / (7 * 86400000)) + 1;
+      const ew     = Math.round((endTs   - cfgTs) / (7 * 86400000)) + 1;
+      f1 = `W${sw} → W${ew} · ${ew - sw + 1} tuần`;
+    } else {
+      const totalWks = Math.round((endTs - startTs) / (7 * 86400000)) + 1;
+      f1 = `W${isoWeek(startMon)} → W${isoWeek(endMon)} · ${totalWks} tuần`;
+    }
     footer = `<div class="wkp-footer">
-      <div class="wkp-f1">W${isoWeek(startMon)} → W${isoWeek(endMon)} · ${totalWks} tuần</div>
-      <div class="wkp-f2">${fmtWkpDate(startMon)} – ${fmtWkpDate(new Date(endTs + 6 * 86400000))}</div>
+      <div class="wkp-f1">${f1}</div>
+      <div class="wkp-f2">${fmtWkpDate(startMon)} – ${fmtWkpDate(endSun)}</div>
     </div>`;
   }
 

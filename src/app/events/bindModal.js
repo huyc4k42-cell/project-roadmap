@@ -171,11 +171,16 @@ function saveTeam() {
 function savePhase() {
   pushHistory();
   const name  = q('#m-ph-name')?.value.trim();
-  const sw    = +q('#m-ph-s')?.value;
-  const ew    = +q('#m-ph-e')?.value;
   const color = q('.co.sel')?.dataset.color || PHASE_COLORS[0];
   if (!name) { shakeErr(q('#m-ph-name')); return; }
-  if (sw < 1 || ew < sw) return;
+
+  const cfgStart   = wkp.cfgStart || wkpMonday(parseDate(S.cfg.start));
+  const cfgStartTs = cfgStart.getTime();
+  let sw = 1, ew = 4;
+  if (wkp.startMon && wkp.endMon) {
+    sw = Math.max(1, Math.round((wkp.startMon.getTime() - cfgStartTs) / (7 * 86400000)) + 1);
+    ew = Math.max(sw, Math.round((wkp.endMon.getTime()   - cfgStartTs) / (7 * 86400000)) + 1);
+  }
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);

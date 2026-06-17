@@ -25,14 +25,31 @@ export function renderModal() {
 /* ── openModal / closeModal ── */
 export function openModal(type, data = null, parseDate, wkpMonday, wkp) {
   S.ui.modal = { type, data };
-  if (type === 'cfg' && parseDate && wkpMonday && wkp) {
-    const sm     = wkpMonday(parseDate(S.cfg.start));
-    wkp.startMon = sm;
-    wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
-    wkp.yr       = sm.getFullYear();
-    wkp.mo       = sm.getMonth();
-    wkp.step     = 'start';
-    wkp.showMonthSel = false;
+  if (parseDate && wkpMonday && wkp) {
+    if (type === 'cfg') {
+      const sm     = wkpMonday(parseDate(S.cfg.start));
+      wkp.startMon = sm;
+      wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
+      wkp.yr       = sm.getFullYear();
+      wkp.mo       = sm.getMonth();
+      wkp.step     = 'start';
+      wkp.showMonthSel = false;
+      wkp.phaseMode = false;
+      wkp.cfgStart  = null;
+    } else if (type === 'add-phase' || type === 'edit-phase') {
+      const ph       = data || {};
+      const cfgStart = wkpMonday(parseDate(S.cfg.start));
+      const sw       = ph.startWeek || 1;
+      const ew       = ph.endWeek   || Math.min(sw + 3, totalWeeks(S.cfg));
+      wkp.cfgStart   = cfgStart;
+      wkp.phaseMode  = true;
+      wkp.startMon   = new Date(cfgStart.getTime() + (sw - 1) * 7 * 86400000);
+      wkp.endMon     = new Date(cfgStart.getTime() + (ew - 1) * 7 * 86400000);
+      wkp.yr         = wkp.startMon.getFullYear();
+      wkp.mo         = wkp.startMon.getMonth();
+      wkp.step       = 'start';
+      wkp.showMonthSel = false;
+    }
   }
   renderModal();
 }
@@ -180,7 +197,6 @@ export function buildModal() {
   if (type === 'add-phase' || type === 'edit-phase') {
     const ph     = data || {};
     const isEdit = type === 'edit-phase';
-    const tw     = totalWeeks(S.cfg);
     const colorBtns = PHASE_COLORS.map(c =>
       `<div class="co${c === (ph.color || PHASE_COLORS[0]) ? ' sel' : ''}" data-color="${c}" style="background:${c}"></div>`).join('');
 
@@ -188,15 +204,9 @@ export function buildModal() {
       <h3>${svgIcon('map', 14)} ${isEdit ? 'Sửa phase' : 'Phase mới'}</h3>
       <div class="fg"><label>Tên phase *</label>
         <input class="fi" id="m-ph-name" value="${esc(ph.name || '')}" placeholder="Phase 1..."/></div>
-      <div class="fg-row">
-        <div class="fg"><label>Tuần bắt đầu</label>
-          <input class="fi" type="number" id="m-ph-s" min="1" max="${tw}" value="${ph.startWeek || 1}"/></div>
-        <div class="fg"><label>Tuần kết thúc</label>
-          <input class="fi" type="number" id="m-ph-e" min="1" max="${tw}" value="${ph.endWeek || 4}"/></div>
-      </div>
+      ${buildWkPicker()}
       <div class="fg"><label>Màu</label>
         <div class="col-opts">${colorBtns}</div></div>
-      <p class="hlp">${weekLabel(ph.startWeek || 1, S.cfg)} → ${weekLabel(ph.endWeek || 4, S.cfg)}</p>
       <div class="mdl-btns">
         ${isEdit ? `<button class="bsm b-dng" id="m-del">Xóa</button>` : ''}
         <button class="bsm b-sec" id="m-cancel">Hủy</button>

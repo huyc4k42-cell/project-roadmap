@@ -5,6 +5,7 @@ import { currentUser }             from '../firebase.js';
 import { PROJ_ACCENTS }            from '../constants.js';
 import { logoUrl }                 from '../icons.js';
 import { buildImportModal }        from './modals.js';
+import { buildWkPicker }          from '../weekpicker.js';
 
 /* State for home-only UI */
 export let homeCtxId        = null;
@@ -229,6 +230,7 @@ export function buildHomeModal(accentSwatches) {
             : (accentSwatches || '')
         }</div>
       </div>
+      ${!isRename ? `<div class="fg"><label>Thời gian dự án</label>${buildWkPicker()}</div>` : ''}
       <div class="mdl-btns">
         <button class="bsm b-sec" id="m-cancel">Hủy</button>
         <button class="bsm b-primary" id="m-save">${isRename ? 'Lưu' : 'Tạo Project'}</button>

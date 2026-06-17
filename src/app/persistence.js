@@ -150,13 +150,15 @@ export async function loadProject(id, rerenderFn) {
 }
 
 /* ── Project CRUD ── */
-export async function createProject(name, subtitle, accent, navigateFn) {
+export async function createProject(name, subtitle, accent, navigateFn, startDate, endDate) {
   const id  = 'proj_' + Date.now();
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
-  const start = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  const endD  = new Date(now.getFullYear(), now.getMonth() + 6, now.getDate());
-  const end   = `${endD.getFullYear()}-${pad(endD.getMonth()+1)}-${pad(endD.getDate())}`;
+  const start = startDate || `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  const end   = endDate   || (() => {
+    const d = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  })();
   const data  = { cfg: { title: name, subtitle: subtitle || '', start, end, scopeRowHeight: 100 },
                   phases: [], teams: [], tasks: [], tags: [], _nextId: 1 };
   cacheProject(id, data);

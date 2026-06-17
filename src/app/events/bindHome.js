@@ -8,6 +8,8 @@ import {
   setHomeCtxId, setHomeUserMenuOpen,
 } from '../render/home.js';
 import { bindImportModal }   from '../import/csv.js';
+import { wkp, bindWkPickerEvents, setRenderModal } from '../weekpicker.js';
+import { wkpMonday, dateStrYMD }                   from '../date.js';
 
 /* Injected callbacks */
 let _renderHome     = null;
@@ -157,7 +159,21 @@ export function bindHome() {
   }
 
   /* New project */
-  const openNew = () => { S.ui.modal = { type: 'new-project', data: {} }; _renderHome?.(); };
+  const openNew = () => {
+    const today    = new Date(); today.setHours(0, 0, 0, 0);
+    const startMon = wkpMonday(today);
+    const endMon   = new Date(startMon.getTime() + 12 * 7 * 86400000);
+    wkp.startMon     = startMon;
+    wkp.endMon       = endMon;
+    wkp.yr           = startMon.getFullYear();
+    wkp.mo           = startMon.getMonth();
+    wkp.step         = 'start';
+    wkp.showMonthSel = false;
+    wkp.phaseMode    = false;
+    wkp.cfgStart     = null;
+    S.ui.modal = { type: 'new-project', data: {} };
+    _renderHome?.();
+  };
   q('#home-new-btn')?.addEventListener('click', openNew);
   q('#home-new-hdr-btn')?.addEventListener('click', openNew);
 
@@ -231,6 +247,12 @@ export function bindHome() {
   });
   q('#m-cancel')?.addEventListener('click', () => { S.ui.modal = null; _renderHome?.(); });
 
+  /* Weekpicker for new-project modal */
+  if (S.ui.modal?.type === 'new-project') {
+    setRenderModal(() => _renderHome?.());
+    bindWkPickerEvents();
+  }
+
   /* Accent swatches */
   qAll('.proj-accent-swatch').forEach(sw => {
     sw.addEventListener('click', () => {
@@ -249,9 +271,12 @@ export function bindHome() {
     const sub   = q('#hm-sub')?.value.trim() || '';
     const type  = S.ui.modal?.type;
     if (type === 'new-project') {
-      const accent = q('.proj-accent-swatch.sel')?.dataset.acc || '#D0A052';
+      const accent   = q('.proj-accent-swatch.sel')?.dataset.acc || '#D0A052';
+      const startDate = wkp.startMon ? dateStrYMD(wkp.startMon) : null;
+      const endSun    = wkp.endMon ? new Date(wkp.endMon.getTime() + 6 * 86400000) : null;
+      const endDate   = endSun ? dateStrYMD(endSun) : null;
       S.ui.modal = null;
-      _createProject?.(name, sub, accent, hash => { location.hash = hash; });
+      _createProject?.(name, sub, accent, hash => { location.hash = hash; }, startDate, endDate);
     } else if (type === 'rename-project') {
       const id     = S.ui.modal.data.id;
       const accent = q('.proj-accent-swatch.sel')?.dataset.acc || S.ui.modal.data.accent || '#D0A052';

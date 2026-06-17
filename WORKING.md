@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase A done
+> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase C done
 
 ---
 
@@ -13,8 +13,8 @@
 | Phase | Mô tả | Status | Commit |
 |-------|-------|--------|--------|
 | A — Bug Fixes | task height, team row, icon preview, sidebar rail | ✅ Done | `ddc4975` |
-| B — UX Polish | task modal, tags, team hover buttons, docs | 🔄 In progress | — |
-| C — Features | create project date picker, add phase mini calendar | ☐ | — |
+| B — UX Polish | task modal, tags, team hover buttons, docs | ✅ Done | `045bb9f` |
+| C — Features | create project date picker, add phase mini calendar | ✅ Done | pending |
 | D — Onboarding | tooltip system | ☐ | — |
 
 ### Phase A — Bug Fixes ✅ `ddc4975`
@@ -25,13 +25,19 @@
 | A3 | Icon preview không update | Click icon/color → live update style.color trên `.ig.sel` |
 | A4 | Sidebar rail lỗi hiển thị | Rail button `height:100%`, hover gold tint |
 
-### Phase B — UX Polish 🔄
+### Phase B — UX Polish ✅ `045bb9f`
 | ID | Item | Status |
 |----|------|--------|
-| B1 | Create Task Modal cleanup (bỏ phase selector, default unassigned team) | ☐ |
-| B2 | Tag — không pre-add tag khi tạo project mới | ☐ |
-| B3 | Team row hover — 2 buttons (reorder + edit) | ☐ |
-| B4 | Docs update — CLAUDE.md + PROJECT_CONTEXT.md + WORKING.md | ☐ |
+| B1 | Create Task Modal cleanup (bỏ phase selector, default unassigned team) | ✅ |
+| B2 | Tag — không pre-add tag khi tạo project mới | ✅ |
+| B3 | Team row hover — 2 buttons (reorder + edit) | ✅ |
+| B4 | Docs update — CLAUDE.md + PROJECT_CONTEXT.md + WORKING.md | ✅ |
+
+### Phase C — Features ✅
+| ID | Item | Implementation |
+|----|------|----------------|
+| C1 | Create Project Date Picker | `weekpicker.js` embedded in `buildHomeModal()` (new-project only, not rename). wkp init in `openNew` handler: start = Monday-aligned today, end = +12 weeks. `createProject()` now accepts `startDate`/`endDate`. |
+| C2 | Add Phase Mini Calendar | Replaced `<input type="number">` week inputs + `<p class="hlp">` with `buildWkPicker()` inline in add/edit-phase modal. `openModal()` initializes `wkp.phaseMode=true`, `wkp.cfgStart`. `savePhase()` computes `sw/ew` from `wkp.startMon/endMon`. Footer shows "W5 → W8 · 4 tuần". |
 
 ---
 

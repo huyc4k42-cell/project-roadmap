@@ -132,7 +132,7 @@ setBindHomeDeps({
     location.hash = '#home';
   }),
   openImportModal:  openImportFn,
-  createProject:    (name, sub, accent, nav) => createProject(name, sub, accent, nav),
+  createProject:    (name, sub, accent, nav, startDate, endDate) => createProject(name, sub, accent, nav, startDate, endDate),
   deleteProject:    (id, cb) => deleteProject(id, cb),
   duplicateProject: (id, cb) => duplicateProject(id, cb),
   renameProject:    (id, name, sub, accent, cb) => renameProject(id, name, sub, accent, cb),
