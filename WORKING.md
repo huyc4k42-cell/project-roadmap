@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase C done
+> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase D done
 
 ---
 
@@ -14,8 +14,8 @@
 |-------|-------|--------|--------|
 | A — Bug Fixes | task height, team row, icon preview, sidebar rail | ✅ Done | `ddc4975` |
 | B — UX Polish | task modal, tags, team hover buttons, docs | ✅ Done | `045bb9f` |
-| C — Features | create project date picker, add phase mini calendar | ✅ Done | pending |
-| D — Onboarding | tooltip system | ☐ | — |
+| C — Features | create project date picker, add phase mini calendar | ✅ Done | `c5d8690` |
+| D — Onboarding | tooltip system | ✅ Done | pending |
 
 ### Phase A — Bug Fixes ✅ `ddc4975`
 | ID | Item | Fix |
@@ -38,6 +38,11 @@
 |----|------|----------------|
 | C1 | Create Project Date Picker | `weekpicker.js` embedded in `buildHomeModal()` (new-project only, not rename). wkp init in `openNew` handler: start = Monday-aligned today, end = +12 weeks. `createProject()` now accepts `startDate`/`endDate`. |
 | C2 | Add Phase Mini Calendar | Replaced `<input type="number">` week inputs + `<p class="hlp">` with `buildWkPicker()` inline in add/edit-phase modal. `openModal()` initializes `wkp.phaseMode=true`, `wkp.cfgStart`. `savePhase()` computes `sw/ew` from `wkp.startMon/endMon`. Footer shows "W5 → W8 · 4 tuần". |
+
+### Phase D — Onboarding ✅
+| ID | Item | Implementation |
+|----|------|----------------|
+| D1 | Tooltip onboarding system | `src/app/onboarding.js` (new module, 2 files). 4-step walkthrough: Welcome → Add phases/teams → Schedule tasks → Done. Spotlight effect via `box-shadow:0 0 0 9999px`. `#onb-root` in `app.html`, separate from `#app`/`#modal-root`. Triggers only for empty projects (`!phases && !teams && !tasks`). Flag: `localStorage aroadmap_onboarded`. "Bỏ qua" + click outside = dismiss. Dot progress indicator. `setOnbCheck` hook in `render/index.js` → called after each `render()`, 600ms delay. |
 
 ---
 

@@ -1,0 +1,19 @@
+/* ── ONBOARDING TOOLTIP SYSTEM ── */
+.onb-overlay{position:fixed;inset:0;z-index:1200;pointer-events:none}
+.onb-dim{position:absolute;inset:0;background:rgba(0,0,0,.65);pointer-events:all}
+.onb-spot{position:absolute;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.65);pointer-events:none;transition:top .3s ease,left .3s ease,width .3s ease,height .3s ease}
+.onb-tip{position:absolute;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:18px 20px;width:300px;pointer-events:all;z-index:1201;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:sup .2s ease}
+.onb-hd{margin-bottom:10px}
+.onb-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold);background:var(--goldD);padding:3px 8px;border-radius:4px}
+.onb-ttl{font-family:'Crimson Pro',Georgia,serif;font-size:19px;font-weight:600;color:var(--txt);margin-bottom:8px;line-height:1.25}
+.onb-bdy{font-size:13px;color:var(--txt2);line-height:1.65;margin-bottom:16px}
+.onb-bdy strong{color:var(--txt);font-weight:600}
+.onb-ft{display:flex;align-items:center;justify-content:space-between}
+.onb-dots{display:flex;gap:4px;align-items:center}
+.onb-dot{width:5px;height:5px;border-radius:50%;background:var(--bd3);transition:all .2s}
+.onb-dot.cur{background:var(--gold);width:14px;border-radius:3px}
+.onb-acts{display:flex;align-items:center;gap:10px}
+.onb-skip{font-size:12px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;transition:color .15s}
+.onb-skip:hover{color:var(--txt2)}
+.onb-btn{font-size:13px;font-weight:500;color:#0a0a0a;background:var(--gold);border:none;cursor:pointer;font-family:inherit;padding:7px 16px;border-radius:var(--r);transition:opacity .15s;white-space:nowrap}
+.onb-btn:hover{opacity:.85}

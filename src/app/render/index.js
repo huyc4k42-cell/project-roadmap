@@ -14,9 +14,11 @@ import { renderHome }                  from './home.js';
 /* ── WW — module-level week-width; set each render cycle ── */
 export let WW = 64;
 
-/* Injected: bind() callback from B7 events layer */
-let _bind = null;
-export function setBind(fn) { _bind = fn; }
+/* Injected callbacks */
+let _bind     = null;
+let _onbCheck = null;
+export function setBind(fn)     { _bind     = fn; }
+export function setOnbCheck(fn) { _onbCheck = fn; }
 
 /* ── render() ── */
 export function render(noSave = false) {
@@ -34,6 +36,7 @@ export function render(noSave = false) {
 
   document.getElementById('app').innerHTML = buildApp();
   _bind?.();
+  _onbCheck?.();
 
   /* Restore scroll */
   const ta2 = document.querySelector('.tl-area');

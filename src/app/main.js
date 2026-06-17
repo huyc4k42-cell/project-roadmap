@@ -8,6 +8,7 @@ import '../styles/timeline.css';
 import '../styles/modals.css';
 import '../styles/home.css';
 import '../styles/main.css';
+import '../styles/onboarding.css';
 import { initFirebase, fbSignIn, fbSignOut } from './firebase.js';
 import { S, undo as _undo, redo as _redo }   from './state.js';
 import { PROJ_PFX }                           from './constants.js';
@@ -22,8 +23,11 @@ import {
   createProject, deleteProject, duplicateProject, renameProject,
 } from './persistence.js';
 
+/* Onboarding */
+import { startOnboarding }          from './onboarding.js';
+
 /* Render */
-import { render, rerender, setBind } from './render/index.js';
+import { render, rerender, setBind, setOnbCheck } from './render/index.js';
 import { renderHome, setLoadIndex as setHomeLoadIndex, setBindHome } from './render/home.js';
 import {
   openModal as _openModalBase, closeModal as _closeModalBase,
@@ -139,6 +143,13 @@ setBindHomeDeps({
   loadIndex,
   initSignInCanvas,
   initHomeEmptyCanvas,
+});
+
+/* onboarding — run after each project render, only for new empty projects */
+setOnbCheck(() => {
+  if (currentProjId && !S.ui.readonly) {
+    setTimeout(() => startOnboarding(), 600);
+  }
 });
 
 /* events/resize.js — inject render + renderRAF, then start global listeners */
