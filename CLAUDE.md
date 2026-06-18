@@ -99,6 +99,42 @@ Vercel proj:  prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx
 
 ---
 
+## Agent Workflow (Plan → Execute)
+
+Dùng 2 agent trong `Agent/` cho mọi task code có độ phức tạp trung bình trở lên:
+
+```
+1. code-analyst  →  quét codebase, tìm root cause, lên plan
+2. [User approve plan]
+3. code-executor →  thực thi đúng plan, không improvise
+```
+
+**Khi nào dùng:**
+- Bug không rõ nguyên nhân
+- Feature chạm nhiều file (>2)
+- Refactor hoặc thay đổi state/data flow
+
+**Cách chạy:**
+
+```
+# Bước 1 — Analyst scan và plan
+/agent code-analyst
+> [mô tả bug hoặc yêu cầu]
+
+# Bước 2 — Đọc plan, reply "go" nếu đồng ý
+
+# Bước 3 — Executor thực thi
+/agent code-executor
+> [paste plan từ analyst + "go"]
+```
+
+**Quy tắc:**
+- `code-analyst` KHÔNG được viết/sửa file — chỉ đọc và lên plan
+- `code-executor` KHÔNG được tự re-plan — nếu có blocker thì dừng, báo user
+- Nếu executor báo 🚨 BLOCKER → quay lại analyst hoặc tự fix, không để executor đoán
+
+---
+
 ## Debug nhanh
 
 1. WW âm → `calcWW()` guard `Math.max(60, ...)`
