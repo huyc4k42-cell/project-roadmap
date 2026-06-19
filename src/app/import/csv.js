@@ -5,15 +5,17 @@ import { parseDate, startMonday, dateStrYMD } from '../date.js';
 import { PHASE_COLORS, PROJ_ACCENTS }   from '../constants.js';
 
 /* Injected from router/persistence (B8) */
-let _loadIndex  = null;
-let _saveIndex  = null;
-let _projKey    = id => 'roadmap-proj-' + id;
-let _rerenderFn = null;
-export function setImportDeps({ loadIndex, saveIndex, projKey, rerenderFn }) {
-  _loadIndex  = loadIndex;
-  _saveIndex  = saveIndex;
-  if (projKey)    _projKey    = projKey;
-  if (rerenderFn) _rerenderFn = rerenderFn;
+let _loadIndex       = null;
+let _saveIndex       = null;
+let _projKey         = id => 'roadmap-proj-' + id;
+let _rerenderFn      = null;
+let _saveToFirestore = null;
+export function setImportDeps({ loadIndex, saveIndex, projKey, rerenderFn, saveToFirestore }) {
+  _loadIndex       = loadIndex;
+  _saveIndex       = saveIndex;
+  if (projKey)          _projKey         = projKey;
+  if (rerenderFn)       _rerenderFn      = rerenderFn;
+  if (saveToFirestore)  _saveToFirestore = saveToFirestore;
 }
 
 /* ── refreshImportPreview ── */
@@ -183,6 +185,9 @@ export function executeCSVImport() {
 
   try { localStorage.setItem(_projKey(projId), JSON.stringify(projData)); }
   catch(e) { showToast('Lỗi lưu dữ liệu — dung lượng đầy?'); return; }
+  if (_saveToFirestore) {
+    _saveToFirestore(projId, projData, t.newProjAccent || '#D0A052').catch(console.error);
+  }
 
   const idx = _loadIndex?.() || [];
   const ex  = idx.find(p => p.id === projId);

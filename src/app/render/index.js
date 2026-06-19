@@ -3,7 +3,7 @@ import { S }                           from '../state.js';
 import { esc }                         from '../utils.js';
 import { calcWW, totalWeeks }          from '../date.js';
 import { currentUser }                 from '../firebase.js';
-import { currentProjId, saveCurrentProject, updateIndexEntry } from '../persistence.js';
+import { currentProjId, saveCurrentProject } from '../persistence.js';
 import { LOGO_IMG, svgIcon }           from '../icons.js';
 import { buildSidebar }                from './sidebar.js';
 import { buildTimeline, setWW }        from './timeline.js';

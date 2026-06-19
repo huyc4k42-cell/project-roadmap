@@ -59,7 +59,8 @@ export function bindModal() {
   /* Reset all data */
   q('#m-reset')?.addEventListener('click', () => {
     if (!confirm('Xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.')) return;
-    S.phases = []; S.teams = []; S.tasks = []; S._nextId = 1;
+    pushHistory();
+    S.phases = []; S.teams = []; S.tasks = []; S.tags = []; S._nextId = 1;
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     _closeModal?.(_render);
   });
@@ -135,13 +136,13 @@ function saveCfg() {
 }
 
 function saveTask() {
-  pushHistory();
   const name   = q('#m-name')?.value.trim();
   const teamId = +q('#m-team')?.value || null;
   const dur    = Math.max(1, +q('#m-dur')?.value || 2);
   const tags   = [...qAll('.to.sel')].map(el => el.dataset.tag);
   const desc   = q('#m-desc')?.value.trim() || '';
   if (!name) { shakeErr(q('#m-name')); return; }
+  pushHistory();
 
   if (S.ui.modal.type === 'edit-task') {
     const t = taskById(S.ui.modal.data.id);
@@ -153,11 +154,11 @@ function saveTask() {
 }
 
 function saveTeam() {
-  pushHistory();
   const name  = q('#m-tm-name')?.value.trim();
   const icon  = q('.ig.sel')?.dataset.icon  || 'layers';
   const color = q('.co.sel')?.dataset.color || '#D0A052';
   if (!name) { shakeErr(q('#m-tm-name')); return; }
+  pushHistory();
 
   if (S.ui.modal.type === 'edit-team') {
     const tm = S.teams.find(t => t.id === S.ui.modal.data.id);
@@ -169,10 +170,10 @@ function saveTeam() {
 }
 
 function savePhase() {
-  pushHistory();
   const name  = q('#m-ph-name')?.value.trim();
   const color = q('.co.sel')?.dataset.color || PHASE_COLORS[0];
   if (!name) { shakeErr(q('#m-ph-name')); return; }
+  pushHistory();
 
   const cfgStart   = wkp.cfgStart || wkpMonday(parseDate(S.cfg.start));
   const cfgStartTs = cfgStart.getTime();

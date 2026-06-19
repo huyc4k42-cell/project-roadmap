@@ -2,7 +2,7 @@
 import { doc, getDoc, setDoc, deleteDoc, collection,
          query, where, getDocs, onSnapshot }   from 'firebase/firestore';
 import { db, currentUser }                     from './firebase.js';
-import { S }                                   from './state.js';
+import { S, resetHistory }                      from './state.js';
 import { INDEX_KEY, PROJ_PFX, LS_KEY }         from './constants.js';
 import { showToast }                           from './utils.js';
 
@@ -15,8 +15,9 @@ export function setCurrentProjId(id) { currentProjId = id; }
 export function loadIndex()    { return _projIndex; }
 export function saveIndex(idx) { _projIndex = idx; }
 
-let _unsubProj = null;
-let _fbSaving  = false;
+let _unsubProj   = null;
+let _fbSaving    = false;
+let _fbSaveTimer = null;
 
 /* ── Cache helpers ── */
 function projKey(id)         { return PROJ_PFX + id; }
@@ -79,14 +80,20 @@ export function updateIndexEntry() {
 /* ── Save ── */
 export async function saveToFirestore(id, data, accent) {
   if (!db || !currentUser) return;
+  clearTimeout(_fbSaveTimer);
   _fbSaving = true;
+  /* Hard max fallback: reset after 5000ms if setDoc never resolves (e.g. offline) */
+  _fbSaveTimer = setTimeout(() => { _fbSaving = false; _fbSaveTimer = null; }, 5000);
   try {
     const pl = _payload(id, data, accent);
     await setDoc(_fsDoc(id), pl);
     const p = _projIndex.find(p => p.id === id);
     if (p) { p.name = pl.name; p.subtitle = pl.subtitle; p.updatedAt = pl.updatedAt; p.stats = pl.stats; }
   } catch(e) { console.error('saveToFirestore:', e); }
-  setTimeout(() => { _fbSaving = false; }, 800);
+  finally {
+    clearTimeout(_fbSaveTimer);
+    _fbSaveTimer = setTimeout(() => { _fbSaving = false; _fbSaveTimer = null; }, 800);
+  }
 }
 
 /* ── Realtime subscription ── */
@@ -102,20 +109,26 @@ export function subscribeToProject(id, rerenderFn) {
     if (d.tasks)   S.tasks   = d.tasks;
     if (d.tags)    S.tags    = d.tags;
     if (d._nextId) S._nextId = d._nextId;
+    if ('collaborators' in d) _projCollaborators = d.collaborators || [];
+    if ('inviteToken'   in d) _projInviteToken   = d.inviteToken   || '';
     cacheProject(id, { cfg: S.cfg, phases: S.phases, teams: S.teams, tasks: S.tasks, tags: S.tags, _nextId: S._nextId });
     rerenderFn(true);
-    showToast('🔄 Cập nhật từ thiết bị khác', 2500);
+    if (d.lastEditedBy?.uid && d.lastEditedBy.uid !== currentUser?.uid) {
+      showToast('🔄 Cập nhật từ thiết bị khác', 2500);
+    }
   });
 }
 
 /* ── Load project ── */
 export async function loadProject(id, rerenderFn) {
+  resetHistory();
   S.cfg = { title: 'Project Roadmap', subtitle: '', start: '2025-06-02', end: '2025-11-30', scopeRowHeight: 100 };
   S.phases = []; S.teams = []; S.tasks = [];
   S.tags = []; S._nextId = 1;
   S.ui.filter = { phase: '', team: '', tag: '', status: 'backlog', search: '' };
   S.ui.modal = null; S.ui.ctx = null; S.ui.dragData = null;
   S.ui.resizeData = null; S.ui.phaseResize = null; S.ui.phaseDragId = null;
+  S.ui.teamDragId = null;
   currentProjId = id;
 
   if (db && currentUser) {

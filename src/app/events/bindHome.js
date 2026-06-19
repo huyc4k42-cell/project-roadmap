@@ -133,6 +133,35 @@ export function loadSampleData(render) {
   render?.();
 }
 
+/* ── Avatar outside-click handler (module-level, self-removes) ── */
+function _onAvatarOutsideClick(e) {
+  if (!e.target.closest('#auth-user-wrap')) {
+    document.removeEventListener('click', _onAvatarOutsideClick);
+    setHomeUserMenuOpen(false);
+    _renderHome?.();
+  }
+}
+
+/* ── Project ctx outside-click handler (module-level, self-removes) ── */
+function _onProjCtxOutsideClick() {
+  document.removeEventListener('click', _onProjCtxOutsideClick);
+  setHomeCtxId(null);
+  _renderHome?.();
+}
+
+/* ── Home keydown handler (module-level so it can be removed/re-added) ── */
+function _onHomeKey(e) {
+  if (e.key === 'Escape') {
+    S.ui.modal = null;
+    setHomeCtxId(null);
+    setHomeUserMenuOpen(false);
+    _renderHome?.();
+  }
+  if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') {
+    q('#m-save')?.click();
+  }
+}
+
 /* ── bindHome ── */
 export function bindHome() {
   /* Canvas animations */
@@ -150,12 +179,8 @@ export function bindHome() {
     _renderHome?.();
   });
   if (homeUserMenuOpen) {
-    document.addEventListener('click', e => {
-      if (!e.target.closest('#auth-user-wrap')) {
-        setHomeUserMenuOpen(false);
-        _renderHome?.();
-      }
-    }, { once: true });
+    document.removeEventListener('click', _onAvatarOutsideClick);
+    document.addEventListener('click', _onAvatarOutsideClick);
   }
 
   /* New project */
@@ -229,7 +254,8 @@ export function bindHome() {
 
   /* Close ctx when clicking outside */
   if (homeCtxId) {
-    document.addEventListener('click', () => { setHomeCtxId(null); _renderHome?.(); }, { once: true });
+    document.removeEventListener('click', _onProjCtxOutsideClick);
+    document.addEventListener('click', _onProjCtxOutsideClick);
   }
 
   /* Theme toggle */
@@ -286,17 +312,8 @@ export function bindHome() {
   });
 
   /* Keyboard shortcuts */
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      S.ui.modal = null;
-      setHomeCtxId(null);
-      setHomeUserMenuOpen(false);
-      _renderHome?.();
-    }
-    if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') {
-      q('#m-save')?.click();
-    }
-  }, { once: true });
+  document.removeEventListener('keydown', _onHomeKey);
+  document.addEventListener('keydown', _onHomeKey);
 
   /* Import modal bind (runs on top of normal modal bind) */
   if (S.ui.modal?.type === 'import') bindImportModal();

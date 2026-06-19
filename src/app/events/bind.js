@@ -57,7 +57,7 @@ export function handleAction(action) {
   if (cmd === 'edit-task')    _openModal?.('edit-task',  taskById(nid));
   if (cmd === 'del-task')   { delTask(nid);  _render?.(); }
   if (cmd === 'toggle-done') { const t = taskById(nid); if (t) { pushHistory(); t.done = !t.done; _render?.(); } }
-  if (cmd === 'unschedule')  { const t = taskById(nid); if (t) { t.startWeek = null; _render?.(); } }
+  if (cmd === 'unschedule')  { const t = taskById(nid); if (t) { pushHistory(); t.startWeek = null; _render?.(); } }
   if (cmd === 'edit-team')   _openModal?.('edit-team',  S.teams.find(t => t.id === nid));
   if (cmd === 'del-team')  { delTeam(nid);  _render?.(); }
   if (cmd === 'edit-phase')  _openModal?.('edit-phase', phaseById(nid));
@@ -229,7 +229,7 @@ export function bind() {
         e.preventDefault(); e.stopPropagation();
         const t = taskById(taskId);
         const tag = S.ui.dragData.tag;
-        if (t && tag && !t.tags.includes(tag)) { t.tags.push(tag); S.ui.dragData = null; _render?.(); }
+        if (t && tag && !t.tags.includes(tag)) { pushHistory(); t.tags.push(tag); S.ui.dragData = null; _render?.(); }
       }
     });
 
@@ -308,7 +308,7 @@ export function bind() {
       e.stopPropagation(); e.preventDefault();
       const id = +el.dataset.resize;
       const t = taskById(id);
-      if (t) S.ui.resizeData = { taskId: id, side: 'right', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek };
+      if (t) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'right', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek }; }
     });
   });
 
@@ -318,7 +318,7 @@ export function bind() {
       e.stopPropagation(); e.preventDefault();
       const id = +el.dataset.resizeLeft;
       const t = taskById(id);
-      if (t) S.ui.resizeData = { taskId: id, side: 'left', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek };
+      if (t) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'left', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek }; }
     });
   });
 
@@ -329,6 +329,7 @@ export function bind() {
       const id = +el.dataset.phResizeLeft;
       const ph = phaseById(id);
       if (!ph) return;
+      pushHistory();
       S.ui.phaseResize = {
         phaseId: id, side: 'left', startX: e.clientX,
         origStart: ph.startWeek, origEnd: ph.endWeek,
@@ -342,6 +343,7 @@ export function bind() {
       const id = +el.dataset.phResizeRight;
       const ph = phaseById(id);
       if (!ph) return;
+      pushHistory();
       S.ui.phaseResize = {
         phaseId: id, side: 'right', startX: e.clientX,
         origStart: ph.startWeek, origEnd: ph.endWeek,
@@ -456,7 +458,7 @@ export function bind() {
       e.preventDefault(); sb.classList.remove('dh-zone');
       if (S.ui.dragData?.type === 'bar') {
         const t = taskById(S.ui.dragData.taskId);
-        if (t) t.startWeek = null;
+        if (t) { pushHistory(); t.startWeek = null; }
         S.ui.dragData = null;
         _render?.();
       }
@@ -517,7 +519,7 @@ export function bind() {
       const ph = phaseById(+el.dataset.scopeId);
       if (ph) ph.scope = el.value;
     });
-    el.addEventListener('blur', () => _render?.());
+    el.addEventListener('blur', () => { pushHistory(); _render?.(); });
   });
 
   /* Output checklist — add item */
@@ -525,6 +527,7 @@ export function bind() {
     el.addEventListener('click', () => {
       const ph = phaseById(+el.dataset.addChk);
       if (!ph) return;
+      pushHistory();
       if (!ph.outputs) ph.outputs = [];
       ph.outputs.push({ id: nextId(), text: '', done: false });
       _render?.();
@@ -538,7 +541,7 @@ export function bind() {
       const ph = phaseById(pid);
       if (!ph) return;
       const o = ph.outputs?.find(x => x.id === oid);
-      if (o) { o.done = el.checked; _render?.(); }
+      if (o) { pushHistory(); o.done = el.checked; _render?.(); }
     });
   });
 
@@ -551,6 +554,13 @@ export function bind() {
       const o = ph.outputs?.find(x => x.id === oid);
       if (o) o.text = el.textContent;
     });
+    el.addEventListener('blur', () => {
+      const [oid, pid] = el.dataset.chkEdit.split(':').map(Number);
+      const ph = phaseById(pid);
+      if (!ph) return;
+      const o = ph.outputs?.find(x => x.id === oid);
+      if (o) { pushHistory(); o.text = el.textContent; }
+    });
   });
 
   /* Output checklist — delete item */
@@ -559,6 +569,7 @@ export function bind() {
       const [oid, pid] = el.dataset.delChk.split(':').map(Number);
       const ph = phaseById(pid);
       if (!ph) return;
+      pushHistory();
       ph.outputs = ph.outputs?.filter(x => x.id !== oid);
       _render?.();
     });
@@ -573,6 +584,7 @@ export function bind() {
         if (!val) return;
         const ph = phaseById(+ta.dataset.pastePh);
         if (!ph) return;
+        pushHistory();
         if (!ph.outputs) ph.outputs = [];
         ph.outputs.push({ id: nextId(), text: val, done: false });
         ta.value = '';
@@ -586,6 +598,7 @@ export function bind() {
       if (!lines.length) return;
       const ph = phaseById(+ta.dataset.pastePh);
       if (!ph) return;
+      pushHistory();
       if (!ph.outputs) ph.outputs = [];
       lines.forEach(line => ph.outputs.push({ id: nextId(), text: line, done: false }));
       _render?.();

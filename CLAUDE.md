@@ -101,7 +101,7 @@ Vercel proj:  prj_o0iwuBDrXnp8BRdKLNKR1vMRphyx
 
 ## Agent Workflow (Plan → Execute)
 
-Dùng 2 agent trong `Agent/` cho mọi task code có độ phức tạp trung bình trở lên:
+Dùng 2 agent trong `.claude/agents/` cho mọi task code có độ phức tạp trung bình trở lên:
 
 ```
 1. code-analyst  →  quét codebase, tìm root cause, lên plan
