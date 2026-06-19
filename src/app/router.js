@@ -1,5 +1,5 @@
 /* ── ROUTER — hash-based routing for home / project / share views ── */
-import { S }                                               from './state.js';
+import { S, resetHistory }                                 from './state.js';
 import { SHARE_PREFIX }                                    from './constants.js';
 import { currentUser }                                     from './firebase.js';
 import { loadProject, unsubscribeProject, setCurrentProjId } from './persistence.js';
@@ -14,6 +14,17 @@ export function setRouterDeps({ render, renderHome }) {
   _renderHome = renderHome;
 }
 
+/* ── resetUiTransient — clear ephemeral UI state on navigation ── */
+function resetUiTransient() {
+  S.ui.dragData    = null;
+  S.ui.resizeData  = null;
+  S.ui.phaseResize = null;
+  S.ui.phaseDragId = null;
+  S.ui.teamDragId  = null;
+  S.ui.ctx         = null;
+  S.ui.modal       = null;
+}
+
 /* ── router() ── */
 export async function router() {
   const hash = location.hash;
@@ -26,6 +37,8 @@ export async function router() {
   if (hash.startsWith(SHARE_PREFIX)) {
     unsubscribeProject();
     setCurrentProjId(null);
+    resetHistory();
+    resetUiTransient();
     S.ui.readonly = false; // will be set true by loadFromHash if valid
     if (loadFromHash()) { _render?.(); }
     return;
@@ -36,6 +49,7 @@ export async function router() {
     if (!currentUser) { location.hash = '#home'; return; }
     const id = hash.slice('#project-'.length);
     unsubscribeProject();
+    resetUiTransient();
     S.ui.readonly = false;
     await loadProject(id, _render);
     _render?.();
@@ -45,8 +59,9 @@ export async function router() {
   /* Home (default) */
   unsubscribeProject();
   setCurrentProjId(null);
+  resetHistory();
+  resetUiTransient();
   S.ui.readonly = false;
-  S.ui.modal = null;
   _renderHome?.();
 }
 

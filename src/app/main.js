@@ -21,6 +21,7 @@ import {
   refreshIndex, migrateOldData, migrateLocalToFirestore,
   currentProjId, loadIndex, saveIndex, setCurrentProjId,
   createProject, deleteProject, duplicateProject, renameProject,
+  saveToFirestore, unsubscribeProject,
 } from './persistence.js';
 
 /* Onboarding */
@@ -132,6 +133,7 @@ setBindHomeDeps({
   renderHome,
   fbSignIn,
   fbSignOut:        () => fbSignOut(() => {
+    unsubscribeProject();
     setCurrentProjId(null);
     location.hash = '#home';
   }),
@@ -162,6 +164,7 @@ setImportDeps({
   saveIndex,
   projKey,
   rerenderFn: rerender,
+  saveToFirestore,
 });
 
 /* router.js — inject render + renderHome */

@@ -90,6 +90,7 @@ export function pushPhasesAfter(phaseId, minStart) {
 }
 
 export function swapPhases(idA, idB) {
+  pushHistory();
   const a = phaseById(idA), b = phaseById(idB);
   if (!a || !b) return;
   [a.startWeek, b.startWeek] = [b.startWeek, a.startWeek];

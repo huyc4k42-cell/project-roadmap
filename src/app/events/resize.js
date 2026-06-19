@@ -1,5 +1,5 @@
 /* ── EVENTS / RESIZE — global mousemove/mouseup for task & phase resize ── */
-import { S, taskById, phaseById, pushHistory } from '../state.js';
+import { S, taskById, phaseById } from '../state.js';
 import { pushPhasesAfter }                      from '../state.js';
 
 /* WW (week-width px) is injected by render/index.js after each render */
@@ -65,6 +65,6 @@ function onMouseMove(e) {
 }
 
 function onMouseUp() {
-  if (S.ui.resizeData)  { pushHistory(); S.ui.resizeData  = null; _render?.(); }
-  if (S.ui.phaseResize) { pushHistory(); S.ui.phaseResize = null; _render?.(); }
+  if (S.ui.resizeData)  { S.ui.resizeData  = null; _render?.(); }
+  if (S.ui.phaseResize) { S.ui.phaseResize = null; _render?.(); }
 }
