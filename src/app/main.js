@@ -9,6 +9,7 @@ import '../styles/modals.css';
 import '../styles/home.css';
 import '../styles/main.css';
 import '../styles/onboarding.css';
+import { initLang }                           from './i18n.js';
 import { initFirebase, fbSignIn, fbSignOut } from './firebase.js';
 import { S, undo as _undo, redo as _redo }   from './state.js';
 import { PROJ_PFX }                           from './constants.js';
@@ -185,6 +186,8 @@ setRouterDeps({ render, renderHome });
 /* ══════════════════════════════════════════════
    BOOT SEQUENCE
 ══════════════════════════════════════════════ */
+/* Detect language before first render */
+initLang();
 migrateOldData();
 
 /* Apply saved theme before first render (prevents flash) */

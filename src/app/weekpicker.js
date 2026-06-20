@@ -1,6 +1,6 @@
 /* ── WEEK PICKER — calendar UI state + HTML builder + event binder ── */
-import { WKP_MONTHS, WKP_DAYS } from './constants.js';
 import { parseDate, isoWeek, dateStrYMD, fmtWkpDate, fmtInput, wkpMonday } from './date.js';
+import { t } from './i18n.js';
 import { q, qAll } from './utils.js';
 
 export let wkp = {
@@ -91,10 +91,10 @@ export function buildWkPicker() {
       const cfgTs  = wkp.cfgStart.getTime();
       const sw     = Math.round((startTs - cfgTs) / (7 * 86400000)) + 1;
       const ew     = Math.round((endTs   - cfgTs) / (7 * 86400000)) + 1;
-      f1 = `W${sw} → W${ew} · ${ew - sw + 1} tuần`;
+      f1 = t('weekpicker.range', { sw, ew, n: ew - sw + 1 });
     } else {
       const totalWks = Math.round((endTs - startTs) / (7 * 86400000)) + 1;
-      f1 = `W${isoWeek(startMon)} → W${isoWeek(endMon)} · ${totalWks} tuần`;
+      f1 = t('weekpicker.rangeIso', { sw: isoWeek(startMon), ew: isoWeek(endMon), n: totalWks });
     }
     footer = `<div class="wkp-footer">
       <div class="wkp-f1">${f1}</div>
@@ -104,7 +104,7 @@ export function buildWkPicker() {
 
   const startVal = startMon ? fmtInput(startMon) : '';
   const endVal   = endMon   ? fmtInput(new Date(endTs + 6 * 86400000)) : '';
-  const MO_ABBR  = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const MO_ABBR  = t('weekpicker.monthsShort');
 
   const calBody = wkp.showMonthSel
     ? `<div class="wkp-yr-nav">
@@ -116,7 +116,7 @@ export function buildWkPicker() {
         ${MO_ABBR.map((m, i) => `<div class="wkp-mo-cell${i === mo ? ' cur' : ''}" data-wmo="${i}">${m}</div>`).join('')}
       </div>`
     : `<div class="wkp-head">
-        <span></span>${WKP_DAYS.map(d => `<span>${d}</span>`).join('')}
+        <span></span>${t('weekpicker.days').map(d => `<span>${d}</span>`).join('')}
       </div>
       <div id="wkp-rows">${rows}</div>
       ${footer}`;
@@ -124,18 +124,18 @@ export function buildWkPicker() {
   return `<div class="wkp">
     <div class="wkp-date-row">
       <div class="wkp-date-field${step === 'start' ? ' active' : ''}" id="wkp-field-start">
-        <span class="wkp-date-lbl">Bắt đầu</span>
+        <span class="wkp-date-lbl">${t('weekpicker.start')}</span>
         <input class="wkp-date-inp" id="wkp-inp-start" placeholder="DD/MM/YYYY" value="${startVal}" autocomplete="off">
       </div>
       <div class="wkp-date-arrow">→</div>
       <div class="wkp-date-field${step === 'end' ? ' active' : ''}" id="wkp-field-end">
-        <span class="wkp-date-lbl">Kết thúc</span>
+        <span class="wkp-date-lbl">${t('weekpicker.end')}</span>
         <input class="wkp-date-inp" id="wkp-inp-end" placeholder="DD/MM/YYYY" value="${endVal}" autocomplete="off">
       </div>
     </div>
     <div class="wkp-nav">
       <button class="wkp-nav-btn" id="wkp-prev">‹</button>
-      <span class="wkp-nav-lbl" id="wkp-mo-lbl">${WKP_MONTHS[mo]} ${yr}</span>
+      <span class="wkp-nav-lbl" id="wkp-mo-lbl">${t('weekpicker.monthsFull')[mo]} ${yr}</span>
       <button class="wkp-nav-btn" id="wkp-next">›</button>
     </div>
     ${calBody}

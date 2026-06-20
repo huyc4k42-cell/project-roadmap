@@ -6,6 +6,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup,
          setPersistence }                                      from 'firebase/auth';
 import { getFirestore }                                        from 'firebase/firestore';
 import { showToast } from './utils.js';
+import { t }         from './i18n.js';
 
 const FIREBASE_CONFIG = {
   apiKey:            'AIzaSyBvJRmMGM94Gl4qxHcxAuHGIQdMjvdRm-4',
@@ -34,9 +35,9 @@ export async function fbSignIn() {
     ];
     if (fallback.includes(e.code) || e.message?.includes('missing initial state') || e.message?.includes('storage-partitioned')) {
       try { await signInWithRedirect(auth, _gProvider); }
-      catch(e2) { showToast('Đăng nhập thất bại: ' + e2.message, 4000); }
+      catch(e2) { showToast(t('toast.signInFailed', { msg: e2.message }), 4000); }
     } else if (e.code !== 'auth/popup-closed-by-user') {
-      showToast('Đăng nhập thất bại: ' + e.message, 4000);
+      showToast(t('toast.signInFailed', { msg: e.message }), 4000);
     }
   }
 }
@@ -58,7 +59,7 @@ export async function initFirebase(onAuthChange) {
     try { await getRedirectResult(auth); }
     catch(e) {
       if (e?.code && e.code !== 'auth/cancelled-popup-request')
-        showToast('Đăng nhập thất bại: ' + e.message, 4000);
+        showToast(t('toast.signInFailed', { msg: e.message }), 4000);
     }
 
     onAuthStateChanged(auth, async user => {

@@ -5,6 +5,7 @@ import { db, currentUser }                     from './firebase.js';
 import { S, resetHistory }                      from './state.js';
 import { INDEX_KEY, PROJ_PFX, LS_KEY }         from './constants.js';
 import { showToast }                           from './utils.js';
+import { t }                                   from './i18n.js';
 
 export let _projIndex          = [];
 export let currentProjId       = null;
@@ -114,7 +115,7 @@ export function subscribeToProject(id, rerenderFn) {
     cacheProject(id, { cfg: S.cfg, phases: S.phases, teams: S.teams, tasks: S.tasks, tags: S.tags, _nextId: S._nextId });
     rerenderFn(true);
     if (d.lastEditedBy?.uid && d.lastEditedBy.uid !== currentUser?.uid) {
-      showToast('🔄 Cập nhật từ thiết bị khác', 2500);
+      showToast(t('toast.syncedFromDevice'), 2500);
     }
   });
 }
@@ -244,7 +245,7 @@ export async function migrateLocalToFirestore() {
     if (!data) continue;
     try { await setDoc(_fsDoc(entry.id), _payload(entry.id, data, entry.accent)); count++; } catch(e) {}
   }
-  if (count > 0) showToast(`☁️ Đã đồng bộ ${count} project lên cloud!`, 4000);
+  if (count > 0) showToast(t('toast.syncedToCloud', { count }), 4000);
 }
 
 /* ── Legacy localStorage migration (single→multi, pre-Firebase era) ── */

@@ -3,6 +3,7 @@ import { S, nextId }                    from '../state.js';
 import { q, qAll, showToast }           from '../utils.js';
 import { parseDate, startMonday, dateStrYMD } from '../date.js';
 import { PHASE_COLORS, PROJ_ACCENTS }   from '../constants.js';
+import { t }                            from '../i18n.js';
 
 /* Injected from router/persistence (B8) */
 let _loadIndex       = null;
@@ -20,33 +21,33 @@ export function setImportDeps({ loadIndex, saveIndex, projKey, rerenderFn, saveT
 
 /* ── refreshImportPreview ── */
 export function refreshImportPreview() {
-  const t = S.ui.modal;
-  if (!t || !t.validatedRows) return;
-  const okChecked = [...t.checkedRows].filter(i => !t.validatedRows[i]?._errors.length).length;
-  const errCount  = t.validatedRows.filter(r => r._errors.length).length;
+  const mi = S.ui.modal;
+  if (!mi || !mi.validatedRows) return;
+  const okChecked = [...mi.checkedRows].filter(i => !mi.validatedRows[i]?._errors.length).length;
+  const errCount  = mi.validatedRows.filter(r => r._errors.length).length;
   const btn = q('#imp-confirm');
   if (btn) {
-    btn.textContent = `✓ Import ${okChecked} task${okChecked !== 1 ? 's' : ''}`;
+    btn.textContent = t('modal.import.importBtn', { n: okChecked });
     btn.disabled = okChecked === 0;
     btn.style.opacity = okChecked === 0 ? '.45' : '1';
   }
   const sum = q('#imp-summary');
-  if (sum) sum.innerHTML = `<b>${okChecked}</b> tasks sẽ import${errCount ? ` · <span class="err-c">${errCount} row lỗi bị bỏ qua</span>` : ''}`;
+  if (sum) sum.innerHTML = t('modal.import.summary', { ok: okChecked }) + (errCount ? t('modal.import.summaryErrors', { err: errCount }) : '');
   qAll('.imp-tbl tr[data-row-i]').forEach(tr => {
     const i = parseInt(tr.dataset.rowI);
-    const hasErr = t.validatedRows[i]?._errors.length > 0;
-    if (!hasErr) tr.className = t.checkedRows.has(i) ? '' : 'row-skip';
+    const hasErr = mi.validatedRows[i]?._errors.length > 0;
+    if (!hasErr) tr.className = mi.checkedRows.has(i) ? '' : 'row-skip';
   });
 }
 
 /* ── handleCSVFile ── */
 export function handleCSVFile(file) {
-  const t = S.ui.modal;
-  if (!t) return;
+  const mi = S.ui.modal;
+  if (!mi) return;
   const ext = file.name.split('.').pop().toLowerCase();
   if (ext !== 'csv' && file.type !== 'text/csv') {
-    t.structError = `File không hợp lệ (nhận được .${ext}). Vui lòng chọn file .csv`;
-    t.filename = ''; t.parsedData = null;
+    mi.structError = t('modal.import.errInvalidFile', { ext });
+    mi.filename = ''; mi.parsedData = null;
     _rerenderFn?.(); return;
   }
   const reader = new FileReader();
@@ -55,10 +56,10 @@ export function handleCSVFile(file) {
     if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1); // strip BOM
     const result = parseCSVText(text);
     if (result.error) {
-      t.structError = result.error; t.filename = ''; t.parsedData = null;
+      mi.structError = result.error; mi.filename = ''; mi.parsedData = null;
     } else {
-      t.structError = null; t.filename = file.name; t.parsedData = result;
-      if (!t.newProjName) t.newProjName = file.name.replace(/\.csv$/i, '').replace(/[-_]/g, ' ');
+      mi.structError = null; mi.filename = file.name; mi.parsedData = result;
+      if (!mi.newProjName) mi.newProjName = file.name.replace(/\.csv$/i, '').replace(/[-_]/g, ' ');
     }
     _rerenderFn?.();
   };
@@ -68,9 +69,9 @@ export function handleCSVFile(file) {
 /* ── CSV Parsing ── */
 function parseCSVText(text) {
   const lines = text.split(/\r?\n/).filter(l => l.trim());
-  if (!lines.length) return { error: 'File CSV rỗng.' };
+  if (!lines.length) return { error: t('modal.import.errEmpty') };
   const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase().replace(/\s+/g, '_'));
-  if (!headers.includes('task_name')) return { error: `Thiếu cột bắt buộc "task_name". Cột hiện có: ${headers.join(', ')}` };
+  if (!headers.includes('task_name')) return { error: t('modal.import.errMissingCol', { cols: headers.join(', ') }) };
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     if (!lines[i].trim()) continue;
@@ -79,7 +80,7 @@ function parseCSVText(text) {
     headers.forEach((h, j) => { row[h] = (vals[j] || '').trim(); });
     rows.push(row);
   }
-  if (!rows.length) return { error: 'File CSV không có dòng dữ liệu (chỉ có header).' };
+  if (!rows.length) return { error: t('modal.import.errNoData') };
   return { headers, rows };
 }
 
@@ -100,15 +101,15 @@ export function validateCSVRows(rows, cfgStart, cfgEnd) {
   const endDate  = cfgEnd   ? parseDate(cfgEnd)     : null;
   return rows.map(row => {
     const r = { ...row, _errors: [], _weekStart: null, _weekDur: 1 };
-    if (!r.task_name) { r._errors.push('Thiếu task_name'); return r; }
+    if (!r.task_name) { r._errors.push(t('modal.import.errMissingName')); return r; }
     const hasDates = r.start_date || r.end_date;
     if (!hasDates) return r; // backlog — OK
     let sd = null, ed = null;
-    if (r.start_date) { try { sd = parseDate(r.start_date); if (isNaN(sd.getTime())) sd = null; } catch(e) {} if (!sd) r._errors.push('start_date không hợp lệ'); }
-    if (r.end_date)   { try { ed = parseDate(r.end_date);   if (isNaN(ed.getTime())) ed = null; } catch(e) {} if (!ed) r._errors.push('end_date không hợp lệ'); }
-    if (sd && ed && sd > ed) r._errors.push('start_date sau end_date');
-    if (sd && startMon && sd < startMon) r._errors.push('start_date trước ngày bắt đầu project');
-    if (ed && endDate && ed > new Date(endDate.getTime() + 7 * 86400000)) r._errors.push('end_date vượt ngoài timeline');
+    if (r.start_date) { try { sd = parseDate(r.start_date); if (isNaN(sd.getTime())) sd = null; } catch(e) {} if (!sd) r._errors.push(t('modal.import.errInvalidStart')); }
+    if (r.end_date)   { try { ed = parseDate(r.end_date);   if (isNaN(ed.getTime())) ed = null; } catch(e) {} if (!ed) r._errors.push(t('modal.import.errInvalidEnd')); }
+    if (sd && ed && sd > ed) r._errors.push(t('modal.import.errStartAfterEnd'));
+    if (sd && startMon && sd < startMon) r._errors.push(t('modal.import.errStartBefore'));
+    if (ed && endDate && ed > new Date(endDate.getTime() + 7 * 86400000)) r._errors.push(t('modal.import.errEndAfter'));
     if (!r._errors.length && sd && startMon) {
       const diffDays = (sd - startMon) / 86400000;
       r._weekStart = Math.max(1, Math.floor(diffDays / 7) + 1);
@@ -123,9 +124,9 @@ export function validateCSVRows(rows, cfgStart, cfgEnd) {
 
 /* ── Execute Import ── */
 export function executeCSVImport() {
-  const t = S.ui.modal;
-  if (!t) return;
-  const { targetId, mode, newProjName, validatedRows, checkedRows, cfgStart, cfgEnd } = t;
+  const mi = S.ui.modal;
+  if (!mi) return;
+  const { targetId, mode, newProjName, validatedRows, checkedRows, cfgStart, cfgEnd } = mi;
   const rowsToImport = validatedRows.filter((_, i) => checkedRows.has(i) && !validatedRows[i]._errors.length);
   if (!rowsToImport.length) return;
 
@@ -136,7 +137,7 @@ export function executeCSVImport() {
   } else {
     projId = targetId;
     try { const raw = localStorage.getItem(_projKey(projId)); projData = raw ? JSON.parse(raw) : null; } catch(e) {}
-    if (!projData) { showToast('Không tìm thấy project!'); return; }
+    if (!projData) { showToast(t('modal.import.noProject')); return; }
     if (mode === 'replace') { projData.phases = []; projData.teams = []; projData.tasks = []; projData._nextId = 1; }
   }
 
@@ -175,30 +176,30 @@ export function executeCSVImport() {
 
   /* Auto-fit phase ranges to cover their tasks */
   projData.phases.forEach(phase => {
-    const pt = projData.tasks.filter(t2 => t2.phaseId === phase.id && t2.startWeek !== null);
+    const pt = projData.tasks.filter(tk => tk.phaseId === phase.id && tk.startWeek !== null);
     if (pt.length) {
-      phase.startWeek = Math.min(...pt.map(t2 => t2.startWeek));
-      phase.endWeek   = Math.max(...pt.map(t2 => t2.startWeek + t2.dur - 1));
+      phase.startWeek = Math.min(...pt.map(tk => tk.startWeek));
+      phase.endWeek   = Math.max(...pt.map(tk => tk.startWeek + tk.dur - 1));
     }
   });
   projData._nextId = nid;
 
   try { localStorage.setItem(_projKey(projId), JSON.stringify(projData)); }
-  catch(e) { showToast('Lỗi lưu dữ liệu — dung lượng đầy?'); return; }
+  catch(e) { showToast(t('modal.import.saveError')); return; }
   if (_saveToFirestore) {
-    _saveToFirestore(projId, projData, t.newProjAccent || '#D0A052').catch(console.error);
+    _saveToFirestore(projId, projData, mi.newProjAccent || '#D0A052').catch(console.error);
   }
 
   const idx = _loadIndex?.() || [];
   const ex  = idx.find(p => p.id === projId);
-  const statsObj = { phases: projData.phases.length, tasks: projData.tasks.length, sched: projData.tasks.filter(t2 => t2.startWeek !== null).length, start: projData.cfg.start, end: projData.cfg.end };
+  const statsObj = { phases: projData.phases.length, tasks: projData.tasks.length, sched: projData.tasks.filter(tk => tk.startWeek !== null).length, start: projData.cfg.start, end: projData.cfg.end };
   if (ex) { ex.updatedAt = Date.now(); ex.stats = statsObj; }
-  else idx.push({ id: projId, name: projData.cfg.title, subtitle: '', accent: t.newProjAccent || '#D0A052', updatedAt: Date.now(), stats: statsObj });
+  else idx.push({ id: projId, name: projData.cfg.title, subtitle: '', accent: mi.newProjAccent || '#D0A052', updatedAt: Date.now(), stats: statsObj });
   _saveIndex?.(idx);
 
   S.ui.modal = null;
   const cnt = rowsToImport.length;
-  showToast(`✓ Đã import ${cnt} task${cnt !== 1 ? 's' : ''} · ${projData.phases.length} phases`);
+  showToast(t('modal.import.successToast', { n: cnt, phases: projData.phases.length }));
   location.hash = '#project-' + projId;
 }
 
@@ -209,14 +210,14 @@ export function downloadCSVTemplate() {
   const addW = w => { const d = new Date(now); d.setDate(d.getDate() + w * 7); return fmt(d); };
   const headers = ['task_name','phase_name','team_name','start_date','end_date','tags','description'];
   const rows = [
-    ['User Research',        'Discovery','Product', addW(0),  addW(2),  'ux;research','Phỏng vấn người dùng'],
-    ['Competitive Analysis', 'Discovery','Product', addW(2),  addW(4),  'research',   'Phân tích đối thủ'],
-    ['Wireframes',           'Design',   'Design',  addW(4),  addW(7),  'ux',         'Thiết kế wireframe chính'],
-    ['Prototype v1',         'Design',   'Design',  addW(7),  addW(10), 'ux',         'Prototype tương tác'],
-    ['Backend API',          'Build',    'Eng',     addW(10), addW(14), 'tech',       'Xây dựng REST API'],
+    ['User Research',        'Discovery','Product', addW(0),  addW(2),  'ux;research','User interviews'],
+    ['Competitive Analysis', 'Discovery','Product', addW(2),  addW(4),  'research',   'Competitor analysis'],
+    ['Wireframes',           'Design',   'Design',  addW(4),  addW(7),  'ux',         'Main wireframes'],
+    ['Prototype v1',         'Design',   'Design',  addW(7),  addW(10), 'ux',         'Interactive prototype'],
+    ['Backend API',          'Build',    'Eng',     addW(10), addW(14), 'tech',       'Build REST API'],
     ['Frontend',             'Build',    'Eng',     addW(12), addW(16), 'tech',       ''],
-    ['Write spec',           '',         '',        '',       '',       '',           'Chưa có lịch - sẽ vào Backlog'],
-    ['Launch plan',          '',         'Product', '',       '',       'growth',     'Kế hoạch ra mắt'],
+    ['Write spec',           '',         '',        '',       '',       '',           'No date — goes to Backlog'],
+    ['Launch plan',          '',         'Product', '',       '',       'growth',     'Launch planning'],
   ];
   const csvEsc = v => (v.includes(',') || v.includes('"') || v.includes('\n')) ? `"${v.replace(/"/g, '""')}"` : v;
   const csv  = [headers.join(','), ...rows.map(r => r.map(csvEsc).join(','))].join('\n');
@@ -228,25 +229,25 @@ export function downloadCSVTemplate() {
 
 /* ── bindImportModal ── */
 export function bindImportModal() {
-  const t = S.ui.modal;
-  if (!t || t.type !== 'import') return;
+  const mi = S.ui.modal;
+  if (!mi || mi.type !== 'import') return;
 
   const close = () => { S.ui.modal = null; _rerenderFn?.(); };
   q('#m-cancel')?.addEventListener('click', close);
   q('#modal-bg')?.addEventListener('click', e => { if (e.target.id === 'modal-bg') close(); });
 
-  if (t.step === 1) {
+  if (mi.step === 1) {
     q('#imp-target')?.addEventListener('change', e => {
-      t.targetId = e.target.value;
-      if (!t.mode) t.mode = 'merge';
+      mi.targetId = e.target.value;
+      if (!mi.mode) mi.mode = 'merge';
       _rerenderFn?.();
     });
-    q('#imp-newname')?.addEventListener('input', e => { t.newProjName = e.target.value; });
-    q('#imp-mode-merge')?.addEventListener('click', () => { t.mode = 'merge'; _rerenderFn?.(); });
-    q('#imp-mode-replace')?.addEventListener('click', () => { t.mode = 'replace'; _rerenderFn?.(); });
+    q('#imp-newname')?.addEventListener('input', e => { mi.newProjName = e.target.value; });
+    q('#imp-mode-merge')?.addEventListener('click', () => { mi.mode = 'merge'; _rerenderFn?.(); });
+    q('#imp-mode-replace')?.addEventListener('click', () => { mi.mode = 'replace'; _rerenderFn?.(); });
     q('#imp-dl-tpl')?.addEventListener('click', downloadCSVTemplate);
     q('#imp-file-clear')?.addEventListener('click', () => {
-      t.filename = ''; t.structError = null; t.parsedData = null; _rerenderFn?.();
+      mi.filename = ''; mi.structError = null; mi.parsedData = null; _rerenderFn?.();
     });
     const dz = q('#imp-dropzone');
     if (dz) {
@@ -258,16 +259,16 @@ export function bindImportModal() {
     q('#imp-file-input')?.addEventListener('change', e => { const f = e.target.files[0]; if (f) handleCSVFile(f); });
 
     q('#imp-next')?.addEventListener('click', () => {
-      if (!t.parsedData) return;
-      t.targetId = q('#imp-target')?.value || 'new';
+      if (!mi.parsedData) return;
+      mi.targetId = q('#imp-target')?.value || 'new';
       const nameEl = q('#imp-newname');
-      if (nameEl) t.newProjName = nameEl.value.trim() || t.newProjName;
+      if (nameEl) mi.newProjName = nameEl.value.trim() || mi.newProjName;
 
       let cfgStart, cfgEnd;
-      if (t.targetId !== 'new') {
-        try { const raw = localStorage.getItem(_projKey(t.targetId)); if (raw) { const d = JSON.parse(raw); cfgStart = d.cfg?.start; cfgEnd = d.cfg?.end; } } catch(e) {}
+      if (mi.targetId !== 'new') {
+        try { const raw = localStorage.getItem(_projKey(mi.targetId)); if (raw) { const d = JSON.parse(raw); cfgStart = d.cfg?.start; cfgEnd = d.cfg?.end; } } catch(e) {}
       } else {
-        const dates = t.parsedData.rows.flatMap(r => [r.start_date, r.end_date].filter(Boolean))
+        const dates = mi.parsedData.rows.flatMap(r => [r.start_date, r.end_date].filter(Boolean))
           .map(s => { try { const d = parseDate(s); return isNaN(d) ? null : d; } catch(e) { return null; } }).filter(Boolean);
         if (dates.length) {
           const mn  = new Date(Math.min(...dates.map(d => d.getTime())));
@@ -279,21 +280,21 @@ export function bindImportModal() {
           cfgStart = dateStrYMD(n); cfgEnd = dateStrYMD(e2);
         }
       }
-      t.cfgStart       = cfgStart; t.cfgEnd = cfgEnd;
-      t.validatedRows  = validateCSVRows(t.parsedData.rows, cfgStart, cfgEnd);
-      t.checkedRows    = new Set(t.validatedRows.map((_, i) => i).filter(i => !t.validatedRows[i]._errors.length));
-      t.step = 2;
+      mi.cfgStart       = cfgStart; mi.cfgEnd = cfgEnd;
+      mi.validatedRows  = validateCSVRows(mi.parsedData.rows, cfgStart, cfgEnd);
+      mi.checkedRows    = new Set(mi.validatedRows.map((_, i) => i).filter(i => !mi.validatedRows[i]._errors.length));
+      mi.step = 2;
       _rerenderFn?.();
     });
 
   } else {
     /* Step 2 */
-    q('#imp-back')?.addEventListener('click', () => { t.step = 1; _rerenderFn?.(); });
+    q('#imp-back')?.addEventListener('click', () => { mi.step = 1; _rerenderFn?.(); });
 
     qAll('.imp-cb').forEach(cb => {
       cb.addEventListener('change', () => {
         const i = parseInt(cb.dataset.i);
-        cb.checked ? t.checkedRows.add(i) : t.checkedRows.delete(i);
+        cb.checked ? mi.checkedRows.add(i) : mi.checkedRows.delete(i);
         refreshImportPreview();
       });
     });
@@ -301,7 +302,7 @@ export function bindImportModal() {
       qAll('.imp-cb:not(:disabled)').forEach(cb => {
         cb.checked = e.target.checked;
         const i = parseInt(cb.dataset.i);
-        e.target.checked ? t.checkedRows.add(i) : t.checkedRows.delete(i);
+        e.target.checked ? mi.checkedRows.add(i) : mi.checkedRows.delete(i);
       });
       refreshImportPreview();
     });

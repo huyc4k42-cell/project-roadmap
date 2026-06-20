@@ -1,6 +1,7 @@
 /* ── EXPORT / PDF — html2canvas + jsPDF export ── */
 import { S }        from '../state.js';
 import { logoUrl }  from '../icons.js';
+import { t }        from '../i18n.js';
 
 /* html2canvas and jsPDF are loaded via CDN <script> tags at runtime.
    Access via window.html2canvas and window.jspdf. */
@@ -12,7 +13,7 @@ export async function exportPDF() {
   /* Loading overlay */
   const ov = document.createElement('div');
   ov.className = 'exp-ol';
-  ov.innerHTML = `<div class="exp-spin"></div><span>Đang xuất PDF...</span>`;
+  ov.innerHTML = `<div class="exp-spin"></div><span>${t('pdf.exportingLabel')}</span>`;
   document.body.appendChild(ov);
 
   try {
@@ -118,12 +119,12 @@ export async function exportPDF() {
     const date = new Date().toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
     pdf.setFontSize(8);
     pdf.setTextColor(62, 58, 54);
-    pdf.text(`Xuất lúc: ${date}`, 30, H * scale + 85);
+    pdf.text(t('pdf.exportedAt', { date }), 30, H * scale + 85);
 
     pdf.save(`roadmap-${S.cfg.title.replace(/\s+/g, '-')}.pdf`);
   } catch(err) {
     console.error(err);
-    alert('Xuất PDF thất bại. Vui lòng thử lại.\n' + err.message);
+    alert(t('pdf.exportFailed') + err.message);
   } finally {
     document.body.removeChild(ov);
   }

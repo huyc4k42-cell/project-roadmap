@@ -10,6 +10,7 @@ import {
 import { bindImportModal }   from '../import/csv.js';
 import { wkp, bindWkPickerEvents, setRenderModal } from '../weekpicker.js';
 import { wkpMonday, dateStrYMD }                   from '../date.js';
+import { t }                                        from '../i18n.js';
 
 /* Injected callbacks */
 let _renderHome     = null;
@@ -245,7 +246,7 @@ export function bindHome() {
   qAll('[data-proj-del]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
     setHomeCtxId(null);
-    if (confirm('Xóa project này? Hành động không thể hoàn tác.')) {
+    if (confirm(t('home.deleteConfirm'))) {
       _deleteProject?.(b.dataset.projDel, _renderHome);
     } else {
       _renderHome?.();

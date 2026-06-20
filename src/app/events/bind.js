@@ -1,6 +1,7 @@
 /* ── EVENTS / BIND — all project-view event handlers ── */
 import { S, nextId, taskById, phaseById, pushHistory, swapPhases, reorderTeam } from '../state.js';
 import { q, qAll }               from '../utils.js';
+import { t }                     from '../i18n.js';
 import { loadRowState, saveRowState, saveSidebarState } from '../storage.js';
 import { setResizeWW }            from './resize.js';
 import { delTask, delTeam, delPhase } from './bindModal.js';
@@ -56,9 +57,9 @@ export function handleAction(action) {
   const nid = +id;
   if (cmd === 'edit-task')    _openModal?.('edit-task',  taskById(nid));
   if (cmd === 'del-task')   { delTask(nid);  _render?.(); }
-  if (cmd === 'toggle-done') { const t = taskById(nid); if (t) { pushHistory(); t.done = !t.done; _render?.(); } }
-  if (cmd === 'unschedule')  { const t = taskById(nid); if (t) { pushHistory(); t.startWeek = null; _render?.(); } }
-  if (cmd === 'edit-team')   _openModal?.('edit-team',  S.teams.find(t => t.id === nid));
+  if (cmd === 'toggle-done') { const tk = taskById(nid); if (tk) { pushHistory(); tk.done = !tk.done; _render?.(); } }
+  if (cmd === 'unschedule')  { const tk = taskById(nid); if (tk) { pushHistory(); tk.startWeek = null; _render?.(); } }
+  if (cmd === 'edit-team')   _openModal?.('edit-team',  S.teams.find(tm => tm.id === nid));
   if (cmd === 'del-team')  { delTeam(nid);  _render?.(); }
   if (cmd === 'edit-phase')  _openModal?.('edit-phase', phaseById(nid));
   if (cmd === 'del-phase') { delPhase(nid); _render?.(); }
@@ -162,7 +163,7 @@ export function bind() {
   qAll('.trl[data-team-id]').forEach(el => {
     el.addEventListener('click', e => {
       if (e.target.closest('[data-action]')) return;
-      const tm = S.teams.find(t => t.id === +el.dataset.teamId);
+      const tm = S.teams.find(m => m.id === +el.dataset.teamId);
       if (tm) _openModal?.('edit-team', tm);
     });
   });
@@ -205,8 +206,8 @@ export function bind() {
 
     el.addEventListener('click', e => {
       if (e.target.closest('[data-del-tag-from-card]')) return;
-      const t = taskById(taskId);
-      if (t) _openModal?.('edit-task', t);
+      const tk = taskById(taskId);
+      if (tk) _openModal?.('edit-task', tk);
     });
 
     el.addEventListener('dragstart', e => {
@@ -227,20 +228,20 @@ export function bind() {
       el.classList.remove('tag-drop-target');
       if (S.ui.dragData?.type === 'tag') {
         e.preventDefault(); e.stopPropagation();
-        const t = taskById(taskId);
+        const tk = taskById(taskId);
         const tag = S.ui.dragData.tag;
-        if (t && tag && !t.tags.includes(tag)) { pushHistory(); t.tags.push(tag); S.ui.dragData = null; _render?.(); }
+        if (tk && tag && !tk.tags.includes(tag)) { pushHistory(); tk.tags.push(tag); S.ui.dragData = null; _render?.(); }
       }
     });
 
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
-      const t = taskById(taskId);
+      const tk = taskById(taskId);
       _openCtx?.(e.clientX, e.clientY, [
-        { l: 'Edit task',                             icon: 'edit', a: `edit-task:${t.id}` },
-        { l: t.done ? 'Mark as active' : 'Mark as done', icon: 'zap', a: `toggle-done:${t.id}` },
+        { l: t('context.editTask'),                                          icon: 'edit', a: `edit-task:${tk.id}` },
+        { l: tk.done ? t('context.markActive') : t('context.markDone'),     icon: 'zap',  a: `toggle-done:${tk.id}` },
         '---',
-        { l: 'Delete task', icon: 'zap', a: `del-task:${t.id}`, d: true },
+        { l: t('context.deleteTask'), icon: 'zap', a: `del-task:${tk.id}`, d: true },
       ]);
     });
   });
@@ -259,8 +260,8 @@ export function bind() {
       if (!S.ui.dragData) return;
       const week   = +el.dataset.week;
       const teamId = +el.dataset.team;
-      const t = taskById(S.ui.dragData.taskId);
-      if (t) { pushHistory(); t.startWeek = week; t.teamId = teamId; }
+      const tk = taskById(S.ui.dragData.taskId);
+      if (tk) { pushHistory(); tk.startWeek = week; tk.teamId = teamId; }
       S.ui.dragData = null;
       _render?.();
     });
@@ -271,16 +272,16 @@ export function bind() {
     el.addEventListener('click', e => {
       if (e.target.closest('.tb-lh,.tb-rh')) return;
       if (S.ui.dragData) return;
-      const t = taskById(+el.dataset.taskId);
-      if (!t || S.ui.readonly) return;
+      const tk = taskById(+el.dataset.taskId);
+      if (!tk || S.ui.readonly) return;
       pushHistory();
-      t.done = !t.done;
+      tk.done = !tk.done;
       _render?.(false);
     });
     el.addEventListener('dblclick', e => {
       if (e.target.closest('.tb-lh,.tb-rh')) return;
-      const t = taskById(+el.dataset.taskId);
-      if (t) _openModal?.('edit-task', t);
+      const tk = taskById(+el.dataset.taskId);
+      if (tk) _openModal?.('edit-task', tk);
     });
     el.addEventListener('dragstart', e => {
       if (e.target.classList.contains('tb-rh')) { e.preventDefault(); return; }
@@ -291,13 +292,13 @@ export function bind() {
     el.addEventListener('dragend', () => { el.classList.remove('drg'); S.ui.dragData = null; });
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
-      const t = taskById(+el.dataset.taskId);
+      const tk = taskById(+el.dataset.taskId);
       _openCtx?.(e.clientX, e.clientY, [
-        { l: 'Edit task',                             icon: 'edit',   a: `edit-task:${t.id}` },
-        { l: t.done ? 'Mark as active' : 'Mark as done', icon: 'zap', a: `toggle-done:${t.id}` },
-        { l: 'Send to backlog',                       icon: 'layers', a: `unschedule:${t.id}` },
+        { l: t('context.editTask'),                                        icon: 'edit',   a: `edit-task:${tk.id}` },
+        { l: tk.done ? t('context.markActive') : t('context.markDone'),   icon: 'zap',    a: `toggle-done:${tk.id}` },
+        { l: t('context.sendToBacklog'),                                   icon: 'layers', a: `unschedule:${tk.id}` },
         '---',
-        { l: 'Delete task', icon: 'zap', a: `del-task:${t.id}`, d: true },
+        { l: t('context.deleteTask'), icon: 'zap', a: `del-task:${tk.id}`, d: true },
       ]);
     });
   });
@@ -307,8 +308,8 @@ export function bind() {
     el.addEventListener('mousedown', e => {
       e.stopPropagation(); e.preventDefault();
       const id = +el.dataset.resize;
-      const t = taskById(id);
-      if (t) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'right', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek }; }
+      const tk = taskById(id);
+      if (tk) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'right', startX: e.clientX, origDur: tk.dur, origStartWeek: tk.startWeek }; }
     });
   });
 
@@ -317,8 +318,8 @@ export function bind() {
     el.addEventListener('mousedown', e => {
       e.stopPropagation(); e.preventDefault();
       const id = +el.dataset.resizeLeft;
-      const t = taskById(id);
-      if (t) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'left', startX: e.clientX, origDur: t.dur, origStartWeek: t.startWeek }; }
+      const tk = taskById(id);
+      if (tk) { pushHistory(); S.ui.resizeData = { taskId: id, side: 'left', startX: e.clientX, origDur: tk.dur, origStartWeek: tk.startWeek }; }
     });
   });
 
@@ -457,8 +458,8 @@ export function bind() {
     sb.addEventListener('drop', e => {
       e.preventDefault(); sb.classList.remove('dh-zone');
       if (S.ui.dragData?.type === 'bar') {
-        const t = taskById(S.ui.dragData.taskId);
-        if (t) { pushHistory(); t.startWeek = null; }
+        const tk = taskById(S.ui.dragData.taskId);
+        if (tk) { pushHistory(); tk.startWeek = null; }
         S.ui.dragData = null;
         _render?.();
       }
@@ -476,9 +477,9 @@ export function bind() {
       e.preventDefault();
       const id = +el.dataset.phDrag;
       _openCtx?.(e.clientX, e.clientY, [
-        { l: 'Sửa phase', icon: 'edit', a: `edit-phase:${id}` },
+        { l: t('context.editPhase'), icon: 'edit', a: `edit-phase:${id}` },
         '---',
-        { l: 'Xóa phase', icon: 'zap', a: `del-phase:${id}`, d: true },
+        { l: t('context.deletePhase'), icon: 'zap', a: `del-phase:${id}`, d: true },
       ]);
     });
   });
@@ -489,9 +490,9 @@ export function bind() {
       e.preventDefault();
       const id = +el.dataset.teamCtx;
       _openCtx?.(e.clientX, e.clientY, [
-        { l: 'Sửa nhóm', icon: 'edit', a: `edit-team:${id}` },
+        { l: t('context.editTeam'), icon: 'edit', a: `edit-team:${id}` },
         '---',
-        { l: 'Xóa nhóm', icon: 'zap', a: `del-team:${id}`, d: true },
+        { l: t('context.deleteTeam'), icon: 'zap', a: `del-team:${id}`, d: true },
       ]);
     });
   });
@@ -500,7 +501,7 @@ export function bind() {
   qAll('[data-edit-team]').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      const tm = S.teams.find(t => t.id === +el.dataset.editTeam);
+      const tm = S.teams.find(m => m.id === +el.dataset.editTeam);
       if (tm) _openModal?.('edit-team', tm);
     });
   });

@@ -6,6 +6,7 @@ import { wkp, bindWkPickerEvents, setRenderModal }      from '../weekpicker.js';
 import { parseDate, dateStrYMD, wkpMonday }             from '../date.js';
 import { setTheme }                                     from '../theme.js';
 import { renderModal }                                  from '../render/modals.js';
+import { t }                                           from '../i18n.js';
 
 
 /* Injected render callbacks */
@@ -58,7 +59,7 @@ export function bindModal() {
 
   /* Reset all data */
   q('#m-reset')?.addEventListener('click', () => {
-    if (!confirm('Xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.')) return;
+    if (!confirm(t('modal.cfg.resetConfirm'))) return;
     pushHistory();
     S.phases = []; S.teams = []; S.tasks = []; S.tags = []; S._nextId = 1;
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
@@ -76,9 +77,9 @@ export function bindModal() {
     urlInp.addEventListener('click', () => urlInp.select());
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(urlInp.value).then(() => {
-        copyBtn.textContent = '✓ Đã sao chép';
+        copyBtn.textContent = t('modal.share.copied');
         copyBtn.classList.add('copied');
-        setTimeout(() => { copyBtn.textContent = 'Sao chép'; copyBtn.classList.remove('copied'); }, 2200);
+        setTimeout(() => { copyBtn.textContent = t('modal.share.copy'); copyBtn.classList.remove('copied'); }, 2200);
       }).catch(() => { urlInp.select(); document.execCommand('copy'); });
     });
   }
@@ -114,7 +115,8 @@ export function bindModal() {
    CRUD ACTIONS
 ══════════════════════════════════════════════ */
 
-function shakeErr(el, msg = 'Vui lòng điền thông tin bắt buộc') {
+function shakeErr(el, msg) {
+  msg = msg ?? t('errors.requiredFields');
   if (!el) return;
   el.classList.remove('err');
   void el.offsetWidth;
@@ -145,8 +147,8 @@ function saveTask() {
   pushHistory();
 
   if (S.ui.modal.type === 'edit-task') {
-    const t = taskById(S.ui.modal.data.id);
-    Object.assign(t, { name, teamId, dur, tags, desc });
+    const tk = taskById(S.ui.modal.data.id);
+    Object.assign(tk, { name, teamId, dur, tags, desc });
   } else {
     S.tasks.push({ id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: null });
   }
