@@ -175,6 +175,7 @@
     "dragTaskDuration": "Drag to change duration",
     "dragTeamOrder": "Drag to reorder",
     "editTeam": "Edit team",
+    "today": "Today",
     "months": ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
   },
   "sidebar": {

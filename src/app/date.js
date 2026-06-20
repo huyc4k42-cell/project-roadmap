@@ -1,6 +1,7 @@
 /* ── DATE — week/date helpers used across timeline rendering ── */
 import { TLW, WW_FILL_COLS } from './constants.js';
 import { loadSidebarState } from './storage.js';
+import { getLang } from './i18n.js';
 
 export function parseDate(s) {
   const [y, m, d] = s.split('-').map(Number);
@@ -57,7 +58,8 @@ export function weekDate(w, cfg) {
 
 export function weekLabel(w, cfg) {
   const d = weekDate(w, cfg);
-  return d.toLocaleDateString('vi-VN', { month: 'numeric', day: 'numeric' });
+  const locale = getLang() === 'vi' ? 'vi-VN' : 'en-US';
+  return d.toLocaleDateString(locale, { month: 'numeric', day: 'numeric' });
 }
 
 export function todayWeekFrac(cfg) {

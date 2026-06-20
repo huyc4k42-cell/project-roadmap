@@ -71,7 +71,7 @@ export function buildTimeline() {
   for (let i = 1; i <= tw; i++) {
     const isCur = Math.floor(twFrac) === i;
     wkCells += `<div class="wk-c${isCur ? ' cur' : ''}">
-      <span class="wn">W${i}</span>
+      <span class="wn">W${i}${isCur ? `<span class="wn-today">${t('timeline.today')}</span>` : ''}</span>
       <span class="wd">${weekLabel(i, S.cfg)}</span>
     </div>`;
   }
@@ -217,7 +217,7 @@ export function buildTeamRow(tm, tw, twFrac) {
   let cells = '';
   for (let i = 1; i <= tw; i++) {
     const ph = phaseAt(i);
-    cells += `<div class="trc${ph ? ' ph-bg' : ''}" style="height:${rowH}px" data-week="${i}" data-team="${tm.id}"></div>`;
+    cells += `<div class="trc${ph ? ' ph-bg' : ''}" data-week="${i}" data-team="${tm.id}"></div>`;
   }
 
   const bars = tasks.map(tk => {
@@ -245,7 +245,7 @@ export function buildTeamRow(tm, tw, twFrac) {
   }).join('');
 
   const todayLine = todayInRange
-    ? `<div class="today-line" style="left:${todayLeft}px;height:${rowH}px"></div>` : '';
+    ? `<div class="today-line" style="left:${todayLeft}px"></div>` : '';
 
   return `
 <div class="tm-row" data-team-id="${tm.id}" style="min-height:${rowH}px">
@@ -261,7 +261,7 @@ export function buildTeamRow(tm, tw, twFrac) {
       </button>
     </div>
   </div>
-  <div class="trr" data-team="${tm.id}" style="height:${rowH}px">
+  <div class="trr" data-team="${tm.id}" style="min-height:${rowH}px">
     ${cells}${todayLine}${bars}
     ${tasks.length === 0 ? `<div class="tm-drop-hint">${t('timeline.dropHint')}</div>` : ''}
   </div>

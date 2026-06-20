@@ -47,7 +47,7 @@
 .wk-c.cur{background:rgba(208,160,82,.06)}
 .wk-c.cur .wn{color:var(--gold)}
 .wk-c.cur .wd{color:var(--gold);opacity:.75}
-.wk-c.cur .wn::after{content:'Hôm nay';display:block;font-size:8px;font-weight:600;color:var(--gold);letter-spacing:.4px;line-height:1;margin-top:2px;opacity:.9}
+.wn-today{display:block;font-size:8px;font-weight:600;color:var(--gold);letter-spacing:.4px;line-height:1;margin-top:2px;opacity:.9}
 
 /* Team rows */
 .tm-rows{position:relative}
@@ -57,8 +57,8 @@
 .tm-ico{flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin-top:1px}
 .tm-ico svg{width:15px;height:15px;stroke-width:1.5}
 .tm-nm{font-size:14px;font-weight:600}
-.trr{position:relative;display:flex;flex:1;min-width:0}
-.trc{width:var(--ww);flex-shrink:0;border-right:1px solid var(--bd);transition:background .1s}
+.trr{position:relative;display:flex;flex:1;min-width:0;align-items:stretch}
+.trc{width:var(--ww);flex-shrink:0;border-right:1px solid var(--bd);transition:background .1s;align-self:stretch}
 .trc.dh{background:rgba(208,160,82,.1)!important}
 .trc.ph-bg{background:rgba(255,255,255,.014)}
 .tm-drop-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--txt3);opacity:.35;pointer-events:none;letter-spacing:.3px;user-select:none}
