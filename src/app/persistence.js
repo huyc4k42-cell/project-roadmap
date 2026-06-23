@@ -43,11 +43,12 @@ function _payload(id, data, accent) {
     collaborators: _projCollaborators,
     inviteToken:   _projInviteToken,
     stats: {
-      phases: data.phases.length,
-      tasks:  data.tasks.length,
-      sched:  data.tasks.filter(t => t.startWeek !== null).length,
-      start:  data.cfg.start,
-      end:    data.cfg.end,
+      phases:    data.phases.length,
+      tasks:     data.tasks.length,
+      sched:     data.tasks.filter(t => t.startWeek !== null).length,
+      start:     data.cfg.start,
+      end:       data.cfg.end,
+      phaseEnds: (data.phases || []).map(ph => ph.endWeek || 0),
     },
     cfg: data.cfg, phases: data.phases, teams: data.teams,
     tasks: data.tasks, tags: data.tags, _nextId: data._nextId,
@@ -72,9 +73,12 @@ export function updateIndexEntry() {
   if (!p) return;
   p.name = S.cfg.title; p.subtitle = S.cfg.subtitle || ''; p.updatedAt = Date.now();
   p.stats = {
-    phases: S.phases.length, tasks: S.tasks.length,
-    sched: S.tasks.filter(t => t.startWeek !== null).length,
-    start: S.cfg.start, end: S.cfg.end,
+    phases:    S.phases.length,
+    tasks:     S.tasks.length,
+    sched:     S.tasks.filter(t => t.startWeek !== null).length,
+    start:     S.cfg.start,
+    end:       S.cfg.end,
+    phaseEnds: S.phases.map(ph => ph.endWeek || 0),
   };
 }
 
@@ -177,7 +181,7 @@ export async function createProject(name, subtitle, accent, navigateFn, startDat
                   phases: [], teams: [], tasks: [], tags: [], _nextId: 1 };
   cacheProject(id, data);
   if (db && currentUser) { try { await setDoc(_fsDoc(id), _payload(id, data, accent || '#D0A052')); } catch(e) {} }
-  _projIndex.unshift({ id, name, subtitle: subtitle || '', accent: accent || '#D0A052', updatedAt: Date.now(), stats: { phases: 0, tasks: 0, sched: 0, start, end } });
+  _projIndex.unshift({ id, name, subtitle: subtitle || '', accent: accent || '#D0A052', updatedAt: Date.now(), stats: { phases: 0, tasks: 0, sched: 0, start, end, phaseEnds: [] } });
   navigateFn('#project-' + id);
 }
 
@@ -259,7 +263,7 @@ export function migrateOldData() {
     const d = JSON.parse(old);
     cacheProject(id, d);
     _projIndex = [{ id, name: d.cfg?.title || 'My Roadmap', subtitle: '', accent: '#D0A052', updatedAt: Date.now(),
-      stats: { phases: d.phases?.length || 0, tasks: d.tasks?.length || 0, sched: d.tasks?.filter(t => t.startWeek !== null).length || 0 } }];
+      stats: { phases: d.phases?.length || 0, tasks: d.tasks?.length || 0, sched: d.tasks?.filter(t => t.startWeek !== null).length || 0, phaseEnds: (d.phases || []).map(p => p.endWeek || 0) } }];
     localStorage.removeItem(LS_KEY);
   } catch(e) {}
 }

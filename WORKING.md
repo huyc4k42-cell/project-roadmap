@@ -60,8 +60,8 @@
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| CARD-1 | Card info hierarchy + content redesign (#6a) | ☐ | — |
-| CARD-2 | Card lớn hơn, hiển thị nhiều thông tin hơn (#6b) | ☐ | — |
+| CARD-1 | Card info hierarchy + content redesign (#6a) | ✅ | pending |
+| CARD-2 | Card lớn hơn, hiển thị nhiều thông tin hơn (#6b) | ✅ | pending |
 
 ### TIER 5 — Phase System · ~4h (pending Q2+Q3)
 

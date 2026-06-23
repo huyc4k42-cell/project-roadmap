@@ -7,6 +7,7 @@ import { logoUrl }                 from '../icons.js';
 import { buildImportModal }        from './modals.js';
 import { buildWkPicker }          from '../weekpicker.js';
 import { t }                      from '../i18n.js';
+import { parseDate, totalWeeks, fmtInput, todayWeekFrac } from '../date.js';
 
 /* State for home-only UI */
 export let homeCtxId        = null;
@@ -153,13 +154,31 @@ export function buildHomeHdr(count) {
   </header>`;
 }
 
+/* ── cardStats helper ── */
+function cardStats(p) {
+  const s = p.stats || {};
+  const tasks     = s.tasks  || 0;
+  const sched     = s.sched  || 0;
+  const phases    = s.phases || 0;
+  const phaseEnds = s.phaseEnds || [];
+  let totalW = 0, startStr = '—', endStr = '—', phasesDone = 0;
+  if (s.start && s.end) {
+    const cfg = { start: s.start, end: s.end };
+    totalW    = totalWeeks(cfg);
+    startStr  = fmtInput(parseDate(s.start));
+    endStr    = fmtInput(parseDate(s.end));
+    const curW = todayWeekFrac(cfg);
+    phasesDone = phaseEnds.filter(ew => ew && ew < curW).length;
+  }
+  return { tasks, sched, phases, phasesDone, totalW, startStr, endStr };
+}
+
 /* ── buildProjCard ── */
 export function buildProjCard(p) {
   const schedPct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
   const accent   = p.accent || '#D0A052';
-  const phases   = p.stats?.phases || 0;
-  const tasks    = p.stats?.tasks  || 0;
   const ctxOpen  = homeCtxId === p.id;
+  const st       = cardStats(p);
 
   return `
 <div class="proj-card" data-proj-id="${p.id}" role="article" aria-label="${esc(p.name)}">
@@ -190,20 +209,42 @@ export function buildProjCard(p) {
       </div>` : ''}
     </div>
   </div>
-  <div class="proj-card-name">${esc(p.name)}</div>
-  <div class="proj-card-sub">${esc(p.subtitle || '')}</div>
+
+  <div class="proj-card-head">
+    <div class="proj-card-name">${esc(p.name)}</div>
+    ${p.subtitle ? `<div class="proj-card-sub">${esc(p.subtitle)}</div>` : ''}
+  </div>
+
+  <div class="proj-card-stats">
+    <div class="proj-stat-row">
+      <span class="proj-stat-lbl">${t('home.cardTimeline')}</span>
+      <span class="proj-stat-val">${st.totalW} ${t('home.cardWeeks').replace('{n}', '').trim()}</span>
+      <span class="proj-stat-detail">${st.startStr} → ${st.endStr}</span>
+    </div>
+    <div class="proj-stat-row">
+      <span class="proj-stat-lbl">${t('home.cardTasks')}</span>
+      <span class="proj-stat-val">${st.tasks}</span>
+      <span class="proj-stat-detail">${t('home.cardScheduled').replace('{n}', st.sched)}</span>
+    </div>
+    <div class="proj-stat-row">
+      <span class="proj-stat-lbl">${t('home.cardPhases')}</span>
+      <span class="proj-stat-val">${st.phases}</span>
+      <span class="proj-stat-detail">${t('home.cardCompleted').replace('{n}', st.phasesDone)}</span>
+    </div>
+  </div>
+
   <div class="proj-card-progress">
     <div class="proj-progress-bar">
       <div class="proj-progress-fill" style="width:${schedPct}%;background:${accent}"></div>
     </div>
     <div class="proj-progress-meta">
-      <span>${t('home.pctScheduled', { pct: schedPct })}</span>
-      <span>${tasks} task${tasks !== 1 ? 's' : ''} · ${phases} phase${phases !== 1 ? 's' : ''}</span>
+      <span>${schedPct}% ${t('home.cardScheduled').replace('{n}','').trim()}</span>
     </div>
   </div>
+
   <div class="proj-card-footer">
     <span class="proj-date">${timeAgo(p.updatedAt)}</span>
-    <span class="proj-card-open-badge">${t('home.openBadge')}</span>
+    <span class="proj-card-open-badge">${t('home.openBadge') || 'Open →'}</span>
   </div>
 </div>`;
 }

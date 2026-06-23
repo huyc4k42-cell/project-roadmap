@@ -28,15 +28,15 @@
 .home-section-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:16px}
 
 /* Project grid */
-.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
 
 /* Project card */
-.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:160px;overflow:hidden}
+.proj-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;position:relative;display:flex;flex-direction:column;min-height:240px;overflow:hidden}
 .proj-card:hover{border-color:var(--bd3);box-shadow:0 8px 28px rgba(0,0,0,.35);transform:translateY(-4px)}
 .proj-card:hover .proj-card-open-badge{opacity:1;transform:translateY(0)}
 .proj-card-stripe{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r2) var(--r2) 0 0}
 .proj-card-top{display:flex;justify-content:flex-end;margin-bottom:4px;min-height:28px}
-.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:22px;font-weight:600;color:var(--txt);margin-bottom:4px;line-height:1.25}
+.proj-card-name{font-family:'Crimson Pro',Georgia,serif;font-size:26px;font-weight:600;color:var(--txt);margin-bottom:4px;line-height:1.25}
 .proj-card-sub{font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:1.5;flex:1;min-height:18px}
 
 /* Progress bar */
@@ -68,7 +68,7 @@
 .proj-ctx-sep{height:1px;background:var(--bd);margin:3px 5px}
 
 /* New project card */
-.proj-new-card{background:transparent;border:1px dashed var(--bd2);border-radius:var(--r2);padding:20px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:180px;color:var(--txt3);font-family:inherit}
+.proj-new-card{background:transparent;border:1px dashed var(--bd2);border-radius:var(--r2);padding:20px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:240px;color:var(--txt3);font-family:inherit}
 .proj-new-card:hover{border-color:var(--gold);color:var(--gold);background:var(--goldB)}
 .proj-new-ico{width:42px;height:42px;border-radius:50%;border:1.5px dashed currentColor;display:flex;align-items:center;justify-content:center;transition:inherit}
 .proj-new-lbl{font-size:13px;font-weight:500}
@@ -139,3 +139,10 @@
 /* Toast */
 .imp-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:10px 18px;font-size:13px;color:var(--txt);box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:300;animation:toast-in .2s ease;white-space:nowrap;pointer-events:none}
 @keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+.proj-card-head{margin-bottom:14px}
+.proj-card-stats{display:flex;flex-direction:column;gap:7px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);margin-bottom:14px;flex:1}
+.proj-stat-row{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.4}
+.proj-stat-lbl{color:var(--txt3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;min-width:64px;flex-shrink:0}
+.proj-stat-val{color:var(--txt);font-weight:600;font-size:13px;min-width:20px}
+.proj-stat-detail{color:var(--txt3);font-size:11px;margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -36,6 +36,12 @@
     "rename": "Rename",
     "duplicate": "Duplicate",
     "openBadge": "Open →",
+    "cardTimeline": "Timeline",
+    "cardTasks": "Tasks",
+    "cardPhases": "Phases",
+    "cardWeeks": "{n} weeks",
+    "cardScheduled": "{n} scheduled",
+    "cardCompleted": "{n} completed",
     "pctScheduled": "{pct}% scheduled",
     "timeAgo": {
       "today": "Today",
