@@ -118,6 +118,12 @@ ${ro ? `<div class="ro-banner">
     <button class="stat" id="stat-sched" title="${t('header.scheduled')}" aria-label="${t('header.statsSched', { n: sched })}"><span class="stat-n gn">${sched}</span><span class="stat-l">${t('header.scheduled')}</span></button>
     <button class="stat" id="stat-back" title="${t('header.backlog')}" aria-label="${t('header.statsBacklog', { n: unsched })}"><span class="stat-n mt">${unsched}</span><span class="stat-l">${t('header.backlog')}</span></button>
     <div class="stat" aria-label="${t('header.statsWeeks', { n: tw })}"><span class="stat-n" style="color:var(--txt2)">${tw}</span><span class="stat-l">${t('header.weeks')}</span></div>
+    <div style="flex:1"></div>
+    <div class="tl-nav">
+      <button class="tl-nav-btn" id="btn-tl-today">Today</button>
+      <button class="tl-nav-btn" id="btn-tl-prev" aria-label="Previous week">&#8249;</button>
+      <button class="tl-nav-btn" id="btn-tl-next" aria-label="Next week">&#8250;</button>
+    </div>
   </div>
 </div>
 <div class="body ${ro ? 'readonly' : ''}">

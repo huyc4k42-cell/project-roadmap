@@ -51,10 +51,10 @@
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| FEAT-1 | Drop task không có team → auto-tạo "Untitled" (#3) | ☐ | — |
-| FEAT-2 | Click/drag timeline cell → create task popup (#11) | ☐ | — |
-| FEAT-3 | Click/drag phase row → create phase popup (#14) | ☐ | — |
-| FEAT-4 | Stats bar: [Today] [<] [>] + arrow key scroll (#16) | ☐ | — |
+| FEAT-1 | Drop task không có team → auto-tạo "Untitled" (#3) | ✅ | pending |
+| FEAT-2 | Click/drag timeline cell → create task popup (#11) | ✅ | pending |
+| FEAT-3 | Click/drag phase row → create phase popup (#14) | ✅ | pending |
+| FEAT-4 | Stats bar: [Today] [<] [>] + arrow key scroll (#16) | ✅ | pending |
 
 ### TIER 4 — Home Cards Redesign · ~4h
 
@@ -75,7 +75,7 @@
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| CSV-1 | Import CSV flow broken sau updates | ☐ | — |
+| CSV-1 | Import CSV flow broken sau updates | ✅ | pending |
 
 ---
 

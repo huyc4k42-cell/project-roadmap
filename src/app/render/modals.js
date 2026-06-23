@@ -131,6 +131,7 @@ export function buildModal() {
   if (type === 'add-task' || type === 'edit-task') {
     const td     = data || {};
     const isEdit = type === 'edit-task';
+    const prefill = (type === 'add-task') ? (S.ui._prefillTask || {}) : {};
     const selTags = td.tags || [];
     const tagOpts = S.tags.map(tg => {
       const [bg, fg] = tagPalette(tg);
@@ -138,6 +139,7 @@ export function buildModal() {
         style="${selTags.includes(tg) ? `border-color:${fg};color:${fg};background:${bg}` : ''}">${esc(tg)}</button>`;
     }).join('');
     const titleKey = isEdit ? t('modal.task.titleEdit') : t('modal.task.titleAdd');
+    const initDur = td.dur || prefill.dur || 2;
 
     return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="${titleKey}">
       <h3>${svgIcon('edit', 14)} ${titleKey}</h3>
@@ -146,14 +148,14 @@ export function buildModal() {
       <div class="fg-row">
         <div class="fg"><label>${t('modal.task.teamLabel')}</label>
           <select class="fi" id="m-team">
-            <option value=""${!td.teamId ? ' selected' : ''}>${t('modal.task.teamNone')}</option>
-            ${S.teams.map(tm => `<option value="${tm.id}"${tm.id === td.teamId ? ' selected' : ''}>${esc(tm.name)}</option>`).join('')}
+            <option value=""${!(td.teamId ?? prefill.teamId) ? ' selected' : ''}>${t('modal.task.teamNone')}</option>
+            ${S.teams.map(tm => `<option value="${tm.id}"${tm.id === (td.teamId ?? prefill.teamId) ? ' selected' : ''}>${esc(tm.name)}</option>`).join('')}
           </select></div>
         <div class="fg"><label>${t('modal.task.durationLabel')}</label>
           <div class="dur-stepper">
             <button type="button" class="dur-btn dur-dec" tabindex="-1">−</button>
-            <span class="dur-val">${td.dur || 2}</span>
-            <input type="hidden" id="m-dur" value="${td.dur || 2}"/>
+            <span class="dur-val">${initDur}</span>
+            <input type="hidden" id="m-dur" value="${initDur}"/>
             <button type="button" class="dur-btn dur-inc" tabindex="-1">+</button>
           </div>
         </div>
@@ -243,9 +245,9 @@ export function buildCtx() {
 
 /* ── Import modal ── */
 export function buildImportModal() {
-  const t = S.ui.modal;
-  if (!t || t.type !== 'import') return '';
-  const step = t.step || 1;
+  const mi = S.ui.modal;
+  if (!mi || mi.type !== 'import') return '';
+  const step = mi.step || 1;
   const idx  = _loadIndex?.() || [];
 
   const stepsHtml = `<div class="imp-steps">
@@ -259,12 +261,10 @@ export function buildImportModal() {
   </div>`;
 
   if (step === 1) {
-    const isNew = !t.targetId || t.targetId === 'new';
+    const isNew = !mi.targetId || mi.targetId === 'new';
     const projOptions = idx.map(p =>
-      `<option value="${p.id}"${t.targetId === p.id ? ' selected' : ''}>${esc(p.name)}</option>`
+      `<option value="${p.id}"${mi.targetId === p.id ? ' selected' : ''}>${esc(p.name)}</option>`
     ).join('');
-
-    const mi = t; // modal import state alias
     return `<div class="mbg" id="modal-bg" role="presentation">
       <div class="mdl mdl-wide" role="dialog" aria-modal="true" aria-label="${t('modal.import.title')}">
         <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>${t('modal.import.title')}</h3>
@@ -337,7 +337,7 @@ export function buildImportModal() {
   }
 
   /* Step 2: Preview */
-  const { validatedRows = [], checkedRows = new Set() } = t;
+  const { validatedRows = [], checkedRows = new Set() } = mi;
   const errCount = validatedRows.filter(r => r._errors.length).length;
   const okChecked = [...checkedRows].filter(i => !validatedRows[i]?._errors.length).length;
 

@@ -163,7 +163,9 @@ function saveTask() {
     const tk = taskById(S.ui.modal.data.id);
     Object.assign(tk, { name, teamId, dur, tags, desc });
   } else {
-    S.tasks.push({ id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: null });
+    const prefill = S.ui._prefillTask || {};
+    S.ui._prefillTask = null;
+    S.tasks.push({ id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: prefill.startWeek ?? null });
   }
   _closeModal?.(_render);
 }

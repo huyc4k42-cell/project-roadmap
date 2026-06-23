@@ -4,6 +4,7 @@ import { q, qAll }               from '../utils.js';
 import { t }                     from '../i18n.js';
 import { loadRowState, saveRowState, saveSidebarState } from '../storage.js';
 import { setResizeWW }            from './resize.js';
+import { todayWeekFrac }          from '../date.js';
 import { delTask, delTeam, delPhase } from './bindModal.js';
 
 /* ── Injected callbacks ── */
@@ -104,6 +105,8 @@ export function onKey(e) {
   }
 
   if (inInput) return;
+  if (e.key === 'ArrowLeft'  && !e.ctrlKey && !e.metaKey) { const el = q('#tl-area') || q('.tl-area'); if (el) { e.preventDefault(); el.scrollBy({ left: -_WW * 2, behavior: 'smooth' }); } return; }
+  if (e.key === 'ArrowRight' && !e.ctrlKey && !e.metaKey) { const el = q('#tl-area') || q('.tl-area'); if (el) { e.preventDefault(); el.scrollBy({ left: +_WW * 2, behavior: 'smooth' }); } return; }
   if (e.key === 'n' && !ctrl) { e.preventDefault(); _openModal?.('add-task'); }
   if (e.key === 'p' && !ctrl) { e.preventDefault(); _openModal?.('add-phase'); }
   if (e.key === 't' && !ctrl) { e.preventDefault(); _openModal?.('add-team'); }
@@ -129,6 +132,22 @@ export function bind() {
   q('#stat-all')?.addEventListener('click',   () => { S.ui.filter.status = ''; _render?.(); });
   q('#stat-sched')?.addEventListener('click', () => { S.ui.filter.status = 'scheduled'; _render?.(); });
   q('#stat-back')?.addEventListener('click',  () => { S.ui.filter.status = 'backlog'; _render?.(); });
+
+  /* Timeline navigation */
+  const getTlArea = () => q('#tl-area') || q('.tl-area');
+  const scrollWeeks = (n) => {
+    const el = getTlArea();
+    if (el) el.scrollBy({ left: n * _WW, behavior: 'smooth' });
+  };
+  q('#btn-tl-prev')?.addEventListener('click', () => scrollWeeks(-4));
+  q('#btn-tl-next')?.addEventListener('click', () => scrollWeeks(+4));
+  q('#btn-tl-today')?.addEventListener('click', () => {
+    const el = getTlArea();
+    if (!el) return;
+    const wf = todayWeekFrac(S.cfg);
+    const target = Math.max(0, (wf - 1) * _WW - el.clientWidth / 2);
+    el.scrollTo({ left: target, behavior: 'smooth' });
+  });
 
   /* Search */
   q('#sb-search')?.addEventListener('input',   e => {
@@ -254,6 +273,7 @@ export function bind() {
   });
 
   /* Timeline cells drop */
+  let trcMouseStart = null; // { week, teamId }
   qAll('.trc').forEach(el => {
     el.addEventListener('dragover', e => {
       if (!S.ui.dragData) return;
@@ -272,6 +292,26 @@ export function bind() {
       S.ui.dragData = null;
       _render?.();
     });
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0 || S.ui.readonly) return;
+      if (S.ui.dragData) return;
+      trcMouseStart = { week: +el.dataset.week, teamId: +el.dataset.team };
+    });
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (!trcMouseStart) return;
+    const start = trcMouseStart;
+    trcMouseStart = null;
+    const cell = e.target.closest('.trc');
+    if (!cell || S.ui.dragData) return;
+    const endWeek  = +cell.dataset.week;
+    const teamId   = +cell.dataset.team;
+    if (teamId !== start.teamId) return; // khác team row → bỏ qua
+    const sw  = Math.min(start.week, endWeek);
+    const dur = Math.abs(endWeek - start.week) + 1;
+    S.ui._prefillTask = { startWeek: sw, teamId: start.teamId, dur };
+    _openModal?.('add-task');
   });
 
   /* Task bars */
@@ -400,6 +440,27 @@ export function bind() {
         _render?.();
       }
     });
+  });
+
+  /* Phase gap — click/drag to create phase */
+  let phGapMouseStart = null;
+  qAll('.ph-cell.ph-gap').forEach(el => {
+    el.addEventListener('mousedown', e => {
+      if (e.button !== 0 || S.ui.readonly) return;
+      phGapMouseStart = +el.dataset.week;
+    });
+  });
+
+  document.addEventListener('mouseup', e => {
+    if (phGapMouseStart == null) return;
+    const start = phGapMouseStart;
+    phGapMouseStart = null;
+    const cell = e.target.closest('.ph-cell.ph-gap');
+    if (!cell) return;
+    const endWeek = +cell.dataset.week;
+    const sw = Math.min(start, endWeek);
+    const ew = Math.max(start, endWeek);
+    _openModal?.('add-phase', { startWeek: sw, endWeek: Math.max(ew, sw + 1) });
   });
 
   /* Team row reorder */
@@ -714,5 +775,25 @@ export function bind() {
       sel?.removeAllRanges();
       sel?.addRange(range);
     }
+  }
+
+  /* Fallback drop zone when no teams exist */
+  const tlArea = q('.tl-area');
+  if (tlArea && S.teams.length === 0) {
+    tlArea.addEventListener('dragover', e => {
+      if (S.ui.dragData?.type === 'backlog' || S.ui.dragData?.type === 'bar') e.preventDefault();
+    }, { once: false });
+    tlArea.addEventListener('drop', e => {
+      if (!S.ui.dragData) return;
+      if (S.ui.dragData.type !== 'backlog' && S.ui.dragData.type !== 'bar') return;
+      e.preventDefault();
+      pushHistory();
+      const tm = { id: nextId(), name: 'Untitled', icon: 'users', color: '#7c3aed' };
+      S.teams.push(tm);
+      const tk = taskById(S.ui.dragData.taskId);
+      if (tk) { tk.teamId = tm.id; tk.startWeek = 1; }
+      S.ui.dragData = null;
+      _render?.();
+    }, { once: true });
   }
 }

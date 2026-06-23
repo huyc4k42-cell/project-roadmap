@@ -24,6 +24,7 @@ export let S = {
     teamDragId:     null,
     readonly:       false,
     _focusOutputId: null,
+    _prefillTask:   null,
   },
   _nextId: 1,
 };

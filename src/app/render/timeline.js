@@ -44,7 +44,7 @@ export function buildTimeline() {
       </div>`;
       w = ph.endWeek + 1;
     } else {
-      phCells += `<div class="ph-cell ph-gap" style="width:${WW}px"></div>`;
+      phCells += `<div class="ph-cell ph-gap" data-week="${w}" style="width:${WW}px"></div>`;
       w++;
     }
   }
