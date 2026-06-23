@@ -87,10 +87,12 @@
       "nameLabel": "Phase name *",
       "namePlaceholder": "Phase 1...",
       "colorLabel": "Color",
-      "startWeek": "Start week",
-      "weeks": "weeks",
-      "previewLabel": "→ ends W{ew} · {dur} weeks · {startDate} – {endDate}",
-      "overlapWarn": "⚠ Overlaps with {name} (W{sw}–W{ew})"
+      "gridLabel": "SELECT YOUR TIME",
+      "gridHelpEmpty": "Click a week to start your phase",
+      "gridHelpStart": "Pick at least one week",
+      "gridSelectedRange": "{n} weeks selected (W{sw} → W{ew})",
+      "gridBlockedHit": "W{w} already belongs to {name} — max selectable up to W{maxW}",
+      "gridTooltipOwnedBy": "Owned by {name}"
     },
     "project": {
       "titleRename": "Rename",

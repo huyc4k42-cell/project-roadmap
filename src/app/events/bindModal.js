@@ -3,7 +3,7 @@ import { S, nextId, phaseById, taskById, pushHistory } from '../state.js';
 import { q, qAll }                                      from '../utils.js';
 import { PHASE_COLORS, LS_KEY }                         from '../constants.js';
 import { wkp, bindWkPickerEvents, setRenderModal }      from '../weekpicker.js';
-import { parseDate, dateStrYMD, wkpMonday, weekDate, fmtInput } from '../date.js';
+import { parseDate, dateStrYMD, wkpMonday, weekDate, fmtInput, totalWeeks } from '../date.js';
 import { setTheme }                                     from '../theme.js';
 import { renderModal }                                  from '../render/modals.js';
 import { t }                                           from '../i18n.js';
@@ -123,64 +123,169 @@ export function bindModal() {
     q('.dur-inc')?.addEventListener('click', () => updateDur(+(durInp.value) + 1));
   }
 
-  /* Phase week inputs */
-  const phSwInp  = q('#m-ph-sw');
-  const phDurInp = q('#m-ph-dur');
-  const phDurVal = q('#m-ph-dur-val');
-  const phPreview = q('#m-ph-preview');
-  const phWarn    = q('#m-ph-warn');
-
-  if (phSwInp && phDurInp) {
-    const updatePhPreview = () => {
-      const sw  = Math.max(1, +phSwInp.value || 1);
-      const dur = Math.max(1, +phDurInp.value || 1);
-      const ew  = sw + dur - 1;
-
-      // Update dur display
-      if (phDurVal) phDurVal.textContent = dur;
-
-      // Build preview text
-      if (phPreview) {
-        // Use weekDate from date.js to get real dates
-        const startDate = weekDate(sw, S.cfg);
-        const endDate   = weekDate(ew, S.cfg);
-        const fmt = d => d ? fmtInput(d) : '?';
-        phPreview.textContent = `→ kết thúc W${ew} · ${dur} tuần · ${fmt(startDate)} – ${fmt(endDate)}`;
-      }
-
-      // Overlap check
-      if (phWarn) {
-        const modalType = S.ui.modal?.type;
-        const editId    = S.ui.modal?.data?.id ?? null;
-        const conflict  = S.phases.find(p =>
-          p.id !== editId &&
-          p.startWeek <= ew && p.endWeek >= sw
-        );
-        if (conflict) {
-          phWarn.textContent = `⚠ Trùng với ${conflict.name} (W${conflict.startWeek}–${conflict.endWeek})`;
-          phWarn.style.display = 'block';
-        } else {
-          phWarn.style.display = 'none';
-        }
-      }
-    };
-
-    // Dur stepper for phase
-    q('#m-ph-sw')?.addEventListener('input', updatePhPreview);
-    q('.phase-week-row .dur-dec')?.addEventListener('click', () => {
-      const v = Math.max(1, (+phDurInp.value || 2) - 1);
-      phDurInp.value = v;
-      updatePhPreview();
-    });
-    q('.phase-week-row .dur-inc')?.addEventListener('click', () => {
-      const v = (+phDurInp.value || 2) + 1;
-      phDurInp.value = v;
-      updatePhPreview();
-    });
-
-    // Run once on open
-    updatePhPreview();
+  /* Phase grid */
+  if (type === 'add-phase' || type === 'edit-phase') {
+    bindPhaseGrid();
   }
+}
+
+/* ── bindPhaseGrid ── */
+function bindPhaseGrid() {
+  const gridEl  = q('#m-ph-grid');
+  const helpEl  = q('#m-ph-grid-help');
+  const saveBtn = q('#m-save');
+  const nameInp = q('#m-ph-name');
+  if (!gridEl) return;
+
+  const totalW = totalWeeks(S.cfg);
+  const editId = S.ui.modal.type === 'edit-phase' ? S.ui.modal.data?.id : null;
+
+  // Build blocked map: weekNumber -> { id, name, color } — excludes the phase being edited
+  const blocked = new Map();
+  for (const p of S.phases) {
+    if (p.id === editId) continue;
+    for (let w = p.startWeek; w <= p.endWeek; w++) {
+      blocked.set(w, { id: p.id, name: p.name, color: p.color });
+    }
+  }
+
+  const g = S.ui._phaseGrid; // { start, end, hoverEnd, blockedHit }
+
+  const getRange = () => {
+    if (g.start == null) return null;
+    const b = g.end ?? g.hoverEnd ?? g.start;
+    return { lo: Math.min(g.start, b), hi: Math.max(g.start, b) };
+  };
+
+  const firstBlockedIn = (lo, hi) => {
+    for (let w = lo; w <= hi; w++) if (blocked.has(w)) return w;
+    return null;
+  };
+
+  // Effective selected range respecting blocked hard-stop
+  const effectiveRange = () => {
+    const r = getRange();
+    if (!r) return null;
+    const bw = firstBlockedIn(r.lo, r.hi);
+    if (bw == null) return r;
+    // Clamp to the side of start
+    if (g.start <= bw) return { lo: r.lo, hi: bw - 1 };
+    return { lo: bw + 1, hi: r.hi };
+  };
+
+  function paint() {
+    const r = effectiveRange();
+    const cells = [];
+    for (let w = 1; w <= totalW; w++) {
+      const b = blocked.get(w);
+      let cls = 'pwg-cell';
+      let style = '';
+      let title = '';
+      if (b) {
+        cls += ' pwg-blocked';
+        style = `background:${b.color}`;
+        title = b.name;
+      } else if (r && w >= r.lo && w <= r.hi) {
+        cls += ' pwg-selected';
+      }
+      cells.push(`<div class="${cls}" data-w="${w}"${title ? ` title="${title}"` : ''}${style ? ` style="${style}"` : ''}>W${w}</div>`);
+    }
+    gridEl.innerHTML = cells.join('');
+    updateHelp();
+  }
+
+  function updateHelp() {
+    const r = effectiveRange();
+    const nameOk = !!nameInp?.value.trim();
+    let msg = '';
+    let warn = false;
+
+    if (g.blockedHit != null && g.start != null) {
+      const b = blocked.get(g.blockedHit);
+      const maxW = g.start <= g.blockedHit ? g.blockedHit - 1 : g.blockedHit + 1;
+      msg = `W${g.blockedHit} đã thuộc về ${b?.name ?? 'phase khác'} — chỉ chọn được đến W${maxW}`;
+      warn = true;
+    } else if (r) {
+      const dur = r.hi - r.lo + 1;
+      msg = `${dur} tuần được chọn (W${r.lo} → W${r.hi})`;
+    } else {
+      msg = 'Click vào tuần để bắt đầu phase';
+    }
+
+    helpEl.textContent = msg;
+    helpEl.classList.toggle('pwg-help-warn', warn);
+
+    const hasRange = r != null;
+    const canSave = nameOk && hasRange;
+    saveBtn.disabled = !canSave;
+    saveBtn.style.opacity = canSave ? '' : '.45';
+    saveBtn.style.cursor  = canSave ? '' : 'not-allowed';
+  }
+
+  // MOUSEOVER — hover preview (Phase B only)
+  gridEl.addEventListener('mouseover', e => {
+    const cell = e.target.closest('.pwg-cell');
+    if (!cell || cell.classList.contains('pwg-blocked')) return;
+    const w = +cell.dataset.w;
+    if (g.start == null) return;
+    // Phase B: start set, end not yet committed (or same as start)
+    if (g.end != null && g.end !== g.start) return;
+    const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
+    const bw = firstBlockedIn(lo, hi);
+    g.hoverEnd = w;
+    g.blockedHit = bw ?? null;
+    paint();
+  });
+
+  // MOUSELEAVE — clear hover preview
+  gridEl.addEventListener('mouseleave', () => {
+    if (g.start != null && (g.end == null || g.end === g.start)) {
+      g.hoverEnd = null;
+      g.blockedHit = null;
+      paint();
+    }
+  });
+
+  // CLICK — state machine
+  gridEl.addEventListener('click', e => {
+    const cell = e.target.closest('.pwg-cell');
+    if (!cell || cell.classList.contains('pwg-blocked')) return;
+    const w = +cell.dataset.w;
+
+    // Phase C: committed range (start & end differ) → reset
+    if (g.start != null && g.end != null && g.end !== g.start) {
+      g.start = w; g.end = w; g.hoverEnd = null; g.blockedHit = null;
+      paint(); return;
+    }
+
+    // Phase A: no start
+    if (g.start == null) {
+      g.start = w; g.end = w; g.hoverEnd = null; g.blockedHit = null;
+      paint(); return;
+    }
+
+    // Phase B: click same cell as start → deselect
+    if (w === g.start) {
+      g.start = null; g.end = null; g.hoverEnd = null; g.blockedHit = null;
+      paint(); return;
+    }
+
+    // Phase B: click different cell → commit (with blocked-range detection)
+    const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
+    const bw = firstBlockedIn(lo, hi);
+    if (bw != null) {
+      // Clamp to blocked side
+      g.end = (w > g.start) ? bw - 1 : bw + 1;
+      g.hoverEnd = null;
+      g.blockedHit = bw;
+    } else {
+      g.end = w; g.hoverEnd = null; g.blockedHit = null;
+    }
+    paint();
+  });
+
+  nameInp?.addEventListener('input', updateHelp);
+  paint(); // initial render
 }
 
 /* ══════════════════════════════════════════════
@@ -247,20 +352,22 @@ function saveTeam() {
 
 function savePhase() {
   const name  = q('#m-ph-name')?.value.trim();
-  const color = q('.co.sel')?.dataset.color || PHASE_COLORS[0];
-  if (!name) { shakeErr(q('#m-ph-name')); return; }
+  const colorEl = q('#m-ph-colors .co.sel') || q('.co.sel');
+  const color = colorEl?.dataset.color || PHASE_COLORS[0];
+  const g = S.ui._phaseGrid;
+  if (!name || !g || g.start == null) return;
   pushHistory();
 
-  const sw = Math.max(1, +q('#m-ph-sw')?.value || 1);
-  const dur = Math.max(1, +q('#m-ph-dur')?.value || 1);
-  const ew  = Math.max(sw, sw + dur - 1);
+  const sw = Math.min(g.start, g.end ?? g.start);
+  const ew = Math.max(g.start, g.end ?? g.start);
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);
-    Object.assign(ph, { name, startWeek: sw, endWeek: ew, color });
+    if (ph) Object.assign(ph, { name, startWeek: sw, endWeek: ew, color });
   } else {
     S.phases.push({ id: nextId(), name, startWeek: sw, endWeek: ew, color, scope: '', outputs: [] });
   }
+  S.ui._phaseGrid = null;
   _closeModal?.(_render);
 }
 

@@ -25,6 +25,7 @@ export let S = {
     readonly:       false,
     _focusOutputId: null,
     _prefillTask:   null,
+    _phaseGrid:     null,
   },
   _nextId: 1,
 };

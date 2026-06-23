@@ -87,10 +87,12 @@
       "nameLabel": "Tên phase *",
       "namePlaceholder": "Phase 1...",
       "colorLabel": "Màu",
-      "startWeek": "Tuần bắt đầu",
-      "weeks": "tuần",
-      "previewLabel": "→ kết thúc W{ew} · {dur} tuần · {startDate} – {endDate}",
-      "overlapWarn": "⚠ Trùng với {name} (W{sw}–W{ew})"
+      "gridLabel": "CHỌN THỜI GIAN",
+      "gridHelpEmpty": "Click vào tuần để bắt đầu phase",
+      "gridHelpStart": "Chọn ít nhất 1 tuần",
+      "gridSelectedRange": "{n} tuần được chọn (W{sw} → W{ew})",
+      "gridBlockedHit": "W{w} đã thuộc về {name} — chỉ chọn được đến W{maxW}",
+      "gridTooltipOwnedBy": "Thuộc về {name}"
     },
     "project": {
       "titleRename": "Đổi tên",

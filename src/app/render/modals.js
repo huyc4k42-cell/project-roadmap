@@ -26,37 +26,31 @@ export function renderModal() {
 /* ── openModal / closeModal ── */
 export function openModal(type, data = null, parseDate, wkpMonday, wkp) {
   S.ui.modal = { type, data };
-  if (parseDate && wkpMonday && wkp) {
-    if (type === 'cfg') {
-      const sm     = wkpMonday(parseDate(S.cfg.start));
-      wkp.startMon = sm;
-      wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
-      wkp.yr       = sm.getFullYear();
-      wkp.mo       = sm.getMonth();
-      wkp.step     = 'start';
-      wkp.showMonthSel = false;
-      wkp.phaseMode = false;
-      wkp.cfgStart  = null;
-    } else if (type === 'add-phase' || type === 'edit-phase') {
-      const ph       = data || {};
-      const cfgStart = wkpMonday(parseDate(S.cfg.start));
-      const sw       = ph.startWeek || 1;
-      const ew       = ph.endWeek   || Math.min(sw + 3, totalWeeks(S.cfg));
-      wkp.cfgStart   = cfgStart;
-      wkp.phaseMode  = true;
-      wkp.startMon   = new Date(cfgStart.getTime() + (sw - 1) * 7 * 86400000);
-      wkp.endMon     = new Date(cfgStart.getTime() + (ew - 1) * 7 * 86400000);
-      wkp.yr         = wkp.startMon.getFullYear();
-      wkp.mo         = wkp.startMon.getMonth();
-      wkp.step       = 'start';
-      wkp.showMonthSel = false;
-    }
+  if (type === 'add-phase' || type === 'edit-phase') {
+    const ph = data || {};
+    S.ui._phaseGrid = {
+      start:      ph.startWeek ?? null,
+      end:        ph.endWeek   ?? null,
+      hoverEnd:   null,
+      blockedHit: null,
+    };
+  } else if (parseDate && wkpMonday && wkp && type === 'cfg') {
+    const sm     = wkpMonday(parseDate(S.cfg.start));
+    wkp.startMon = sm;
+    wkp.endMon   = wkpMonday(parseDate(S.cfg.end));
+    wkp.yr       = sm.getFullYear();
+    wkp.mo       = sm.getMonth();
+    wkp.step     = 'start';
+    wkp.showMonthSel = false;
+    wkp.phaseMode = false;
+    wkp.cfgStart  = null;
   }
   renderModal();
 }
 
 export function closeModal(renderFn) {
   S.ui.modal = null;
+  S.ui._phaseGrid = null;
   const root = document.getElementById('modal-root');
   if (root) root.innerHTML = '';
   renderFn?.();
@@ -216,33 +210,17 @@ export function buildModal() {
       <h3>${svgIcon('map', 14)} ${titleKey}</h3>
       <div class="fg"><label>${t('modal.phase.nameLabel')}</label>
         <input class="fi" id="m-ph-name" value="${esc(ph.name || '')}" placeholder="${t('modal.phase.namePlaceholder')}"/></div>
-      <div class="fg">
-        <label>${t('modal.phase.startWeek') || 'Start week'}</label>
-        <div class="phase-week-row">
-          <div class="phase-inp-wrap">
-            <span class="phase-inp-prefix">W</span>
-            <input class="fi phase-sw-inp" type="number" id="m-ph-sw"
-              min="1" max="${totalWeeks(S.cfg)}"
-              value="${ph.startWeek || 1}"/>
-          </div>
-          <span class="phase-sep">+</span>
-          <div class="phase-dur-wrap">
-            <button type="button" class="dur-btn dur-dec" tabindex="-1">−</button>
-            <span class="dur-val" id="m-ph-dur-val">${(ph.endWeek || 4) - (ph.startWeek || 1) + 1}</span>
-            <input type="hidden" id="m-ph-dur" value="${(ph.endWeek || 4) - (ph.startWeek || 1) + 1}"/>
-            <button type="button" class="dur-btn dur-inc" tabindex="-1">+</button>
-          </div>
-          <span class="phase-sep">${t('modal.phase.weeks') || 'tuần'}</span>
-        </div>
-        <div class="phase-preview" id="m-ph-preview"></div>
-        <div class="phase-overlap-warn" id="m-ph-warn" style="display:none"></div>
-      </div>
       <div class="fg"><label>${t('modal.phase.colorLabel')}</label>
-        <div class="col-opts">${colorBtns}</div></div>
+        <div class="col-opts" id="m-ph-colors">${colorBtns}</div></div>
+      <div class="fg">
+        <label class="flb">${t('modal.phase.gridLabel') || 'SELECT YOUR TIME'} *</label>
+        <div class="pwg" id="m-ph-grid" role="grid" aria-label="Select weeks"></div>
+        <div class="pwg-help" id="m-ph-grid-help"></div>
+      </div>
       <div class="mdl-btns">
         ${isEdit ? `<button class="bsm b-dng" id="m-del">${t('common.delete')}</button>` : ''}
         <button class="bsm b-sec" id="m-cancel">${t('common.cancel')}</button>
-        <button class="bsm b-primary" id="m-save">${isEdit ? t('common.save') : t('common.add')}</button>
+        <button class="bsm b-primary" id="m-save" disabled>${isEdit ? t('common.save') : t('common.add')}</button>
       </div>
     </div></div>`;
   }
