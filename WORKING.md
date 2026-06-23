@@ -1,7 +1,83 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-17 · Session: Version Sprint — Phase D done
+> Cập nhật lần cuối: 2026-06-23 · Session: Big Update v2 — TIER 1 bugs
+
+---
+
+## 🔥 BIG UPDATE v2 — 2026-06-23
+
+> 16 issues từ user feedback. Deploy từng Tier riêng.
+> **Quy tắc:** Xong Tier N → commit → mới làm Tier N+1.
+> **Regression check:** Chạy smoke test checklist trước mỗi `git push`.
+
+### Smoke Test Checklist (chạy trước mỗi commit push)
+- [ ] Sign in Google → vào được app, không redirect lại login
+- [ ] Home hiện project cards đúng
+- [ ] Tạo project mới → vào timeline
+- [ ] Search bar nhập text được, filter hoạt động
+- [ ] Tạo phase (modal mở, save, hiện trên timeline)
+- [ ] Tạo task (modal mở, save, hiện trong backlog)
+- [ ] Kéo task từ backlog vào timeline
+- [ ] Export PDF không crash
+- [ ] Import CSV → preview → import thành công
+- [ ] Ctrl+Z undo hoạt động
+- [ ] Modal đóng bằng Escape
+- [ ] Phase scope expand/collapse không mất dữ liệu
+
+### TIER 1 — Critical Bugs · ~4h
+
+| ID | Issue | Status | Commit |
+|----|-------|--------|--------|
+| BUG-1 | Search bar không nhập được (#8) | ✅ | pending |
+| BUG-2 | Login phải đăng nhập lại mỗi lần (#9) | ✅ | pending |
+| BUG-3 | Dropdown collapse làm mất phase scope (#2) | ✅ | pending |
+| BUG-4 | Kéo phase → phase kề bị đổi màu (#5b) | 🔄 re-investigate | — |
+| BUG-5 | Sidebar toggle button bị crop (#10) | ✅ | pending |
+| BUG-6 | More options card bị crop (#6c) | ✅ | pending |
+
+### TIER 2 — UX Quick Wins · ~3h
+
+| ID | Issue | Status | Commit |
+|----|-------|--------|--------|
+| UX-1 | Output: bỏ text "paste multiple" hint (#4a) | ☐ | — |
+| UX-2 | Output: Enter → thêm output mới (#4b) | ☐ | — |
+| UX-3 | Output: Add output → auto-focus input (#4c) | ☐ | — |
+| UX-4 | Bỏ "Drop tasks here" text (#12) | ☐ | — |
+| UX-5 | Duration stepper [-] 2 [+] (#13) | ☐ | — |
+| UX-6 | Export dùng ngôn ngữ hiện tại (#7) | ☐ | — |
+
+### TIER 3 — Feature Additions · ~8h
+
+| ID | Issue | Status | Commit |
+|----|-------|--------|--------|
+| FEAT-1 | Drop task không có team → auto-tạo "Untitled" (#3) | ☐ | — |
+| FEAT-2 | Click/drag timeline cell → create task popup (#11) | ☐ | — |
+| FEAT-3 | Click/drag phase row → create phase popup (#14) | ☐ | — |
+| FEAT-4 | Stats bar: [Today] [<] [>] + arrow key scroll (#16) | ☐ | — |
+
+### TIER 4 — Home Cards Redesign · ~4h
+
+| ID | Issue | Status | Commit |
+|----|-------|--------|--------|
+| CARD-1 | Card info hierarchy + content redesign (#6a) | ☐ | — |
+| CARD-2 | Card lớn hơn, hiển thị nhiều thông tin hơn (#6b) | ☐ | — |
+
+### TIER 5 — Phase System · ~4h (pending Q2+Q3)
+
+| ID | Issue | Status | Decision |
+|----|-------|--------|----------|
+| PHASE-1 | Phase time selection UX (#5a) | ⏳ Q2 pending | → /grill-me khi đến |
+| PHASE-2 | Phase move → task positions (#5c) | ⏳ Q3 pending | Option B (delta shift) — /grill-me khi đến |
+| PHASE-3 | Phase min 1 week enforcement (#5d) | ☐ | — |
+
+### TIER 6 — Import CSV broken (#1)
+
+| ID | Issue | Status | Commit |
+|----|-------|--------|--------|
+| CSV-1 | Import CSV flow broken sau updates | ☐ | — |
+
+---
 
 ---
 

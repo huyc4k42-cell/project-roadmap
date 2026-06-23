@@ -13,7 +13,7 @@
 .sb-rail-icon{display:flex;align-items:center;justify-content:center}
 .sb-rail-badge{font-size:11px;font-weight:600;background:var(--s3);border-radius:4px;padding:2px 7px;color:var(--txt2);min-width:22px;text-align:center}
 .sb.rail .sb-rail-btn{display:flex}
-.sb-toggle{background:none;border:none;color:var(--txt3);cursor:pointer;padding:2px;line-height:1;display:flex;align-items:center;border-radius:3px;transition:color .15s;flex-shrink:0}
+.sb-toggle{background:none;border:none;color:var(--txt3);cursor:pointer;padding:2px;line-height:1;display:flex;align-items:center;border-radius:3px;transition:color .15s;flex-shrink:0;position:relative;z-index:10}
 .sb-toggle:hover{color:var(--txt)}
 .sb.dh-zone{background:rgba(208,160,82,.04)}
 

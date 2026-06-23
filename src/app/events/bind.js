@@ -131,7 +131,14 @@ export function bind() {
   q('#stat-back')?.addEventListener('click',  () => { S.ui.filter.status = 'backlog'; _render?.(); });
 
   /* Search */
-  q('#sb-search')?.addEventListener('input',   e => { S.ui.filter.search = e.target.value; _render?.(true); });
+  q('#sb-search')?.addEventListener('input',   e => {
+    const el  = e.target;
+    const sel = el.selectionStart;
+    S.ui.filter.search = el.value;
+    _render?.(true);
+    const newEl = q('#sb-search');
+    if (newEl) { newEl.focus(); newEl.setSelectionRange(sel, sel); }
+  });
   q('#sb-search')?.addEventListener('keydown', e => { if (e.key === 'Escape') { S.ui.filter.search = ''; _render?.(); } });
 
   /* Empty state buttons */
@@ -516,11 +523,14 @@ export function bind() {
 
   /* Scope textarea — live update, persist on blur */
   qAll('[data-scope-id]').forEach(el => {
+    let dirty = false;
+    el.addEventListener('focus', () => { dirty = false; });
     el.addEventListener('input', () => {
+      if (!dirty) { pushHistory(); dirty = true; }
       const ph = phaseById(+el.dataset.scopeId);
       if (ph) ph.scope = el.value;
     });
-    el.addEventListener('blur', () => { pushHistory(); _render?.(); });
+    el.addEventListener('blur', () => { if (dirty) _render?.(); });
   });
 
   /* Output checklist — add item */

@@ -56,6 +56,8 @@ export async function initFirebase(onAuthChange) {
     _gProvider = new GoogleAuthProvider();
     _gProvider.setCustomParameters({ prompt: 'select_account' });
 
+    try { await setPersistence(auth, browserLocalPersistence); } catch(e) { /* ignore, fallback to default */ }
+
     try { await getRedirectResult(auth); }
     catch(e) {
       if (e?.code && e.code !== 'auth/cancelled-popup-request')

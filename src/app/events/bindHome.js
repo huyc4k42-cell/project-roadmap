@@ -221,8 +221,19 @@ export function bindHome() {
   qAll('[data-proj-menu]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      setHomeCtxId(homeCtxId === btn.dataset.projMenu ? null : btn.dataset.projMenu);
+      const rect    = btn.getBoundingClientRect();
+      const opening = homeCtxId !== btn.dataset.projMenu;
+      setHomeCtxId(opening ? btn.dataset.projMenu : null);
       _renderHome?.();
+      // Position the fixed dropdown below the trigger button (after render)
+      if (opening) {
+        const freshCard = q(`.proj-card[data-proj-id="${btn.dataset.projMenu}"]`);
+        const freshMenu = freshCard?.querySelector('.proj-ctx');
+        if (freshMenu) {
+          freshMenu.style.top  = (rect.bottom + 4) + 'px';
+          freshMenu.style.left = (rect.right - (freshMenu.offsetWidth || 150)) + 'px';
+        }
+      }
     });
   });
 
