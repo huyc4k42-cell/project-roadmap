@@ -1,7 +1,7 @@
 /* ── EXPORT / PDF — html2canvas + jsPDF export ── */
 import { S }        from '../state.js';
 import { logoUrl }  from '../icons.js';
-import { t }        from '../i18n.js';
+import { t, getLang } from '../i18n.js';
 
 /* html2canvas and jsPDF are loaded via CDN <script> tags at runtime.
    Access via window.html2canvas and window.jspdf. */
@@ -116,7 +116,8 @@ export async function exportPDF() {
     pdf.addImage(lc.toDataURL('image/png'), 'PNG', W * scale - 50, 8, 80, 32);
 
     /* Footer */
-    const date = new Date().toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
+    const _localeMap = { en: 'en-US', vi: 'vi-VN' };
+    const date = new Date().toLocaleDateString(_localeMap[getLang()] || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     pdf.setFontSize(8);
     pdf.setTextColor(62, 58, 54);
     pdf.text(t('pdf.exportedAt', { date }), 30, H * scale + 85);

@@ -32,7 +32,7 @@
 | BUG-1 | Search bar không nhập được (#8) | ✅ | pending |
 | BUG-2 | Login phải đăng nhập lại mỗi lần (#9) | ✅ | pending |
 | BUG-3 | Dropdown collapse làm mất phase scope (#2) | ✅ | pending |
-| BUG-4 | Kéo phase → phase kề bị đổi màu (#5b) | 🔄 re-investigate | — |
+| BUG-4 | Kéo phase → phase kề bị đổi màu (#5b) | ✅ | pending |
 | BUG-5 | Sidebar toggle button bị crop (#10) | ✅ | pending |
 | BUG-6 | More options card bị crop (#6c) | ✅ | pending |
 
@@ -40,12 +40,12 @@
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| UX-1 | Output: bỏ text "paste multiple" hint (#4a) | ☐ | — |
-| UX-2 | Output: Enter → thêm output mới (#4b) | ☐ | — |
-| UX-3 | Output: Add output → auto-focus input (#4c) | ☐ | — |
-| UX-4 | Bỏ "Drop tasks here" text (#12) | ☐ | — |
-| UX-5 | Duration stepper [-] 2 [+] (#13) | ☐ | — |
-| UX-6 | Export dùng ngôn ngữ hiện tại (#7) | ☐ | — |
+| UX-1 | Output: bỏ text "paste multiple" hint (#4a) | ✅ | pending |
+| UX-2 | Output: Enter → thêm output mới (#4b) | ✅ | pending |
+| UX-3 | Output: Add output → auto-focus input (#4c) | ✅ | pending |
+| UX-4 | Bỏ "Drop tasks here" text (#12) | ✅ | pending |
+| UX-5 | Duration stepper [-] 2 [+] (#13) | ✅ | pending |
+| UX-6 | Export dùng ngôn ngữ hiện tại (#7) | ✅ | pending |
 
 ### TIER 3 — Feature Additions · ~8h
 

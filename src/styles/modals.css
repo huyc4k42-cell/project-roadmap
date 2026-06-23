@@ -129,3 +129,8 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 [data-theme="light"] .auth-logo-bg{background:rgba(244,241,237,.75)}
 [data-theme="light"] .auth-google-btn{background:rgba(0,0,0,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(0,0,0,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
 [data-theme="light"] .auth-google-btn:hover{background:rgba(0,0,0,.10);border-color:rgba(0,0,0,.22)}
+
+.dur-stepper{display:flex;align-items:center;gap:8px}
+.dur-btn{width:32px;height:32px;border:1px solid var(--bd2);background:var(--s2);color:var(--txt);border-radius:var(--r);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.dur-btn:hover{background:var(--s3);border-color:var(--gold);color:var(--gold)}
+.dur-val{min-width:36px;text-align:center;font-size:15px;font-weight:600;color:var(--txt)}

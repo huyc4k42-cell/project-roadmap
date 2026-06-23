@@ -162,7 +162,7 @@
     "scopeDesc": "Scope & objectives",
     "outputTitle": "Output",
     "outputToggle": "Collapse/expand Output",
-    "outputPlaceholder": "Paste multiple lines → auto-add to list...",
+    "outputPlaceholder": "",
     "outputDesc": "Deliverables checklist",
     "outputAdd": "+ Add output",
     "dragResizeHeight": "Drag to resize height",

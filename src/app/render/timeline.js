@@ -263,7 +263,6 @@ export function buildTeamRow(tm, tw, twFrac) {
   </div>
   <div class="trr" data-team="${tm.id}" style="min-height:${rowH}px">
     ${cells}${todayLine}${bars}
-    ${tasks.length === 0 ? `<div class="tm-drop-hint">${t('timeline.dropHint')}</div>` : ''}
   </div>
 </div>`;
 }

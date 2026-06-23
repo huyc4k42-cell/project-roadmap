@@ -109,6 +109,19 @@ export function bindModal() {
       if (selIcon) selIcon.style.color = el.dataset.color;
     });
   });
+
+  /* Duration stepper */
+  const durVal = q('.dur-val');
+  const durInp = q('#m-dur');
+  if (durVal && durInp) {
+    const updateDur = n => {
+      const v = Math.max(1, Math.min(52, n));
+      durVal.textContent = v;
+      durInp.value = v;
+    };
+    q('.dur-dec')?.addEventListener('click', () => updateDur(+(durInp.value) - 1));
+    q('.dur-inc')?.addEventListener('click', () => updateDur(+(durInp.value) + 1));
+  }
 }
 
 /* ══════════════════════════════════════════════

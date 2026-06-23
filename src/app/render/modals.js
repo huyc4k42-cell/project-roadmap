@@ -150,7 +150,13 @@ export function buildModal() {
             ${S.teams.map(tm => `<option value="${tm.id}"${tm.id === td.teamId ? ' selected' : ''}>${esc(tm.name)}</option>`).join('')}
           </select></div>
         <div class="fg"><label>${t('modal.task.durationLabel')}</label>
-          <input class="fi" type="number" id="m-dur" min="1" max="52" value="${td.dur || 2}"/></div>
+          <div class="dur-stepper">
+            <button type="button" class="dur-btn dur-dec" tabindex="-1">−</button>
+            <span class="dur-val">${td.dur || 2}</span>
+            <input type="hidden" id="m-dur" value="${td.dur || 2}"/>
+            <button type="button" class="dur-btn dur-inc" tabindex="-1">+</button>
+          </div>
+        </div>
       </div>
       <div class="fg"><label>${t('modal.task.notesLabel')}</label>
         <textarea class="fi" id="m-desc" rows="3" placeholder="${t('modal.task.notesPlaceholder')}">${esc(td.desc || '')}</textarea></div>

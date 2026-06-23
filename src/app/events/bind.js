@@ -365,6 +365,21 @@ export function bind() {
     el.addEventListener('dragstart', e => {
       S.ui.phaseDragId = +el.dataset.phDrag;
       e.dataTransfer.effectAllowed = 'move';
+      // Custom drag ghost — small badge to avoid covering adjacent phase
+      const phId = +el.dataset.phDrag;
+      const ph = phaseById(phId);
+      const ghost = document.createElement('div');
+      ghost.textContent = ph?.name || '';
+      Object.assign(ghost.style, {
+        position: 'fixed', top: '-200px', left: '0',
+        background: ph?.color || '#333',
+        color: '#fff', padding: '4px 10px',
+        borderRadius: '4px', fontSize: '12px', fontWeight: '600',
+        pointerEvents: 'none', whiteSpace: 'nowrap',
+      });
+      document.body.appendChild(ghost);
+      e.dataTransfer.setDragImage(ghost, 10, 16);
+      requestAnimationFrame(() => ghost.remove());
     });
     el.addEventListener('dragend', () => { S.ui.phaseDragId = null; });
   });
@@ -540,7 +555,9 @@ export function bind() {
       if (!ph) return;
       pushHistory();
       if (!ph.outputs) ph.outputs = [];
-      ph.outputs.push({ id: nextId(), text: '', done: false });
+      const newId = nextId();
+      ph.outputs.push({ id: newId, text: '', done: false });
+      S.ui._focusOutputId = newId;
       _render?.();
     });
   });
@@ -571,6 +588,22 @@ export function bind() {
       if (!ph) return;
       const o = ph.outputs?.find(x => x.id === oid);
       if (o) { pushHistory(); o.text = el.textContent; }
+    });
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const [oid, pid] = el.dataset.chkEdit.split(':').map(Number);
+        const ph = phaseById(pid);
+        if (!ph) return;
+        pushHistory();
+        const cur = ph.outputs?.find(x => x.id === oid);
+        if (cur) cur.text = el.textContent;
+        const newId = nextId();
+        const idx = ph.outputs.findIndex(x => x.id === oid);
+        ph.outputs.splice(idx + 1, 0, { id: newId, text: '', done: false });
+        S.ui._focusOutputId = newId;
+        _render?.();
+      }
     });
   });
 
@@ -665,4 +698,21 @@ export function bind() {
   document.addEventListener('click', onDocClick, { once: true });
   document.removeEventListener('keydown', onKey);
   document.addEventListener('keydown', onKey);
+
+  /* Auto-focus newly created output item */
+  if (S.ui._focusOutputId != null) {
+    const focusId = S.ui._focusOutputId;
+    S.ui._focusOutputId = null;
+    const target = [...qAll('[data-chk-edit]')].find(n => +n.dataset.chkEdit.split(':')[0] === focusId);
+    if (target) {
+      target.focus();
+      // Place caret at end
+      const range = document.createRange();
+      const sel = window.getSelection();
+      range.selectNodeContents(target);
+      range.collapse(false);
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+    }
+  }
 }

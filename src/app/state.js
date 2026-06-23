@@ -20,9 +20,10 @@ export let S = {
     dragData:    null,
     resizeData:  null,
     phaseResize: null,
-    phaseDragId: null,
-    teamDragId:  null,
-    readonly:    false,
+    phaseDragId:    null,
+    teamDragId:     null,
+    readonly:       false,
+    _focusOutputId: null,
   },
   _nextId: 1,
 };
