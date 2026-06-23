@@ -86,7 +86,11 @@
       "titleAdd": "Phase mới",
       "nameLabel": "Tên phase *",
       "namePlaceholder": "Phase 1...",
-      "colorLabel": "Màu"
+      "colorLabel": "Màu",
+      "startWeek": "Tuần bắt đầu",
+      "weeks": "tuần",
+      "previewLabel": "→ kết thúc W{ew} · {dur} tuần · {startDate} – {endDate}",
+      "overlapWarn": "⚠ Trùng với {name} (W{sw}–W{ew})"
     },
     "project": {
       "titleRename": "Đổi tên",

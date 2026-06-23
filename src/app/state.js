@@ -95,8 +95,21 @@ export function swapPhases(idA, idB) {
   pushHistory();
   const a = phaseById(idA), b = phaseById(idB);
   if (!a || !b) return;
+
+  const oldStartA = a.startWeek;
+  const oldStartB = b.startWeek;
+
   [a.startWeek, b.startWeek] = [b.startWeek, a.startWeek];
   [a.endWeek,   b.endWeek  ] = [b.endWeek,   a.endWeek  ];
+
+  const deltaA = a.startWeek - oldStartA;
+  const deltaB = b.startWeek - oldStartB;
+
+  S.tasks.forEach(tk => {
+    if (tk.startWeek == null) return;
+    if (tk.phaseId === a.id)      tk.startWeek = Math.max(1, tk.startWeek + deltaA);
+    else if (tk.phaseId === b.id) tk.startWeek = Math.max(1, tk.startWeek + deltaB);
+  });
 }
 
 export function reorderTeam(dragId, targetId) {

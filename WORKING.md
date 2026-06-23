@@ -67,9 +67,9 @@
 
 | ID | Issue | Status | Decision |
 |----|-------|--------|----------|
-| PHASE-1 | Phase time selection UX (#5a) | ⏳ Q2 pending | → /grill-me khi đến |
-| PHASE-2 | Phase move → task positions (#5c) | ⏳ Q3 pending | Option B (delta shift) — /grill-me khi đến |
-| PHASE-3 | Phase min 1 week enforcement (#5d) | ☐ | — |
+| PHASE-1 | Phase time selection UX (#5a) | ✅ | pending |
+| PHASE-2 | Phase move → task positions (#5c) | ✅ | pending |
+| PHASE-3 | Phase min 1 week enforcement (#5d) | ✅ | pending |
 
 ### TIER 6 — Import CSV broken (#1)
 

@@ -3,7 +3,7 @@ import { S, nextId, phaseById, taskById, pushHistory } from '../state.js';
 import { q, qAll }                                      from '../utils.js';
 import { PHASE_COLORS, LS_KEY }                         from '../constants.js';
 import { wkp, bindWkPickerEvents, setRenderModal }      from '../weekpicker.js';
-import { parseDate, dateStrYMD, wkpMonday }             from '../date.js';
+import { parseDate, dateStrYMD, wkpMonday, weekDate, fmtInput } from '../date.js';
 import { setTheme }                                     from '../theme.js';
 import { renderModal }                                  from '../render/modals.js';
 import { t }                                           from '../i18n.js';
@@ -122,6 +122,65 @@ export function bindModal() {
     q('.dur-dec')?.addEventListener('click', () => updateDur(+(durInp.value) - 1));
     q('.dur-inc')?.addEventListener('click', () => updateDur(+(durInp.value) + 1));
   }
+
+  /* Phase week inputs */
+  const phSwInp  = q('#m-ph-sw');
+  const phDurInp = q('#m-ph-dur');
+  const phDurVal = q('#m-ph-dur-val');
+  const phPreview = q('#m-ph-preview');
+  const phWarn    = q('#m-ph-warn');
+
+  if (phSwInp && phDurInp) {
+    const updatePhPreview = () => {
+      const sw  = Math.max(1, +phSwInp.value || 1);
+      const dur = Math.max(1, +phDurInp.value || 1);
+      const ew  = sw + dur - 1;
+
+      // Update dur display
+      if (phDurVal) phDurVal.textContent = dur;
+
+      // Build preview text
+      if (phPreview) {
+        // Use weekDate from date.js to get real dates
+        const startDate = weekDate(sw, S.cfg);
+        const endDate   = weekDate(ew, S.cfg);
+        const fmt = d => d ? fmtInput(d) : '?';
+        phPreview.textContent = `→ kết thúc W${ew} · ${dur} tuần · ${fmt(startDate)} – ${fmt(endDate)}`;
+      }
+
+      // Overlap check
+      if (phWarn) {
+        const modalType = S.ui.modal?.type;
+        const editId    = S.ui.modal?.data?.id ?? null;
+        const conflict  = S.phases.find(p =>
+          p.id !== editId &&
+          p.startWeek <= ew && p.endWeek >= sw
+        );
+        if (conflict) {
+          phWarn.textContent = `⚠ Trùng với ${conflict.name} (W${conflict.startWeek}–${conflict.endWeek})`;
+          phWarn.style.display = 'block';
+        } else {
+          phWarn.style.display = 'none';
+        }
+      }
+    };
+
+    // Dur stepper for phase
+    q('#m-ph-sw')?.addEventListener('input', updatePhPreview);
+    q('.phase-week-row .dur-dec')?.addEventListener('click', () => {
+      const v = Math.max(1, (+phDurInp.value || 2) - 1);
+      phDurInp.value = v;
+      updatePhPreview();
+    });
+    q('.phase-week-row .dur-inc')?.addEventListener('click', () => {
+      const v = (+phDurInp.value || 2) + 1;
+      phDurInp.value = v;
+      updatePhPreview();
+    });
+
+    // Run once on open
+    updatePhPreview();
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -192,13 +251,9 @@ function savePhase() {
   if (!name) { shakeErr(q('#m-ph-name')); return; }
   pushHistory();
 
-  const cfgStart   = wkp.cfgStart || wkpMonday(parseDate(S.cfg.start));
-  const cfgStartTs = cfgStart.getTime();
-  let sw = 1, ew = 4;
-  if (wkp.startMon && wkp.endMon) {
-    sw = Math.max(1, Math.round((wkp.startMon.getTime() - cfgStartTs) / (7 * 86400000)) + 1);
-    ew = Math.max(sw, Math.round((wkp.endMon.getTime()   - cfgStartTs) / (7 * 86400000)) + 1);
-  }
+  const sw = Math.max(1, +q('#m-ph-sw')?.value || 1);
+  const dur = Math.max(1, +q('#m-ph-dur')?.value || 1);
+  const ew  = Math.max(sw, sw + dur - 1);
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);

@@ -47,7 +47,7 @@ function onMouseMove(e) {
     if (!ph) return;
 
     if (side === 'right') {
-      const newEnd = Math.max(origStart + 1, origEnd + delta);
+      const newEnd = Math.max(origStart, origEnd + delta);
       ph.endWeek = newEnd;
       /* Restore all other phases to originals, then push cascade */
       origAll.forEach(o => {
@@ -58,7 +58,7 @@ function onMouseMove(e) {
       });
       pushPhasesAfter(phaseId, newEnd + 1);
     } else {
-      ph.startWeek = Math.max(1, Math.min(origEnd - 1, origStart + delta));
+      ph.startWeek = Math.max(1, Math.min(origEnd, origStart + delta));
     }
     _renderRAF?.();
   }

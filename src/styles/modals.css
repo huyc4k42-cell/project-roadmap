@@ -134,3 +134,14 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .dur-btn{width:32px;height:32px;border:1px solid var(--bd2);background:var(--s2);color:var(--txt);border-radius:var(--r);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .dur-btn:hover{background:var(--s3);border-color:var(--gold);color:var(--gold)}
 .dur-val{min-width:36px;text-align:center;font-size:15px;font-weight:600;color:var(--txt)}
+
+.phase-week-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.phase-inp-wrap{display:flex;align-items:center;border:1px solid var(--bd2);border-radius:var(--r);background:var(--s2);overflow:hidden}
+.phase-inp-prefix{padding:0 8px;color:var(--txt2);font-size:13px;font-weight:600;border-right:1px solid var(--bd2);line-height:32px}
+.phase-sw-inp{width:52px;border:none;background:transparent;color:var(--txt);font-size:13px;padding:6px 8px;outline:none;font-family:inherit}
+.phase-sw-inp::-webkit-inner-spin-button,.phase-sw-inp::-webkit-outer-spin-button{opacity:1}
+.phase-sw-inp:invalid{color:var(--red)}
+.phase-sep{color:var(--txt3);font-size:13px}
+.phase-dur-wrap{display:flex;align-items:center;gap:6px}
+.phase-preview{font-size:12px;color:var(--txt3);margin-top:6px;min-height:16px}
+.phase-overlap-warn{font-size:12px;color:#b8860b;background:rgba(184,134,11,.1);border:1px solid rgba(184,134,11,.3);border-radius:var(--r);padding:5px 9px;margin-top:6px}

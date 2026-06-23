@@ -216,7 +216,27 @@ export function buildModal() {
       <h3>${svgIcon('map', 14)} ${titleKey}</h3>
       <div class="fg"><label>${t('modal.phase.nameLabel')}</label>
         <input class="fi" id="m-ph-name" value="${esc(ph.name || '')}" placeholder="${t('modal.phase.namePlaceholder')}"/></div>
-      ${buildWkPicker()}
+      <div class="fg">
+        <label>${t('modal.phase.startWeek') || 'Start week'}</label>
+        <div class="phase-week-row">
+          <div class="phase-inp-wrap">
+            <span class="phase-inp-prefix">W</span>
+            <input class="fi phase-sw-inp" type="number" id="m-ph-sw"
+              min="1" max="${totalWeeks(S.cfg)}"
+              value="${ph.startWeek || 1}"/>
+          </div>
+          <span class="phase-sep">+</span>
+          <div class="phase-dur-wrap">
+            <button type="button" class="dur-btn dur-dec" tabindex="-1">−</button>
+            <span class="dur-val" id="m-ph-dur-val">${(ph.endWeek || 4) - (ph.startWeek || 1) + 1}</span>
+            <input type="hidden" id="m-ph-dur" value="${(ph.endWeek || 4) - (ph.startWeek || 1) + 1}"/>
+            <button type="button" class="dur-btn dur-inc" tabindex="-1">+</button>
+          </div>
+          <span class="phase-sep">${t('modal.phase.weeks') || 'tuần'}</span>
+        </div>
+        <div class="phase-preview" id="m-ph-preview"></div>
+        <div class="phase-overlap-warn" id="m-ph-warn" style="display:none"></div>
+      </div>
       <div class="fg"><label>${t('modal.phase.colorLabel')}</label>
         <div class="col-opts">${colorBtns}</div></div>
       <div class="mdl-btns">

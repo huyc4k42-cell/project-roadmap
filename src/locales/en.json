@@ -86,7 +86,11 @@
       "titleAdd": "New Phase",
       "nameLabel": "Phase name *",
       "namePlaceholder": "Phase 1...",
-      "colorLabel": "Color"
+      "colorLabel": "Color",
+      "startWeek": "Start week",
+      "weeks": "weeks",
+      "previewLabel": "→ ends W{ew} · {dur} weeks · {startDate} – {endDate}",
+      "overlapWarn": "⚠ Overlaps with {name} (W{sw}–W{ew})"
     },
     "project": {
       "titleRename": "Rename",
