@@ -135,22 +135,26 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .dur-btn:hover{background:var(--s3);border-color:var(--gold);color:var(--gold)}
 .dur-val{min-width:36px;text-align:center;font-size:15px;font-weight:600;color:var(--txt)}
 
+/* Phase modal — wider to fit week grid with date labels */
+.mdl-phase { width: 640px; }
+
 /* Phase week grid */
 .pwg {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 6px;
+  gap: 5px;
   margin-top: 6px;
-  max-height: 260px;
+  max-height: 320px;
   overflow-y: auto;
 }
 .pwg-cell {
-  aspect-ratio: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
+  gap: 3px;
+  padding: 6px 2px;
+  min-height: 48px;
   color: var(--txt2);
   background: var(--s3);
   border: 1.5px solid var(--bd);
@@ -168,12 +172,26 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
   background: rgba(208, 160, 82, 0.18);
   color: var(--gold);
 }
+.pwg-cell.pwg-selected .pwg-dt { color: var(--gold); opacity: .8; }
 .pwg-cell.pwg-blocked {
-  color: #fff;
-  font-weight: 600;
+  color: rgba(255,255,255,.9);
   cursor: not-allowed;
   border-color: transparent;
   opacity: 0.9;
+}
+.pwg-cell.pwg-blocked .pwg-dt { color: rgba(255,255,255,.7); }
+.pwg-wn {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .3px;
+}
+.pwg-dt {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--txt3);
+  line-height: 1;
+  white-space: nowrap;
 }
 .pwg-help {
   font-size: 12px;

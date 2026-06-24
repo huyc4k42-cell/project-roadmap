@@ -188,7 +188,14 @@ function bindPhaseGrid() {
     const el = document.createElement('div');
     el.className = 'pwg-cell';
     el.dataset.w = w;
-    el.textContent = `W${w}`;
+    const sd = weekDate(w, S.cfg);
+    const ed = new Date(sd); ed.setDate(ed.getDate() + 6);
+    const dd = d => String(d.getDate()).padStart(2, '0');
+    const mm = d => d.getMonth() + 1;
+    const dtLabel = sd.getMonth() === ed.getMonth()
+      ? `${dd(sd)} - ${dd(ed)}/${mm(ed)}`
+      : `${dd(sd)}/${mm(sd)}-${dd(ed)}/${mm(ed)}`;
+    el.innerHTML = `<span class="pwg-wn">W${w}</span><span class="pwg-dt">${dtLabel}</span>`;
     const b = blocked.get(w);
     if (b) {
       el.classList.add('pwg-blocked');

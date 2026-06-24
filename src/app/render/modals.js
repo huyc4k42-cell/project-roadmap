@@ -206,7 +206,7 @@ export function buildModal() {
       `<div class="co${c === (ph.color || PHASE_COLORS[0]) ? ' sel' : ''}" data-color="${c}" style="background:${c}"></div>`).join('');
     const titleKey = isEdit ? t('modal.phase.titleEdit') : t('modal.phase.titleAdd');
 
-    return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl" role="dialog" aria-modal="true" aria-label="${titleKey}">
+    return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl mdl-phase" role="dialog" aria-modal="true" aria-label="${titleKey}">
       <h3>${svgIcon('map', 14)} ${titleKey}</h3>
       <div class="fg"><label>${t('modal.phase.nameLabel')}</label>
         <input class="fi" id="m-ph-name" value="${esc(ph.name || '')}" placeholder="${t('modal.phase.namePlaceholder')}"/></div>
