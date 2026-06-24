@@ -1,6 +1,6 @@
 ---
 name: code-analyst
-description: Deeply scans the codebase to locate bugs or change areas, understands root causes, then produces a precise implementation plan. Use this agent for all code issues (logic, animation, state, UI behavior) before any code is written. Replaces the old code-scanner + code-planner combo.
+description: "ALWAYS use this agent automatically — BEFORE writing or editing any code — when the task involves: bugs or unexpected behavior, logic/state/data flow changes, features touching >1 file, drag-drop/modal/Firebase/undo/render logic. SKIP for simple UI-only tasks: CSS tweaks, color/spacing/font changes, single-property visual edits with no logic involved."
 model: claude-opus-4-7
 tools:
   - Read

@@ -109,10 +109,16 @@ Dùng 2 agent trong `.claude/agents/` cho mọi task code có độ phức tạp
 3. code-executor →  thực thi đúng plan, không improvise
 ```
 
-**Khi nào dùng:**
-- Bug không rõ nguyên nhân
-- Feature chạm nhiều file (>2)
-- Refactor hoặc thay đổi state/data flow
+**Routing tự động — Claude tự quyết:**
+
+| Task | Làm gì |
+|------|--------|
+| CSS, màu, spacing, font, border-radius | Làm thẳng — KHÔNG cần agent |
+| Sửa text, label, icon đơn lẻ | Làm thẳng — KHÔNG cần agent |
+| Bug logic, state, render sai | TỰ ĐỘNG gọi `code-analyst` trước |
+| Feature chạm >1 file | TỰ ĐỘNG gọi `code-analyst` trước |
+| Drag-drop, modal, Firebase, undo | TỰ ĐỘNG gọi `code-analyst` trước |
+| Refactor hoặc thay đổi data flow | TỰ ĐỘNG gọi `code-analyst` trước |
 
 **Cách chạy:**
 

@@ -64,6 +64,10 @@ export async function initFirebase(onAuthChange) {
         showToast(t('toast.signInFailed', { msg: e.message }), 4000);
     }
 
+    // Đợi Firebase đọc xong IndexedDB session trước khi register listener
+    // Tránh onAuthStateChanged fire null rồi user → router() redirect sai
+    await auth.authStateReady();
+
     onAuthStateChanged(auth, async user => {
       currentUser = user;
       await onAuthChange(user);

@@ -29,53 +29,53 @@
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| BUG-1 | Search bar không nhập được (#8) | ✅ | pending |
-| BUG-2 | Login phải đăng nhập lại mỗi lần (#9) | ✅ | pending |
-| BUG-3 | Dropdown collapse làm mất phase scope (#2) | ✅ | pending |
-| BUG-4 | Kéo phase → phase kề bị đổi màu (#5b) | ✅ | pending |
-| BUG-5 | Sidebar toggle button bị crop (#10) | ✅ | pending |
-| BUG-6 | More options card bị crop (#6c) | ✅ | pending |
+| BUG-1 | Search bar không nhập được (#8) | ✅ | `a6061d0` |
+| BUG-2 | Login phải đăng nhập lại mỗi lần (#9) | ✅ | `a6061d0` |
+| BUG-3 | Dropdown collapse làm mất phase scope (#2) | ✅ | `a6061d0` |
+| BUG-4 | Kéo phase → phase kề bị đổi màu (#5b) | ✅ | `436aafd` |
+| BUG-5 | Sidebar toggle button bị crop (#10) | ✅ | `a6061d0` |
+| BUG-6 | More options card bị crop (#6c) | ✅ | `a6061d0` |
 
 ### TIER 2 — UX Quick Wins · ~3h
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| UX-1 | Output: bỏ text "paste multiple" hint (#4a) | ✅ | pending |
-| UX-2 | Output: Enter → thêm output mới (#4b) | ✅ | pending |
-| UX-3 | Output: Add output → auto-focus input (#4c) | ✅ | pending |
-| UX-4 | Bỏ "Drop tasks here" text (#12) | ✅ | pending |
-| UX-5 | Duration stepper [-] 2 [+] (#13) | ✅ | pending |
-| UX-6 | Export dùng ngôn ngữ hiện tại (#7) | ✅ | pending |
+| UX-1 | Output: bỏ text "paste multiple" hint (#4a) | ✅ | `436aafd` |
+| UX-2 | Output: Enter → thêm output mới (#4b) | ✅ | `436aafd` |
+| UX-3 | Output: Add output → auto-focus input (#4c) | ✅ | `436aafd` |
+| UX-4 | Bỏ "Drop tasks here" text (#12) | ✅ | `436aafd` |
+| UX-5 | Duration stepper [-] 2 [+] (#13) | ✅ | `436aafd` |
+| UX-6 | Export dùng ngôn ngữ hiện tại (#7) | ✅ | `436aafd` |
 
 ### TIER 3 — Feature Additions · ~8h
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| FEAT-1 | Drop task không có team → auto-tạo "Untitled" (#3) | ✅ | pending |
-| FEAT-2 | Click/drag timeline cell → create task popup (#11) | ✅ | pending |
-| FEAT-3 | Click/drag phase row → create phase popup (#14) | ✅ | pending |
-| FEAT-4 | Stats bar: [Today] [<] [>] + arrow key scroll (#16) | ✅ | pending |
+| FEAT-1 | Drop task không có team → auto-tạo "Untitled" (#3) | ✅ | `841ff01` |
+| FEAT-2 | Click/drag timeline cell → create task popup (#11) | ✅ | `841ff01` |
+| FEAT-3 | Click/drag phase row → create phase popup (#14) | ✅ | `841ff01` |
+| FEAT-4 | Stats bar: [Today] [<] [>] + arrow key scroll (#16) | ✅ | `841ff01` |
 
 ### TIER 4 — Home Cards Redesign · ~4h
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| CARD-1 | Card info hierarchy + content redesign (#6a) | ✅ | pending |
-| CARD-2 | Card lớn hơn, hiển thị nhiều thông tin hơn (#6b) | ✅ | pending |
+| CARD-1 | Card info hierarchy + content redesign (#6a) | ✅ | `032232a` |
+| CARD-2 | Card lớn hơn, hiển thị nhiều thông tin hơn (#6b) | ✅ | `032232a` |
 
 ### TIER 5 — Phase System · ~4h (pending Q2+Q3)
 
 | ID | Issue | Status | Decision |
 |----|-------|--------|----------|
 | PHASE-1 | Phase time selection UX (#5a) | ✅ | `e699ffe` |
-| PHASE-2 | Phase move → task positions (#5c) | ✅ | pending |
-| PHASE-3 | Phase min 1 week enforcement (#5d) | ✅ | pending |
+| PHASE-2 | Phase move → task positions (#5c) | ✅ | `d4fbde4` |
+| PHASE-3 | Phase min 1 week enforcement (#5d) | ✅ | `d4fbde4` |
 
 ### TIER 6 — Import CSV broken (#1)
 
 | ID | Issue | Status | Commit |
 |----|-------|--------|--------|
-| CSV-1 | Import CSV flow broken sau updates | ✅ | pending |
+| CSV-1 | Import CSV flow broken sau updates | ✅ | `841ff01` |
 
 ---
 
@@ -130,7 +130,7 @@
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Commit mới nhất: `a20d444` — đang live tại https://aroadmap.cloud
+- ✅ Commit mới nhất: `52d146f` — đang live tại https://aroadmap.cloud
 - ✅ Landing page `index.html` live tại https://aroadmap.cloud
 - ✅ App tại https://aroadmap.cloud/app (Vite build → `app.html`)
 - ✅ Firebase Auth + Firestore + Security rules đã deploy
@@ -185,7 +185,7 @@ git commit -m "feat: modal-root separation, settings 2-col, phase mini calendar,
 |---|------|----------------|------|------|
 | M1 | **Tách #modal-root** | Thêm `<div id="modal-root"></div>` vào HTML tĩnh ngoài `#app`. `openModal()` render vào `#modal-root` thay vì include trong `buildApp()`. Modal không bị replace khi `render()` chạy → fix jitter + focus + animation fade-in | ✅ | 7dc74d8 |
 | M2 | **Settings modal 2-column** | Grid 2 cột. **Trái:** Project name, description, Start date input, End date input, week calendar reference (highlight range đã chọn). **Phải:** Delete project button (red, trái) + Cancel/Save (phải). Accent color picker bỏ khỏi đây | ✅ | 7dc74d8 |
-| M3 | **Add Phase: mini calendar** | Thay number input `startWeek`/`endWeek` bằng mini calendar inline. Click = start, click lại = end. Footer: "Week X → Week Y · N weeks" | ☐ | — |
+| M3 | **Add Phase: mini calendar** | Replaced numeric inputs với interactive week grid (stable DOM, click-click). State machine A/B/C, blocked weeks, hover preview, date labels. Modal 640px. | ✅ | `e699ffe` |
 | M4 | **Theme toggle → Home** | Bỏ theme toggle khỏi project detail header. Thêm vào Home header (cạnh avatar) | ✅ | 7dc74d8 |
 
 **Test checklist Phase 3:**
@@ -207,9 +207,9 @@ git commit -m "feat: avatar dropdown, 2-row header, cards redesign, empty state,
 | C1 | **Avatar dropdown** | Click avatar → dropdown: "Signed in as [email]" (muted) + divider + "Sign Out" với icon. Bỏ logout button riêng. Close khi click outside | ✅ | 5e78c8a |
 | C2 | **App header 2-row** | **Row 1** (58px): breadcrumb + hdr-btns (Share, Export, Settings — không còn Theme, không còn Stats). **Row 2** (36px, bg --s2, border-bottom): stats compact (Tổng / Đã xếp / Backlog / Tuần). Update `--hdr: 58px → 94px` | ✅ | 5e78c8a |
 | C3 | **Project cards redesign** | Primary: name 22px Crimson Pro + subtitle 12px. Secondary: 1 progress bar đơn giản (% tasks scheduled, màu accent). Hover: `-4px translateY` + shadow + "Open →" badge góc phải dưới. Stats ẩn vào hover tooltip. Min-height 160px. Bỏ circle SVG + time-elapsed bar | ✅ | 5e78c8a |
-| C4 | **Empty state** | Khi `_projIndex.length === 0`: dot matrix canvas bg (opacity 0.15, tái dùng canvas logic từ sign-in). Center: headline + sub + "New Project" (btn-gold) + "View Sample →" (btn-ghost → load `#v1=...` demo read-only) | ✅ | pending |
-| C5 | **Filter đơn giản** | Bỏ dropdown Trạng thái. Gộp Phase + Team thành 1 dropdown với `optgroup` hoặc tab toggle. Giữ Search + Tag pills | ✅ | pending |
-| C6 | **Lane algorithm fix** | `assignLanes()`: row height = `max(lanes per phase group)` không cộng dồn. No-phase tasks = nhóm riêng, global max = `Math.max(...phaseGroupMaxes, noPhaseLanes)`. Task span tính theo `phaseId` | ✅ | pending |
+| C4 | **Empty state** | Khi `_projIndex.length === 0`: dot matrix canvas bg (opacity 0.15, tái dùng canvas logic từ sign-in). Center: headline + sub + "New Project" (btn-gold) + "View Sample →" (btn-ghost → load `#v1=...` demo read-only) | ✅ | `d4f723b` |
+| C5 | **Filter đơn giản** | Bỏ dropdown Trạng thái. Gộp Phase + Team thành 1 dropdown với `optgroup` hoặc tab toggle. Giữ Search + Tag pills | ✅ | `d4f723b` |
+| C6 | **Lane algorithm fix** | `assignLanes()`: row height = `max(lanes per phase group)` không cộng dồn. No-phase tasks = nhóm riêng, global max = `Math.max(...phaseGroupMaxes, noPhaseLanes)`. Task span tính theo `phaseId` | ✅ | `d4f723b` |
 
 ---
 
@@ -220,8 +220,8 @@ git commit -m "feat: task description UI, task done state, first-login sample pr
 
 | # | Item | Mô tả kỹ thuật | Done | Hash |
 |---|------|----------------|------|------|
-| F1 | **Task description UI** | Modal `edit-task`: thêm `<textarea>` cho `desc` field. Label "Notes", placeholder "Add context, links, or details…", 3 rows. Không required. Field đã có trong data model | ✅ | pending |
-| F2 | **Task done/complete state** | Thêm `done: boolean` (default `false`) vào task. Click trái task bar → toggle done. Visual: opacity 0.45 + strikethrough text. Context menu: "Mark as done" / "Mark as active". Stats: thêm done count | ✅ | pending |
+| F1 | **Task description UI** | Modal `edit-task`: thêm `<textarea>` cho `desc` field. Label "Notes", placeholder "Add context, links, or details…", 3 rows. Không required. Field đã có trong data model | ✅ | `d4f723b` |
+| F2 | **Task done/complete state** | Thêm `done: boolean` (default `false`) vào task. Click trái task bar → toggle done. Visual: opacity 0.45 + strikethrough text. Context menu: "Mark as done" / "Mark as active". Stats: thêm done count | ✅ | `d4f723b` |
 | F3 | **First-login sample project** | Sau `_refreshIndex()` nếu `_projIndex.length === 0`: auto-tạo project demo "Product Launch Q3 · Sample" với compressed data. Home header: nút "This is a sample — create your own +". Xóa sample khi tạo project thật đầu tiên | ☐ | — |
 
 ---
@@ -233,12 +233,12 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 
 | # | Item | Mô tả kỹ thuật | Done | Hash |
 |---|------|----------------|------|------|
-| L1 | **Nav spotlight effect** | `mousemove` trên `.nav-inner`. CSS custom props `--mouse-x`, `--mouse-y`. Pseudo-element background: `radial-gradient(200px circle at var(--mouse-x) var(--mouse-y), rgba(208,160,82,.25), transparent)`. Remove khi mouse leaves | ✅ | pending |
-| L2 | **Features dropdown** | Click "Features" link trong nav → dropdown panel. 3 card: Visual Timeline / Real-time Sync / Share & Export (icon + title + desc). Hover card: gold gradient bg tint. Click outside → close. Vanilla JS, không dùng framework | ✅ | pending |
-| L3 | **"Everything you need" rebuild** | Xóa `#features` bento grid hiện tại. Thay bằng features-9 layout: center stat "**73%**" + "more productive" + subtext. 3 pain→solution bordered cards, 3 cột: (1) "Spreadsheets don't show the big picture" → Visual Timeline (2) "Changes get lost between meetings" → Real-time Sync (3) "Stakeholders need progress, not complexity" → One-click Share | ✅ | pending |
-| L4 | **CTA section minimal** | Replace `#cta-final`: centered, bg `--s1`. Crimson Pro 4rem "Your roadmap is waiting." + sub "Start building in minutes." + 1 btn-gold "Get Started →". Không có email input | ✅ | pending |
-| L5 | **Footer flickering** | Replace footer: "Aroadmap" Crimson Pro ~6rem, mỗi char có CSS `@keyframes flicker` (opacity jumps, random delay). Links nhỏ bên dưới (Privacy · Terms · © 2026 Aroadmap) | ✅ | pending |
-| L6 | **Meta + lang fixes** | `index.html`: `og:title` → "Aroadmap — Visual Project Roadmap", `<title>` → "Aroadmap", `alt` → "Aroadmap". `timeline.html`: `lang="vi"→"en"`, `<title>` → "Aroadmap — Timeline" | ✅ | 8eea115 |
+| L1 | **Nav spotlight effect** | `mousemove` trên `.nav-inner`. CSS custom props `--mouse-x`, `--mouse-y`. Pseudo-element background: `radial-gradient(200px circle at var(--mouse-x) var(--mouse-y), rgba(208,160,82,.25), transparent)`. Remove khi mouse leaves | ✅ | `41360c9` |
+| L2 | **Features dropdown** | Click "Features" link trong nav → dropdown panel. 3 card: Visual Timeline / Real-time Sync / Share & Export (icon + title + desc). Hover card: gold gradient bg tint. Click outside → close. Vanilla JS, không dùng framework | ✅ | `41360c9` |
+| L3 | **"Everything you need" rebuild** | Xóa `#features` bento grid hiện tại. Thay bằng features-9 layout: center stat "**73%**" + "more productive" + subtext. 3 pain→solution bordered cards, 3 cột: (1) "Spreadsheets don't show the big picture" → Visual Timeline (2) "Changes get lost between meetings" → Real-time Sync (3) "Stakeholders need progress, not complexity" → One-click Share | ✅ | `41360c9` |
+| L4 | **CTA section minimal** | Replace `#cta-final`: centered, bg `--s1`. Crimson Pro 4rem "Your roadmap is waiting." + sub "Start building in minutes." + 1 btn-gold "Get Started →". Không có email input | ✅ | `41360c9` |
+| L5 | **Footer flickering** | Replace footer: "Aroadmap" Crimson Pro ~6rem, mỗi char có CSS `@keyframes flicker` (opacity jumps, random delay). Links nhỏ bên dưới (Privacy · Terms · © 2026 Aroadmap) | ✅ | `41360c9` |
+| L6 | **Meta + lang fixes** | `index.html`: `og:title` → "Aroadmap — Visual Project Roadmap", `<title>` → "Aroadmap", `alt` → "Aroadmap". `timeline.html`: `lang="vi"→"en"`, `<title>` → "Aroadmap — Timeline" | ✅ | `8eea115` |
 
 ---
 
@@ -248,11 +248,11 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 |-------|-------|--------|
 | 1 — Bug Fixes | 5 | ✅ Done — `7113d05` |
 | 2 — Visual System | 3 | ✅ Done — `8eea115` |
-| 3 — Modal Architecture | 4 | 🔄 3/4 done — M3 pending |
-| 4 — Component Redesigns | 6 | ✅ 6/6 done — C1-C3: `5e78c8a`, C4-C6: pending |
-| 5 — New Features | 3 | 🔄 2/3 done — F1+F2 pending commit, F3 skipped |
-| 6 — Landing Page | 6 | ✅ 6/6 done — pending commit |
-| **Total** | **27** | **26/27 done** |
+| 3 — Modal Architecture | 4 | ✅ 4/4 done — M1-M2,M4: `7dc74d8`, M3: `e699ffe` |
+| 4 — Component Redesigns | 6 | ✅ 6/6 done — C1-C3: `5e78c8a`, C4-C6: `d4f723b` |
+| 5 — New Features | 3 | 🔄 2/3 done — F1+F2: `d4f723b`, F3 skipped |
+| 6 — Landing Page | 6 | ✅ 6/6 done — L1-L5: `41360c9`, L6: `8eea115` |
+| **Total** | **27** | **26/27 done (F3 skipped)** |
 
 ---
 
