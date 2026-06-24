@@ -233,16 +233,61 @@ function bindPhaseGrid() {
     saveBtn.style.cursor  = canSave ? '' : 'not-allowed';
   }
 
-  // MOUSEOVER — hover preview (Phase B only: start set, end null)
+  // Track mousedown cell for drag support
+  let _downW = null;
+
+  // MOUSEDOWN — record start cell; also set Phase B start for drag preview
+  gridEl.addEventListener('mousedown', e => {
+    const cell = e.target.closest('.pwg-cell');
+    if (!cell || cell.classList.contains('pwg-blocked')) return;
+    _downW = +cell.dataset.w;
+  });
+
+  // MOUSEOVER — hover preview AND drag preview
   gridEl.addEventListener('mouseover', e => {
     const cell = e.target.closest('.pwg-cell');
     if (!cell || cell.classList.contains('pwg-blocked')) return;
     const w = +cell.dataset.w;
-    if (g.start == null || g.end != null) return; // only Phase B
+    const dragging = (e.buttons & 1) === 1; // left button held = drag
+
+    // During drag: set g.start from mousedown cell if not already in Phase B
+    if (dragging && _downW != null && w !== _downW && !blocked.has(_downW)) {
+      if (g.start == null || g.end != null) {
+        g.start = _downW; g.end = null; g.hoverEnd = null; g.blockedHit = null;
+      }
+    }
+
+    if (g.start == null || g.end != null) return; // not Phase B
     const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
     const bw = firstBlockedIn(lo, hi);
     g.hoverEnd = w;
     g.blockedHit = bw ?? null;
+    paint();
+  });
+
+  // MOUSEUP — commit drag range when released on a different cell
+  gridEl.addEventListener('mouseup', e => {
+    const downW = _downW;
+    _downW = null;
+    if (downW == null) return;
+    const cell = e.target.closest('.pwg-cell');
+    if (!cell || cell.classList.contains('pwg-blocked')) return;
+    const upW = +cell.dataset.w;
+    if (upW === downW) return; // same cell = regular click, let click handler run
+
+    // Drag commit: different cells
+    const startW = g.start ?? downW;
+    const lo = Math.min(startW, upW), hi = Math.max(startW, upW);
+    const bw = firstBlockedIn(lo, hi);
+    g.start = startW;
+    if (bw != null) {
+      g.end = startW <= bw ? bw - 1 : bw + 1;
+      g.blockedHit = bw;
+    } else {
+      g.end = upW;
+      g.blockedHit = null;
+    }
+    g.hoverEnd = null;
     paint();
   });
 
@@ -255,7 +300,8 @@ function bindPhaseGrid() {
     }
   });
 
-  // CLICK — state machine
+  // CLICK — state machine for click-click selection
+  // (does not fire for drag: browser suppresses click when mousedown/mouseup are on different elements)
   gridEl.addEventListener('click', e => {
     const cell = e.target.closest('.pwg-cell');
     if (!cell || cell.classList.contains('pwg-blocked')) return;
@@ -279,7 +325,7 @@ function bindPhaseGrid() {
       paint(); return;
     }
 
-    // Phase B: click different cell → commit range (with blocked-range detection)
+    // Phase B: click different cell → commit range
     const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
     const bw = firstBlockedIn(lo, hi);
     if (bw != null) {
@@ -363,7 +409,7 @@ function savePhase() {
   const colorEl = q('#m-ph-colors .co.sel') || q('.co.sel');
   const color = colorEl?.dataset.color || PHASE_COLORS[0];
   const g = S.ui._phaseGrid;
-  if (!name || !g || g.start == null) return;
+  if (!name || !g || g.start == null || g.end == null) return;
   pushHistory();
 
   const sw = Math.min(g.start, g.end);
