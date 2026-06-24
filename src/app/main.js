@@ -136,7 +136,7 @@ setBindHomeDeps({
   fbSignOut:        () => fbSignOut(() => {
     unsubscribeProject();
     setCurrentProjId(null);
-    location.hash = '#home';
+    window.location.replace('/');
   }),
   openImportModal:  openImportFn,
   createProject:    (name, sub, accent, nav, startDate, endDate) => createProject(name, sub, accent, nav, startDate, endDate),

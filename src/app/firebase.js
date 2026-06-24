@@ -43,6 +43,7 @@ export async function fbSignIn() {
 }
 
 export async function fbSignOut(onSignedOut) {
+  try { localStorage.removeItem('aroadmap_authed'); } catch(e) {}
   await signOut(auth);
   currentUser = null;
   onSignedOut?.();
@@ -70,6 +71,10 @@ export async function initFirebase(onAuthChange) {
 
     onAuthStateChanged(auth, async user => {
       currentUser = user;
+      try {
+        if (user) localStorage.setItem('aroadmap_authed', '1');
+        else      localStorage.removeItem('aroadmap_authed');
+      } catch(e) {}
       await onAuthChange(user);
     });
   } catch(e) {

@@ -12,6 +12,21 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style id="auth-redirect-veil">body{opacity:0}</style>
+<script>
+(function(){
+  try {
+    if (localStorage.getItem('aroadmap_authed') === '1') {
+      window.location.replace('/app');
+      return;
+    }
+  } catch(e) {}
+  window.__authVeilTimer = setTimeout(function(){
+    var v = document.getElementById('auth-redirect-veil');
+    if (v) v.parentNode.removeChild(v);
+  }, 500);
+})();
+</script>
 <style>
 /* ── RESET & TOKENS ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -696,6 +711,7 @@ footer{border-top:1px solid var(--bd);padding-top:2.75rem}
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 /* ── FIREBASE (same project as timeline.html) ──
    IMPORTANT: Add this rule to Firestore Security Rules before going live:
@@ -713,6 +729,26 @@ const fbApp = initializeApp({
   appId:             '1:587173505646:web:f7eae8acdc15e96397147f',
 }, 'landing');
 const db = getFirestore(fbApp);
+
+/* ── AUTH REDIRECT FALLBACK ── */
+(function(){
+  try { if (localStorage.getItem('aroadmap_authed') === '1') return; } catch(e) {}
+  const fbAuth = getAuth(fbApp);
+  let decided = false;
+  const unsub = onAuthStateChanged(fbAuth, function(user){
+    if (decided) return;
+    decided = true;
+    unsub();
+    clearTimeout(window.__authVeilTimer);
+    if (user) {
+      try { localStorage.setItem('aroadmap_authed', '1'); } catch(e) {}
+      window.location.replace('/app');
+    } else {
+      var v = document.getElementById('auth-redirect-veil');
+      if (v) v.parentNode.removeChild(v);
+    }
+  });
+})();
 
 /* ── GSAP ── */
 gsap.registerPlugin(ScrollTrigger);
