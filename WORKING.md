@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-23 · Session: Big Update v2 — TIER 1 bugs
+> Cập nhật lần cuối: 2026-06-24 · Session: Phase Grid — stable DOM rewrite + date labels
 
 ---
 
@@ -67,7 +67,7 @@
 
 | ID | Issue | Status | Decision |
 |----|-------|--------|----------|
-| PHASE-1 | Phase time selection UX (#5a) | ✅ | pending |
+| PHASE-1 | Phase time selection UX (#5a) | ✅ | `e699ffe` |
 | PHASE-2 | Phase move → task positions (#5c) | ✅ | pending |
 | PHASE-3 | Phase min 1 week enforcement (#5d) | ✅ | pending |
 
@@ -287,6 +287,46 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 ---
 
 ## 📝 Session Log
+
+### 2026-06-24 — Phase Grid Redesign (PHASE-1)
+
+**Vấn đề:** Add Phase modal dùng numeric inputs cho startWeek/endWeek — UX kém.
+
+**Thay đổi:**
+- Thay numeric inputs bằng interactive week grid (ô vuông = tuần, tối đa 8 cols/row)
+- `S.ui._phaseGrid` = `{start, end, hoverEnd, blockedHit}` — transient selection state
+- State machine 3 pha: A (chưa chọn) → B (đã click start) → C (committed)
+- Blocked weeks map: tuần thuộc phase khác hiện màu phase đó, cursor not-allowed
+- Hover preview: Phase B hover → highlight range preview + help text
+- Modal rộng 640px (`mdl-phase`), mỗi ô hiện 2 dòng: `W1` + `02 - 09/4`
+
+**Root cause bug (lần fix thứ 4):** `paint()` gọi `gridEl.innerHTML = ...` trên mỗi `mouseover` → DOM bị rebuild → mousedown target bị remove trước khi mouseup/click fire → click lần 2 không commit.
+
+**Fix dứt điểm (stable DOM):**
+- Build tất cả cell divs 1 lần duy nhất bằng `createElement` + cache `cellEls[]`
+- `updateCells()` chỉ toggle classList, không bao giờ rebuild innerHTML sau init
+- Bỏ hoàn toàn drag (mousedown/mouseup) — click-click only
+- 3 event handlers: click (state machine) + mouseover (hover preview) + mouseleave (clear)
+
+**Spec (grill-me session — 9 decisions):**
+- Click-click only (không drag)
+- Hover preview (stable DOM)
+- Phase C + click = reset về Phase B mới
+- Click ô blocked = ignore
+- Click cùng ô 2 lần = commit 1-week phase hợp lệ
+- Hover qua blocked = preview clamp tại blocked-1 + warning
+- Chọn ngược chiều = auto-normalize min/max
+- Mouseleave = xóa hover preview
+- Edit phase = pre-fill Phase C từ data có sẵn
+
+**Commits:**
+- `bec01d3` — state machine Phase A/B/C, hàm getRange đúng
+- `469366c` — drag support + bỏ guard lỗi Phase C→reset
+- `75d491e` — help text + auto-focus khi commit range
+- `106d275` — rewrite stable DOM (lần fix dứt điểm)
+- `e699ffe` — modal 640px + date label "02 - 09/4" trong mỗi ô
+
+---
 
 ### 2026-06-09 — Vite Migration B7–B9 + Merge
 

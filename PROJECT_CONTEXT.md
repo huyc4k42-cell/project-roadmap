@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-17 · Commit app: `ddc4975` (Phase A) · Commit docs: (file này)
+> Cập nhật lần cuối: 2026-06-24 · Commit app: `e699ffe` (Phase Grid) · Commit docs: (file này)
 
 ---
 
@@ -164,6 +164,7 @@ const S = {
     phaseResize: null,  // phase resize state
     phaseDragId: null,  // phase drag/swap state
     teamDragId: null,   // team row reorder state (mới thêm)
+    _phaseGrid: null,   // { start, end, hoverEnd, blockedHit } — transient phase grid state
     readonly: false,
   }
 }
@@ -356,6 +357,15 @@ assignLanes(tasks)
 - [x] Project CRUD (Create, Rename, Duplicate, Delete)
 - [x] Accent color picker
 - [x] Empty state
+
+### Phase Time Range Grid (2026-06-24)
+- [x] **Week grid selector** — thay numeric inputs trong add/edit-phase modal
+- [x] **Stable DOM architecture** — build cells 1 lần, updateCells() chỉ toggle classList
+- [x] **State machine A/B/C** — A: chưa chọn, B: đã click start + hover preview, C: committed
+- [x] **Blocked weeks** — tuần thuộc phase khác hiện màu phase đó, không clickable
+- [x] **Hover preview** — Phase B: di chuột hiện highlight preview + help text + clamp tại blocked
+- [x] **Date labels** — mỗi ô hiện 2 dòng: Wn (bold) + "02 - 09/4" (date range)
+- [x] **Modal width** — class `mdl-phase` = 640px (từ 460px)
 
 ### CSV Import
 - [x] 2-step flow: chọn project → preview table
@@ -573,6 +583,20 @@ Firestore rules cho `/waitlist/{email}`: `allow create: if true; allow read/writ
 ## 11. Design Decisions Log
 
 > Append-only. Không xóa entry cũ — dùng để trace lý do đằng sau các quyết định.
+
+### [2026-06-24] Phase Time Range Grid (PHASE-1)
+| # | Quyết định |
+|---|-----------|
+| D55 | Phase time selection: click-click only (không drag). Click 1 = start, click 2 = end. |
+| D56 | Hover preview: stable DOM — build cells 1 lần bằng createElement, chỉ toggle classList, không rebuild innerHTML. Root cause bug: innerHTML rebuild giữa mousedown và mouseup khiến click event không fire. |
+| D57 | Phase C (committed) + click free cell → reset về Phase B với start mới. |
+| D58 | Click ô blocked (tuần thuộc phase khác) → ignore hoàn toàn. Cursor not-allowed. |
+| D59 | Click cùng ô 2 lần trong Phase B → commit 1-week range hợp lệ (start = end). |
+| D60 | Hover qua blocked → preview clamp tại blocked-1, help text cảnh báo. |
+| D61 | Chọn ngược chiều (click W9 rồi W3) → auto-normalize: range = min(start,end)→max(start,end). |
+| D62 | Mouseleave khỏi grid trong Phase B → xóa hoverEnd, trở về chỉ highlight ô start. |
+| D63 | Edit phase → pre-fill Phase C từ startWeek/endWeek có sẵn (không bắt chọn lại). |
+| D64 | Modal add/edit-phase: class mdl-phase (640px). Mỗi ô 2 dòng: Wn (bold) + dd-dd/MM (date range). Cross-month: dd/MM-dd/MM. |
 
 ### [2026-06-07] Firebase Integration
 | # | Quyết định |
