@@ -138,6 +138,8 @@ function bindPhaseGrid() {
   if (!gridEl) return;
 
   const totalW = totalWeeks(S.cfg);
+  if (totalW < 1) return;
+
   const editId = S.ui.modal.type === 'edit-phase' ? S.ui.modal.data?.id : null;
 
   // Build blocked map: weekNumber -> { id, name, color } — excludes the phase being edited
@@ -151,68 +153,80 @@ function bindPhaseGrid() {
 
   const g = S.ui._phaseGrid; // { start, end, hoverEnd, blockedHit }
 
-  const getRange = () => {
-    if (g.start == null) return null;
-    if (g.end != null) {
-      // Phase C: committed range (single or multi week)
-      return { lo: Math.min(g.start, g.end), hi: Math.max(g.start, g.end) };
-    }
-    // Phase B: hover preview or just start clicked
-    const b = g.hoverEnd ?? g.start;
-    return { lo: Math.min(g.start, b), hi: Math.max(g.start, b) };
-  };
+  // ── Pure helpers ──────────────────────────────────────────────────
 
   const firstBlockedIn = (lo, hi) => {
     for (let w = lo; w <= hi; w++) if (blocked.has(w)) return w;
     return null;
   };
 
-  // Effective selected range respecting blocked hard-stop
+  const getRange = () => {
+    if (g.start == null) return null;
+    if (g.end != null) {
+      return { lo: Math.min(g.start, g.end), hi: Math.max(g.start, g.end) };
+    }
+    // Phase B: hover preview
+    const b = g.hoverEnd ?? g.start;
+    return { lo: Math.min(g.start, b), hi: Math.max(g.start, b) };
+  };
+
   const effectiveRange = () => {
     const r = getRange();
     if (!r) return null;
     const bw = firstBlockedIn(r.lo, r.hi);
     if (bw == null) return r;
-    // Clamp to the side of start
     if (g.start <= bw) return { lo: r.lo, hi: bw - 1 };
     return { lo: bw + 1, hi: r.hi };
   };
 
-  function paint() {
-    const r = effectiveRange();
-    const cells = [];
-    for (let w = 1; w <= totalW; w++) {
-      const b = blocked.get(w);
-      let cls = 'pwg-cell';
-      let style = '';
-      let title = '';
-      if (b) {
-        cls += ' pwg-blocked';
-        style = `background:${b.color}`;
-        title = b.name;
-      } else if (r && w >= r.lo && w <= r.hi) {
-        cls += ' pwg-selected';
-      }
-      cells.push(`<div class="${cls}" data-w="${w}"${title ? ` title="${title}"` : ''}${style ? ` style="${style}"` : ''}>W${w}</div>`);
+  // ── Stable DOM init — build cells ONCE ───────────────────────────
+
+  const cellEls = []; // index 0 unused; cellEls[w] = element for week w
+
+  gridEl.innerHTML = '';
+  for (let w = 1; w <= totalW; w++) {
+    const el = document.createElement('div');
+    el.className = 'pwg-cell';
+    el.dataset.w = w;
+    el.textContent = `W${w}`;
+    const b = blocked.get(w);
+    if (b) {
+      el.classList.add('pwg-blocked');
+      el.style.background = b.color;
+      el.title = b.name;
     }
-    gridEl.innerHTML = cells.join('');
+    cellEls[w] = el;
+    gridEl.appendChild(el);
+  }
+
+  // ── updateCells — classList-only, no innerHTML touch ─────────────
+
+  function updateCells() {
+    const r = effectiveRange();
+    for (let w = 1; w <= totalW; w++) {
+      const el = cellEls[w];
+      if (el.classList.contains('pwg-blocked')) continue; // blocked: never mutate
+      el.classList.toggle('pwg-selected', !!(r && w >= r.lo && w <= r.hi));
+    }
     updateHelp();
   }
 
+  // ── updateHelp — text + save button state ────────────────────────
+
   function updateHelp() {
     const r = effectiveRange();
-    const nameOk = !!nameInp?.value.trim();
+    const nameOk      = !!nameInp?.value.trim();
     const isCommitted = g.end != null;
-    const isHoverPreview = g.start != null && g.end == null && g.hoverEnd != null;
+    const isHover     = g.start != null && g.end == null && g.hoverEnd != null;
     let msg = '';
     let warn = false;
 
-    if (g.blockedHit != null && g.start != null) {
-      const b = blocked.get(g.blockedHit);
+    if (g.blockedHit != null && g.start != null && g.end == null) {
+      const b   = blocked.get(g.blockedHit);
       const maxW = g.start <= g.blockedHit ? g.blockedHit - 1 : g.blockedHit + 1;
-      msg = `W${g.blockedHit} đã thuộc về ${b?.name ?? 'phase khác'} — chỉ chọn được đến W${maxW}`;
+      msg  = `W${g.blockedHit} đã thuộc về ${b?.name ?? 'phase khác'} — chỉ chọn được đến W${maxW}`;
       warn = true;
-    } else if (isHoverPreview && r) {
+    } else if (isHover && r) {
       const dur = r.hi - r.lo + 1;
       msg = `Click để chọn ${dur} tuần (W${r.lo} → W${r.hi})`;
     } else if (isCommitted && r) {
@@ -235,76 +249,9 @@ function bindPhaseGrid() {
     saveBtn.style.cursor  = canSave ? '' : 'not-allowed';
   }
 
-  // Track mousedown cell for drag support
-  let _downW = null;
+  // ── Event handlers (3 total, no drag) ────────────────────────────
 
-  // MOUSEDOWN — record start cell; also set Phase B start for drag preview
-  gridEl.addEventListener('mousedown', e => {
-    const cell = e.target.closest('.pwg-cell');
-    if (!cell || cell.classList.contains('pwg-blocked')) return;
-    _downW = +cell.dataset.w;
-  });
-
-  // MOUSEOVER — hover preview AND drag preview
-  gridEl.addEventListener('mouseover', e => {
-    const cell = e.target.closest('.pwg-cell');
-    if (!cell || cell.classList.contains('pwg-blocked')) return;
-    const w = +cell.dataset.w;
-    const dragging = (e.buttons & 1) === 1; // left button held = drag
-
-    // During drag: set g.start from mousedown cell if not already in Phase B
-    if (dragging && _downW != null && w !== _downW && !blocked.has(_downW)) {
-      if (g.start == null || g.end != null) {
-        g.start = _downW; g.end = null; g.hoverEnd = null; g.blockedHit = null;
-      }
-    }
-
-    if (g.start == null || g.end != null) return; // not Phase B
-    const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
-    const bw = firstBlockedIn(lo, hi);
-    g.hoverEnd = w;
-    g.blockedHit = bw ?? null;
-    paint();
-  });
-
-  // MOUSEUP — commit drag range when released on a different cell
-  gridEl.addEventListener('mouseup', e => {
-    const downW = _downW;
-    _downW = null;
-    if (downW == null) return;
-    const cell = e.target.closest('.pwg-cell');
-    if (!cell || cell.classList.contains('pwg-blocked')) return;
-    const upW = +cell.dataset.w;
-    if (upW === downW) return; // same cell = regular click, let click handler run
-
-    // Drag commit: different cells
-    const startW = g.start ?? downW;
-    const lo = Math.min(startW, upW), hi = Math.max(startW, upW);
-    const bw = firstBlockedIn(lo, hi);
-    g.start = startW;
-    if (bw != null) {
-      g.end = startW <= bw ? bw - 1 : bw + 1;
-      g.blockedHit = bw;
-    } else {
-      g.end = upW;
-      g.blockedHit = null;
-    }
-    g.hoverEnd = null;
-    paint();
-    if (!nameInp?.value.trim()) nameInp?.focus();
-  });
-
-  // MOUSELEAVE — clear hover preview (Phase B only)
-  gridEl.addEventListener('mouseleave', () => {
-    if (g.start != null && g.end == null) {
-      g.hoverEnd = null;
-      g.blockedHit = null;
-      paint();
-    }
-  });
-
-  // CLICK — state machine for click-click selection
-  // (does not fire for drag: browser suppresses click when mousedown/mouseup are on different elements)
+  // CLICK — state machine
   gridEl.addEventListener('click', e => {
     const cell = e.target.closest('.pwg-cell');
     if (!cell || cell.classList.contains('pwg-blocked')) return;
@@ -312,40 +259,62 @@ function bindPhaseGrid() {
 
     // Phase A: no start → set start, enter Phase B
     if (g.start == null) {
-      g.start = w; g.end = null; g.hoverEnd = null; g.blockedHit = null;
-      paint(); return;
+      g.start = w; g.end = null; g.hoverEnd = w; g.blockedHit = null;
+      updateCells(); return;
     }
 
-    // Phase C: committed → reset, enter Phase B with new start
+    // Phase C: committed → reset to Phase B with new start
     if (g.end != null) {
-      g.start = w; g.end = null; g.hoverEnd = null; g.blockedHit = null;
-      paint(); return;
+      g.start = w; g.end = null; g.hoverEnd = w; g.blockedHit = null;
+      updateCells(); return;
     }
 
-    // Phase B: click same cell as start → commit as single-week (Phase C)
-    if (w === g.start) {
-      g.end = w; g.hoverEnd = null; g.blockedHit = null;
-      paint();
-      if (!nameInp?.value.trim()) nameInp?.focus();
-      return;
-    }
-
-    // Phase B: click different cell → commit range
+    // Phase B → commit (clamp if blocked week in range)
     const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
     const bw = firstBlockedIn(lo, hi);
     if (bw != null) {
-      g.end = (w > g.start) ? bw - 1 : bw + 1;
-      g.hoverEnd = null;
-      g.blockedHit = bw;
+      g.end        = (w > g.start) ? bw - 1 : bw + 1;
+      g.blockedHit = null; // clear warning after commit
     } else {
-      g.end = w; g.hoverEnd = null; g.blockedHit = null;
+      g.end        = w;
+      g.blockedHit = null;
     }
-    paint();
+    g.hoverEnd = null;
+    updateCells();
     if (!nameInp?.value.trim()) nameInp?.focus();
   });
 
+  // MOUSEOVER — hover preview (Phase B only)
+  gridEl.addEventListener('mouseover', e => {
+    const cell = e.target.closest('.pwg-cell');
+    if (!cell) return;
+    if (g.start == null || g.end != null) return; // Phase B only
+
+    const w = +cell.dataset.w;
+
+    if (cell.classList.contains('pwg-blocked')) {
+      g.hoverEnd   = null;
+      g.blockedHit = w;
+      updateCells(); return;
+    }
+
+    const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
+    g.hoverEnd   = w;
+    g.blockedHit = firstBlockedIn(lo, hi) ?? null;
+    updateCells();
+  });
+
+  // MOUSELEAVE — clear hover preview (Phase B only)
+  gridEl.addEventListener('mouseleave', () => {
+    if (g.start != null && g.end == null) {
+      g.hoverEnd   = null;
+      g.blockedHit = null;
+      updateCells();
+    }
+  });
+
   nameInp?.addEventListener('input', updateHelp);
-  paint(); // initial render
+  updateCells(); // initial paint — also handles edit-phase pre-fill
 }
 
 /* ══════════════════════════════════════════════
