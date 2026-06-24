@@ -153,7 +153,10 @@ function bindPhaseGrid() {
 
   const getRange = () => {
     if (g.start == null) return null;
-    const b = g.end ?? g.hoverEnd ?? g.start;
+    // Phase C: end committed (differs from start) — use end directly
+    // Phase B: end === start (single click) — prefer hoverEnd for preview
+    const committed = g.end != null && g.end !== g.start;
+    const b = committed ? g.end : (g.hoverEnd ?? g.end ?? g.start);
     return { lo: Math.min(g.start, b), hi: Math.max(g.start, b) };
   };
 
