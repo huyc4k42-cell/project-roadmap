@@ -217,7 +217,9 @@ function bindPhaseGrid() {
       msg = `Click để chọn ${dur} tuần (W${r.lo} → W${r.hi})`;
     } else if (isCommitted && r) {
       const dur = r.hi - r.lo + 1;
-      msg = `${dur} tuần được chọn (W${r.lo} → W${r.hi})`;
+      msg = nameOk
+        ? `${dur} tuần được chọn (W${r.lo} → W${r.hi})`
+        : `${dur} tuần được chọn — nhập tên phase để thêm`;
     } else if (g.start != null) {
       msg = 'Click tuần kế tiếp để xác định khoảng thời gian';
     } else {
@@ -289,6 +291,7 @@ function bindPhaseGrid() {
     }
     g.hoverEnd = null;
     paint();
+    if (!nameInp?.value.trim()) nameInp?.focus();
   });
 
   // MOUSELEAVE — clear hover preview (Phase B only)
@@ -322,7 +325,9 @@ function bindPhaseGrid() {
     // Phase B: click same cell as start → commit as single-week (Phase C)
     if (w === g.start) {
       g.end = w; g.hoverEnd = null; g.blockedHit = null;
-      paint(); return;
+      paint();
+      if (!nameInp?.value.trim()) nameInp?.focus();
+      return;
     }
 
     // Phase B: click different cell → commit range
@@ -336,6 +341,7 @@ function bindPhaseGrid() {
       g.end = w; g.hoverEnd = null; g.blockedHit = null;
     }
     paint();
+    if (!nameInp?.value.trim()) nameInp?.focus();
   });
 
   nameInp?.addEventListener('input', updateHelp);
