@@ -153,10 +153,12 @@ function bindPhaseGrid() {
 
   const getRange = () => {
     if (g.start == null) return null;
-    // Phase C: end committed (differs from start) — use end directly
-    // Phase B: end === start (single click) — prefer hoverEnd for preview
-    const committed = g.end != null && g.end !== g.start;
-    const b = committed ? g.end : (g.hoverEnd ?? g.end ?? g.start);
+    if (g.end != null) {
+      // Phase C: committed range (single or multi week)
+      return { lo: Math.min(g.start, g.end), hi: Math.max(g.start, g.end) };
+    }
+    // Phase B: hover preview or just start clicked
+    const b = g.hoverEnd ?? g.start;
     return { lo: Math.min(g.start, b), hi: Math.max(g.start, b) };
   };
 
@@ -200,6 +202,8 @@ function bindPhaseGrid() {
   function updateHelp() {
     const r = effectiveRange();
     const nameOk = !!nameInp?.value.trim();
+    const isCommitted = g.end != null;
+    const isHoverPreview = g.start != null && g.end == null && g.hoverEnd != null;
     let msg = '';
     let warn = false;
 
@@ -208,9 +212,14 @@ function bindPhaseGrid() {
       const maxW = g.start <= g.blockedHit ? g.blockedHit - 1 : g.blockedHit + 1;
       msg = `W${g.blockedHit} đã thuộc về ${b?.name ?? 'phase khác'} — chỉ chọn được đến W${maxW}`;
       warn = true;
-    } else if (r) {
+    } else if (isHoverPreview && r) {
+      const dur = r.hi - r.lo + 1;
+      msg = `Click để chọn ${dur} tuần (W${r.lo} → W${r.hi})`;
+    } else if (isCommitted && r) {
       const dur = r.hi - r.lo + 1;
       msg = `${dur} tuần được chọn (W${r.lo} → W${r.hi})`;
+    } else if (g.start != null) {
+      msg = 'Click tuần kế tiếp để xác định khoảng thời gian';
     } else {
       msg = 'Click vào tuần để bắt đầu phase';
     }
@@ -218,21 +227,18 @@ function bindPhaseGrid() {
     helpEl.textContent = msg;
     helpEl.classList.toggle('pwg-help-warn', warn);
 
-    const hasRange = r != null;
-    const canSave = nameOk && hasRange;
+    const canSave = nameOk && isCommitted;
     saveBtn.disabled = !canSave;
     saveBtn.style.opacity = canSave ? '' : '.45';
     saveBtn.style.cursor  = canSave ? '' : 'not-allowed';
   }
 
-  // MOUSEOVER — hover preview (Phase B only)
+  // MOUSEOVER — hover preview (Phase B only: start set, end null)
   gridEl.addEventListener('mouseover', e => {
     const cell = e.target.closest('.pwg-cell');
     if (!cell || cell.classList.contains('pwg-blocked')) return;
     const w = +cell.dataset.w;
-    if (g.start == null) return;
-    // Phase B: start set, end not yet committed (or same as start)
-    if (g.end != null && g.end !== g.start) return;
+    if (g.start == null || g.end != null) return; // only Phase B
     const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
     const bw = firstBlockedIn(lo, hi);
     g.hoverEnd = w;
@@ -240,9 +246,9 @@ function bindPhaseGrid() {
     paint();
   });
 
-  // MOUSELEAVE — clear hover preview
+  // MOUSELEAVE — clear hover preview (Phase B only)
   gridEl.addEventListener('mouseleave', () => {
-    if (g.start != null && (g.end == null || g.end === g.start)) {
+    if (g.start != null && g.end == null) {
       g.hoverEnd = null;
       g.blockedHit = null;
       paint();
@@ -255,29 +261,28 @@ function bindPhaseGrid() {
     if (!cell || cell.classList.contains('pwg-blocked')) return;
     const w = +cell.dataset.w;
 
-    // Phase C: committed range (start & end differ) → reset
-    if (g.start != null && g.end != null && g.end !== g.start) {
-      g.start = w; g.end = w; g.hoverEnd = null; g.blockedHit = null;
-      paint(); return;
-    }
-
-    // Phase A: no start
+    // Phase A: no start → set start, enter Phase B
     if (g.start == null) {
-      g.start = w; g.end = w; g.hoverEnd = null; g.blockedHit = null;
+      g.start = w; g.end = null; g.hoverEnd = null; g.blockedHit = null;
       paint(); return;
     }
 
-    // Phase B: click same cell as start → deselect
+    // Phase C: committed → reset, enter Phase B with new start
+    if (g.end != null) {
+      g.start = w; g.end = null; g.hoverEnd = null; g.blockedHit = null;
+      paint(); return;
+    }
+
+    // Phase B: click same cell as start → commit as single-week (Phase C)
     if (w === g.start) {
-      g.start = null; g.end = null; g.hoverEnd = null; g.blockedHit = null;
+      g.end = w; g.hoverEnd = null; g.blockedHit = null;
       paint(); return;
     }
 
-    // Phase B: click different cell → commit (with blocked-range detection)
+    // Phase B: click different cell → commit range (with blocked-range detection)
     const lo = Math.min(g.start, w), hi = Math.max(g.start, w);
     const bw = firstBlockedIn(lo, hi);
     if (bw != null) {
-      // Clamp to blocked side
       g.end = (w > g.start) ? bw - 1 : bw + 1;
       g.hoverEnd = null;
       g.blockedHit = bw;
@@ -361,8 +366,8 @@ function savePhase() {
   if (!name || !g || g.start == null) return;
   pushHistory();
 
-  const sw = Math.min(g.start, g.end ?? g.start);
-  const ew = Math.max(g.start, g.end ?? g.start);
+  const sw = Math.min(g.start, g.end);
+  const ew = Math.max(g.start, g.end);
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);
