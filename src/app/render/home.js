@@ -157,8 +157,6 @@ export function buildHomeHdr(count) {
 /* ── cardStats helper ── */
 function cardStats(p) {
   const s = p.stats || {};
-  const tasks     = s.tasks  || 0;
-  const sched     = s.sched  || 0;
   const phases    = s.phases || 0;
   const phaseEnds = s.phaseEnds || [];
   let totalW = 0, startStr = '—', endStr = '—', phasesDone = 0;
@@ -170,7 +168,7 @@ function cardStats(p) {
     const curW = todayWeekFrac(cfg);
     phasesDone = phaseEnds.filter(ew => ew && ew < curW).length;
   }
-  return { tasks, sched, phases, phasesDone, totalW, startStr, endStr };
+  return { phases, phasesDone, totalW, startStr, endStr };
 }
 
 /* ── buildProjCard ── */
@@ -220,11 +218,6 @@ export function buildProjCard(p) {
       <span class="proj-stat-lbl">${t('home.cardTimeline')}</span>
       <span class="proj-stat-val">${st.totalW} ${t('home.cardWeeks').replace('{n}', '').trim()}</span>
       <span class="proj-stat-detail">${st.startStr} → ${st.endStr}</span>
-    </div>
-    <div class="proj-stat-row">
-      <span class="proj-stat-lbl">${t('home.cardTasks')}</span>
-      <span class="proj-stat-val">${st.tasks}</span>
-      <span class="proj-stat-detail">${t('home.cardScheduled').replace('{n}', st.sched)}</span>
     </div>
     <div class="proj-stat-row">
       <span class="proj-stat-lbl">${t('home.cardPhases')}</span>
