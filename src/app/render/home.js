@@ -157,23 +157,42 @@ export function buildHomeHdr(count) {
 /* ── cardStats helper ── */
 function cardStats(p) {
   const s = p.stats || {};
-  const phases    = s.phases || 0;
-  const phaseEnds = s.phaseEnds || [];
+  const phases      = s.phases      || 0;
+  const phaseEnds   = s.phaseEnds   || [];
+  const phaseStarts = s.phaseStarts || [];
+  const phaseColors = s.phaseColors || [];
   let totalW = 0, startStr = '—', endStr = '—', phasesDone = 0;
+  let phaseSegs = [], markerPct = null;
+
   if (s.start && s.end) {
     const cfg = { start: s.start, end: s.end };
-    totalW    = totalWeeks(cfg);
-    startStr  = fmtInput(parseDate(s.start));
-    endStr    = fmtInput(parseDate(s.end));
+    totalW   = totalWeeks(cfg);
+    startStr = fmtInput(parseDate(s.start));
+    endStr   = fmtInput(parseDate(s.end));
     const curW = todayWeekFrac(cfg);
     phasesDone = phaseEnds.filter(ew => ew && ew < curW).length;
+
+    if (totalW > 0 && phaseStarts.length > 0) {
+      phaseSegs = phaseStarts.map((sw, i) => {
+        const ew = phaseEnds[i] || sw;
+        return {
+          left:   Math.max(0, (sw - 1) / totalW * 100),
+          width:  Math.max(0.5, (ew - sw + 1) / totalW * 100),
+          color:  phaseColors[i] || '#D0A052',
+          active: curW >= sw && curW <= ew,
+          done:   ew < curW,
+        };
+      });
+      if (curW >= 1 && curW <= totalW + 1) {
+        markerPct = Math.min(99.5, (curW - 1) / totalW * 100);
+      }
+    }
   }
-  return { phases, phasesDone, totalW, startStr, endStr };
+  return { phases, phasesDone, totalW, startStr, endStr, phaseSegs, markerPct };
 }
 
 /* ── buildProjCard ── */
 export function buildProjCard(p) {
-  const schedPct = p.stats?.tasks > 0 ? Math.round(p.stats.sched / p.stats.tasks * 100) : 0;
   const accent   = p.accent || '#D0A052';
   const ctxOpen  = homeCtxId === p.id;
   const st       = cardStats(p);
@@ -227,11 +246,9 @@ export function buildProjCard(p) {
   </div>
 
   <div class="proj-card-progress">
-    <div class="proj-progress-bar">
-      <div class="proj-progress-fill" style="width:${schedPct}%;background:${accent}"></div>
-    </div>
-    <div class="proj-progress-meta">
-      <span>${schedPct}% ${t('home.cardScheduled').replace('{n}','').trim()}</span>
+    <div class="proj-phase-bar">
+      ${st.phaseSegs.map(seg => `<div class="proj-phase-seg${seg.active ? ' active' : seg.done ? ' done' : ''}" style="left:${seg.left.toFixed(1)}%;width:${seg.width.toFixed(1)}%;background:${seg.color}"></div>`).join('')}
+      ${st.markerPct !== null ? `<div class="proj-phase-now" style="left:${st.markerPct.toFixed(1)}%"></div>` : ''}
     </div>
   </div>
 
