@@ -21,10 +21,41 @@ let _bindHome  = null;
 export function setLoadIndex(fn) { _loadIndex = fn; }
 export function setBindHome(fn)  { _bindHome  = fn; }
 
+/* ── ctx portal helper — rendered in body to escape card overflow:hidden + transform ── */
+function _buildCtxMenu(projId) {
+  return `<div class="proj-ctx" role="menu">
+    <button class="proj-ctx-item" role="menuitem" data-proj-open="${projId}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      ${t('home.open')}
+    </button>
+    <button class="proj-ctx-item" role="menuitem" data-proj-rename="${projId}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      ${t('home.rename')}
+    </button>
+    <button class="proj-ctx-item" role="menuitem" data-proj-dup="${projId}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      ${t('home.duplicate')}
+    </button>
+    <div class="proj-ctx-sep"></div>
+    <button class="proj-ctx-item dng" role="menuitem" data-proj-del="${projId}">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+      ${t('common.delete')}
+    </button>
+  </div>`;
+}
+
 /* ── renderHome ── */
 export function renderHome() {
   document.title = 'Arthur — Projects';
   document.getElementById('app').innerHTML = buildHome();
+  /* Ctx portal: always in body, never inside a card — avoids overflow:hidden + transform clip */
+  document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
+  if (homeCtxId) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = _buildCtxMenu(homeCtxId);
+    const ctx = tmp.firstElementChild;
+    if (ctx) document.body.appendChild(ctx);
+  }
   _bindHome?.();
 }
 
@@ -194,7 +225,6 @@ function cardStats(p) {
 /* ── buildProjCard ── */
 export function buildProjCard(p) {
   const accent   = p.accent || '#D0A052';
-  const ctxOpen  = homeCtxId === p.id;
   const st       = cardStats(p);
 
   return `
@@ -205,25 +235,6 @@ export function buildProjCard(p) {
       <button class="proj-menu-btn" data-proj-menu="${p.id}" aria-label="Project options" aria-haspopup="true">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
       </button>
-      ${ctxOpen ? `<div class="proj-ctx" role="menu">
-        <button class="proj-ctx-item" role="menuitem" data-proj-open="${p.id}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          ${t('home.open')}
-        </button>
-        <button class="proj-ctx-item" role="menuitem" data-proj-rename="${p.id}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          ${t('home.rename')}
-        </button>
-        <button class="proj-ctx-item" role="menuitem" data-proj-dup="${p.id}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          ${t('home.duplicate')}
-        </button>
-        <div class="proj-ctx-sep"></div>
-        <button class="proj-ctx-item dng" role="menuitem" data-proj-del="${p.id}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
-          ${t('common.delete')}
-        </button>
-      </div>` : ''}
     </div>
   </div>
 

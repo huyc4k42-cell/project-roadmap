@@ -146,19 +146,17 @@ function _onAvatarOutsideClick(e) {
 /* ── Project ctx outside-click handler (module-level, self-removes) ── */
 function _onProjCtxOutsideClick() {
   document.removeEventListener('click', _onProjCtxOutsideClick);
-  document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
   setHomeCtxId(null);
-  _renderHome?.();
+  _renderHome?.(); // renderHome removes ctx from body
 }
 
 /* ── Home keydown handler (module-level so it can be removed/re-added) ── */
 function _onHomeKey(e) {
   if (e.key === 'Escape') {
-    document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
     S.ui.modal = null;
     setHomeCtxId(null);
     setHomeUserMenuOpen(false);
-    _renderHome?.();
+    _renderHome?.(); // renderHome removes ctx from body
   }
   if (e.key === 'Enter' && S.ui.modal && e.target.tagName !== 'TEXTAREA') {
     q('#m-save')?.click();
@@ -167,7 +165,7 @@ function _onHomeKey(e) {
 
 /* ── bindHome ── */
 export function bindHome() {
-  if (!homeCtxId) document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
+  /* renderHome() handles ctx portal lifecycle — no manual cleanup needed here */
 
   /* Canvas animations */
   _initSignInCanvas?.();
@@ -225,21 +223,17 @@ export function bindHome() {
   qAll('[data-proj-menu]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      // Remove any stale ctx from body before opening new one
-      document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
-      const rect    = btn.getBoundingClientRect();
-      const opening = homeCtxId !== btn.dataset.projMenu;
-      setHomeCtxId(opening ? btn.dataset.projMenu : null);
-      _renderHome?.();
+      const rect   = btn.getBoundingClientRect();
+      const projId = btn.dataset.projMenu;
+      const opening = homeCtxId !== projId;
+      setHomeCtxId(opening ? projId : null);
+      _renderHome?.(); // renderHome appends/removes ctx portal in body
       if (opening) {
-        const freshCard = q(`.proj-card[data-proj-id="${btn.dataset.projMenu}"]`);
-        const freshMenu = freshCard?.querySelector('.proj-ctx');
-        if (freshMenu) {
-          // Move to body to escape card's transform/overflow:hidden containing block
-          document.body.appendChild(freshMenu);
-          const w = freshMenu.offsetWidth || 150;
-          freshMenu.style.top  = (rect.bottom + 4) + 'px';
-          freshMenu.style.left = (rect.right - w) + 'px';
+        const ctx = document.body.querySelector('.proj-ctx');
+        if (ctx) {
+          const w = ctx.offsetWidth || 150;
+          ctx.style.top  = (rect.bottom + 4) + 'px';
+          ctx.style.left = (rect.right - w) + 'px';
         }
       }
     });
