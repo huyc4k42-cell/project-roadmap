@@ -146,6 +146,7 @@ function _onAvatarOutsideClick(e) {
 /* ── Project ctx outside-click handler (module-level, self-removes) ── */
 function _onProjCtxOutsideClick() {
   document.removeEventListener('click', _onProjCtxOutsideClick);
+  document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
   setHomeCtxId(null);
   _renderHome?.();
 }
@@ -153,6 +154,7 @@ function _onProjCtxOutsideClick() {
 /* ── Home keydown handler (module-level so it can be removed/re-added) ── */
 function _onHomeKey(e) {
   if (e.key === 'Escape') {
+    document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
     S.ui.modal = null;
     setHomeCtxId(null);
     setHomeUserMenuOpen(false);
@@ -165,6 +167,8 @@ function _onHomeKey(e) {
 
 /* ── bindHome ── */
 export function bindHome() {
+  if (!homeCtxId) document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
+
   /* Canvas animations */
   _initSignInCanvas?.();
   _initHomeEmptyCanvas?.();
@@ -221,17 +225,21 @@ export function bindHome() {
   qAll('[data-proj-menu]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
+      // Remove any stale ctx from body before opening new one
+      document.body.querySelectorAll('.proj-ctx').forEach(el => el.remove());
       const rect    = btn.getBoundingClientRect();
       const opening = homeCtxId !== btn.dataset.projMenu;
       setHomeCtxId(opening ? btn.dataset.projMenu : null);
       _renderHome?.();
-      // Position the fixed dropdown below the trigger button (after render)
       if (opening) {
         const freshCard = q(`.proj-card[data-proj-id="${btn.dataset.projMenu}"]`);
         const freshMenu = freshCard?.querySelector('.proj-ctx');
         if (freshMenu) {
+          // Move to body to escape card's transform/overflow:hidden containing block
+          document.body.appendChild(freshMenu);
+          const w = freshMenu.offsetWidth || 150;
           freshMenu.style.top  = (rect.bottom + 4) + 'px';
-          freshMenu.style.left = (rect.right - (freshMenu.offsetWidth || 150)) + 'px';
+          freshMenu.style.left = (rect.right - w) + 'px';
         }
       }
     });

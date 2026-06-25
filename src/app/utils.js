@@ -24,3 +24,14 @@ export function showToast(msg, dur = 3000) {
   document.body.appendChild(el);
   setTimeout(() => el.remove(), dur);
 }
+
+/* Returns first color in palette not already in `used` array.
+   Falls back to cycling through palette if all colors are taken. */
+export function firstUnusedColor(palette, used) {
+  if (!Array.isArray(palette) || palette.length === 0) return null;
+  const usedSet = new Set((used || []).filter(Boolean).map(c => String(c).toLowerCase()));
+  for (const c of palette) {
+    if (!usedSet.has(String(c).toLowerCase())) return c;
+  }
+  return palette[(used?.length || 0) % palette.length];
+}

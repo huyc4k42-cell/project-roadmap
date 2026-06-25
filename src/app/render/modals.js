@@ -1,8 +1,8 @@
 /* ── RENDER / MODALS — project modal, context menu, renderModal ── */
 import { S, phaseById }                  from '../state.js';
-import { esc, tagPalette }               from '../utils.js';
+import { esc, tagPalette, firstUnusedColor } from '../utils.js';
 import { totalWeeks, weekLabel }         from '../date.js';
-import { ICONS, PHASE_COLORS, PROJ_ACCENTS, SHEETS_TEMPLATE_URL } from '../constants.js';
+import { ICONS, PHASE_COLORS, TEAM_COLORS, PROJ_ACCENTS, SHEETS_TEMPLATE_URL } from '../constants.js';
 import { svgIcon }                       from '../icons.js';
 import { buildWkPicker }                 from '../weekpicker.js';
 import { t }                             from '../i18n.js';
@@ -171,14 +171,15 @@ export function buildModal() {
     const tm     = data || {};
     const isEdit = type === 'edit-team';
     const selIcon  = tm.icon  || 'layers';
-    const selColor = tm.color || '#D0A052';
+    const selColor = (type === 'edit-team')
+      ? (tm.color || TEAM_COLORS[0])
+      : (tm.color || firstUnusedColor(TEAM_COLORS, S.teams.map(t => t.color)));
     const iconGrid = Object.entries(ICONS).map(([key, ic]) =>
       `<button class="ig${key === selIcon ? ' sel' : ''}" data-icon="${key}" style="${key === selIcon ? `color:${selColor}` : ''}">
         ${svgIcon(key, 15)}
         <span class="ig-lbl">${ic.l}</span>
       </button>`).join('');
-    const colors = ['#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#10b981','#ef4444','#8b5cf6'];
-    const colorDots = colors.map(c =>
+    const colorDots = TEAM_COLORS.map(c =>
       `<div class="co${c === selColor ? ' sel' : ''}" data-color="${c}" style="background:${c}"></div>`).join('');
     const titleKey = isEdit ? t('modal.team.titleEdit') : t('modal.team.titleAdd');
 
@@ -202,8 +203,11 @@ export function buildModal() {
   if (type === 'add-phase' || type === 'edit-phase') {
     const ph     = data || {};
     const isEdit = type === 'edit-phase';
+    const defaultPhaseColor = (type === 'edit-phase')
+      ? (ph.color || PHASE_COLORS[0])
+      : (ph.color || firstUnusedColor(PHASE_COLORS, S.phases.map(p => p.color)));
     const colorBtns = PHASE_COLORS.map(c =>
-      `<div class="co${c === (ph.color || PHASE_COLORS[0]) ? ' sel' : ''}" data-color="${c}" style="background:${c}"></div>`).join('');
+      `<div class="co${c === defaultPhaseColor ? ' sel' : ''}" data-color="${c}" style="background:${c}"></div>`).join('');
     const titleKey = isEdit ? t('modal.phase.titleEdit') : t('modal.phase.titleAdd');
 
     return `<div class="mbg" id="modal-bg" role="presentation"><div class="mdl mdl-phase" role="dialog" aria-modal="true" aria-label="${titleKey}">

@@ -28,6 +28,11 @@ export const PHASE_COLORS = [
   '#0e7490','#7f1d1d','#1e3a5f','#4a1942','#14532d',
 ];
 
+export const TEAM_COLORS = [
+  '#D0A052','#7c3aed','#1d4ed8','#047857','#be185d',
+  '#0e7490','#b45309','#10b981','#ef4444','#8b5cf6',
+];
+
 export const PROJ_ACCENTS = [
   '#D0A052','#7c3aed','#1d4ed8','#047857','#be185d','#0e7490','#b45309','#e05757',
 ];
