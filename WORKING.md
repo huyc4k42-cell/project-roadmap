@@ -1,7 +1,7 @@
 # WORKING — Aroadmap
 > **File volatile — thay đổi mỗi session.**
 > Đọc file này SAU `PROJECT_CONTEXT.md` để biết trạng thái hiện tại.
-> Cập nhật lần cuối: 2026-06-24 · Session: Phase Grid — stable DOM rewrite + date labels
+> Cập nhật lần cuối: 2026-06-26 · Session: New Project Modal Redesign — dual calendar + preset sidebar
 
 ---
 
@@ -130,7 +130,7 @@
 ```
 
 **Trạng thái hiện tại:**
-- ✅ Commit mới nhất: `52d146f` — đang live tại https://aroadmap.cloud
+- ✅ Commit mới nhất: `91f994a` — đang live tại https://aroadmap.cloud
 - ✅ Landing page `index.html` live tại https://aroadmap.cloud
 - ✅ App tại https://aroadmap.cloud/app (Vite build → `app.html`)
 - ✅ Firebase Auth + Firestore + Security rules đã deploy
@@ -287,6 +287,44 @@ git commit -m "feat: landing — spotlight nav, features dropdown, features-9, C
 ---
 
 ## 📝 Session Log
+
+### 2026-06-26 — New Project Modal Redesign
+
+**Mục tiêu:** Redesign modal "Tạo Project mới" từ narrow form + popover calendar sang wide 2-panel layout (~900px).
+
+**Thay đổi chính:**
+- **Layout mới:** 3 zone dọc — (1) Project name + subtitle, (2) Accent color row, (3) 2-column: preset sidebar (160px) + calendar panel (1fr)
+- **Dual inline calendar:** Thay popover bằng 2 tháng side-by-side, navigate cùng nhau. Giữ nguyên snap-to-Monday + week row selection logic.
+- **Preset sidebar:** 5 buttons — 4 Tuần / 1 Tháng / 3 Tháng / 6 Tháng / Tùy chỉnh. Click preset → giữ startMon, tính endMon mới.
+- **WEEKS stepper:** `[-] N [+]` nằm inline bên phải date row (BẮT ĐẦU → KẾT THÚC → stepper). Thay `<input type="number">` cũ.
+- **Auto-custom:** Mọi thao tác manual (click calendar, date input, stepper) → `wkp.npPreset = 'custom'` → button Tùy chỉnh tự highlight.
+- **npRefresh():** Surgical re-render chỉ `.np-wkp-wrap` element thay vì full `renderHome()` — fix flicker khi click preset.
+- **Auto accent color:** `firstUnusedColor(PROJ_ACCENTS, usedAccents)` thay vì hardcode `i===0`. Cycle khi hết màu.
+- **Sidebar button fix:** `.sb { overflow: visible }` để `.sb-toggle` không bị clip.
+
+**Files thay đổi:**
+| File | Thay đổi |
+|------|----------|
+| `src/app/weekpicker.js` | Thêm `buildNpDualCalendar()`, `npRefresh()`, `wkpNpDayClick()`, `applyNpPreset()`, `bindNpCalendarEvents()`. `wkp.npPreset` field mới. |
+| `src/app/render/home.js` | `_buildNewProjectModal()` với 3-zone layout. `firstUnusedColor` import. `NP_PRESETS` constant. |
+| `src/app/events/bindHome.js` | `setRenderModal(() => npRefresh())`. Preset button + WEEKS stepper binding. `wkp.npPreset = null` khi reset. |
+| `src/styles/modals.css` | `.new-project-modal`, `.np-*` classes, `.np-weeks-stepper` inline row layout. |
+| `src/styles/sidebar.css` | `.sb { overflow: visible }` |
+
+**Commits:**
+- `6c85fb0` — feat(home): new-project modal redesign — dual calendar + preset sidebar
+- `9877855` — fix(home): 4 fixes — no-flicker preset, WEEKS stepper, auto-accent, sidebar clip
+- `91f994a` — fix(home): WEEKS stepper inline with date row, aligned right
+
+**Decisions:**
+- D65: New-project modal: 900px wide, 3-zone layout (form / accent / timeline 2-col)
+- D66: Dual calendar: 2 tháng inline (không popover), nav cùng nhau
+- D67: Preset sidebar: 5 buttons với Tùy chỉnh (dashed border, italic) — auto-select khi manual pick
+- D68: WEEKS stepper: `[-] N [+]` inline trong date row, margin-left:auto (căn phải)
+- D69: npRefresh(): surgical DOM replace `.np-wkp-wrap` only, sync preset active class — không rebuild home
+- D70: Auto accent: firstUnusedColor() cycle khi full palette đã dùng hết
+
+---
 
 ### 2026-06-24 — Phase Grid Redesign (PHASE-1)
 

@@ -1,7 +1,7 @@
 # PROJECT CONTEXT — Arthur Roadmap Timeline
 > **Dùng file này để nạp context kỹ thuật ổn định vào đầu mỗi session Claude mới.**
 > Đọc kèm `WORKING.md` để biết sprint hiện tại + decisions đã chốt.
-> Cập nhật lần cuối: 2026-06-24 · Commit app: `e699ffe` (Phase Grid) · Commit docs: (file này)
+> Cập nhật lần cuối: 2026-06-26 · Commit app: `91f994a` (New Project Modal Redesign)
 
 ---
 
@@ -367,6 +367,17 @@ assignLanes(tasks)
 - [x] **Date labels** — mỗi ô hiện 2 dòng: Wn (bold) + "02 - 09/4" (date range)
 - [x] **Modal width** — class `mdl-phase` = 640px (từ 460px)
 
+### New Project Modal Redesign (2026-06-26)
+- [x] **Wide 2-panel modal** — 900px, 3-zone layout: form / accent row / preset+calendar
+- [x] **Dual inline calendar** — 2 tháng side-by-side, navigate cùng nhau, không dùng popover
+- [x] **Snap-to-Monday giữ nguyên** — week row selection, `wkpMonday()` logic không đổi
+- [x] **Preset sidebar** — 5 buttons: 4 Tuần / 1 Tháng / 3 Tháng / 6 Tháng / Tùy chỉnh
+- [x] **Auto-custom** — mọi manual interaction (calendar click, date input, stepper) → `wkp.npPreset='custom'`
+- [x] **WEEKS stepper** — `[-] N [+]` inline trong date row, căn phải bằng margin-left:auto
+- [x] **npRefresh()** — surgical re-render `.np-wkp-wrap` only (không full renderHome) → no flicker
+- [x] **Auto accent color** — `firstUnusedColor()` tự chọn màu chưa dùng, cycle khi hết palette
+- [x] **wkp.npPreset** — state field mới trong wkp object: `null | '4w' | '1m' | '3m' | '6m' | 'custom'`
+
 ### CSV Import
 - [x] 2-step flow: chọn project → preview table
 - [x] Schema: `task_name, phase_name, team_name, start_date, end_date, tags, description`
@@ -444,7 +455,7 @@ todayWeekFrac()           // → vị trí today (fractional week number)
 │   │   ├── utils.js       ← q(), qAll(), esc(), tagPalette()
 │   │   ├── theme.js       ← dark/light/system toggle
 │   │   ├── storage.js     ← localStorage helpers
-│   │   ├── weekpicker.js  ← calendar date-range picker (dùng trong cfg modal)
+│   │   ├── weekpicker.js  ← calendar date-range picker. exports: buildWkPicker (cfg modal), buildNpDualCalendar + npRefresh + applyNpPreset + wkpNpDayClick + bindNpCalendarEvents (new-project modal dual calendar)
 │   │   ├── canvas.js      ← dot-matrix animation (sign-in + home empty state)
 │   │   ├── share.js       ← buildShareURL, loadFromHash (#v1=...)
 │   │   ├── icons.js       ← svgIcon(), LOGO_IMG, logoUrl
@@ -583,6 +594,18 @@ Firestore rules cho `/waitlist/{email}`: `allow create: if true; allow read/writ
 ## 11. Design Decisions Log
 
 > Append-only. Không xóa entry cũ — dùng để trace lý do đằng sau các quyết định.
+
+### [2026-06-26] New Project Modal Redesign
+| # | Quyết định |
+|---|-----------|
+| D65 | Modal "Tạo project mới": 900px wide, 3-zone layout (form zone / accent row / timeline 2-col). Không ảnh hưởng edit modal. |
+| D66 | Dual calendar: 2 tháng inline (không popover), navigate cùng nhau. Snap-to-Monday + week row logic giữ nguyên. |
+| D67 | Preset sidebar: 5 buttons — 4 Tuần / 1 Tháng / 3 Tháng / 6 Tháng / Tùy chỉnh. Tùy chỉnh có dashed border + italic (visual indicator = manual mode). |
+| D68 | Auto-custom: mọi thao tác manual (click calendar row, nhập date input, stepper) → `wkp.npPreset='custom'` → Tùy chỉnh highlight. |
+| D69 | WEEKS stepper: `[-] N [+]` inline trong date row, margin-left:auto để căn phải. Không dùng tên class `.dur-btn` để tránh coupling với task modal. |
+| D70 | npRefresh(): surgical replace chỉ `.np-wkp-wrap` — không rebuild toàn bộ home DOM. Sync preset active state bằng classList.toggle, không rebind preset buttons. |
+| D71 | Auto accent color: `firstUnusedColor(PROJ_ACCENTS, usedAccents)`. Khi full palette → cycle theo `used.length % palette.length`. |
+| D72 | `setRenderModal(() => npRefresh())` thay vì `() => _renderHome?.()` — giới hạn scope re-render của modal callbacks trong weekpicker.js. |
 
 ### [2026-06-24] Phase Time Range Grid (PHASE-1)
 | # | Quyết định |
