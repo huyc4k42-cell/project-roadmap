@@ -1,6 +1,6 @@
 /* ── RENDER / HOME — home screen, project cards, home modals ── */
 import { S }                       from '../state.js';
-import { esc }                     from '../utils.js';
+import { esc, firstUnusedColor }   from '../utils.js';
 import { currentUser }             from '../firebase.js';
 import { PROJ_ACCENTS }            from '../constants.js';
 import { logoUrl }                 from '../icons.js';
@@ -90,8 +90,12 @@ export function buildHome() {
   }
 
   const idx           = _loadIndex?.() || [];
-  const accentSwatches = PROJ_ACCENTS.map((c, i) =>
-    `<span class="proj-accent-swatch${i === 0 ? ' sel' : ''}" data-acc="${c}" style="background:${c}"></span>`
+  const usedAccents   = idx.map(p => p.accent).filter(Boolean);
+  const defaultAccent = firstUnusedColor(PROJ_ACCENTS, usedAccents) || PROJ_ACCENTS[0];
+  const accentSwatches = PROJ_ACCENTS.map(c =>
+    `<button class="proj-accent-swatch${c === defaultAccent ? ' sel' : ''}"
+             style="background:${c}" data-acc="${c}"
+             aria-label="Màu ${c}" aria-pressed="${c === defaultAccent}"></button>`
   ).join('');
 
   const modal = S.ui.modal

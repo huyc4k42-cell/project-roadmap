@@ -1,6 +1,6 @@
 /* ── SIDEBAR: backlog, tags, task cards, filter, search ── */
 
-.sb{width:var(--sb);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .2s}
+.sb{width:var(--sb);flex-shrink:0;background:var(--s1);border-right:1px solid var(--bd);display:flex;flex-direction:column;transition:width .2s;overflow:visible}
 .sb-hd{padding:12px 14px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
 .sb-hd h2{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:var(--txt)}
 .sb-badge{font-size:12px;background:var(--s3);border-radius:4px;padding:2px 8px;color:var(--txt2)}

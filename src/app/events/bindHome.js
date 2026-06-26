@@ -8,7 +8,7 @@ import {
   setHomeCtxId, setHomeUserMenuOpen,
 } from '../render/home.js';
 import { bindImportModal }   from '../import/csv.js';
-import { wkp, bindWkPickerEvents, setRenderModal, applyNpPreset, bindNpCalendarEvents } from '../weekpicker.js';
+import { wkp, bindWkPickerEvents, setRenderModal, applyNpPreset, bindNpCalendarEvents, npRefresh } from '../weekpicker.js';
 import { wkpMonday, dateStrYMD }                   from '../date.js';
 import { t }                                        from '../i18n.js';
 
@@ -290,7 +290,7 @@ export function bindHome() {
 
   /* New-project modal: dual calendar + presets */
   if (S.ui.modal?.type === 'new-project') {
-    setRenderModal(() => _renderHome?.());
+    setRenderModal(() => npRefresh());
     bindNpCalendarEvents();
 
     qAll('.np-preset-btn').forEach(btn => {
@@ -299,7 +299,7 @@ export function bindHome() {
         if (key === 'custom') {
           /* Custom = just mark active, don't change dates */
           wkp.npPreset = 'custom';
-          _renderHome?.();
+          npRefresh();
         } else {
           applyNpPreset(key);
         }

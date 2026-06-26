@@ -239,7 +239,16 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .np-preset-btn[data-np-preset="custom"].active{border-style:solid;font-style:normal}
 
 .np-calendar-panel{padding:16px}
-.np-wkp-wrap{}
+.np-wkp-wrap{display:grid;grid-template-columns:1fr auto;gap:0;align-items:start}
+.np-wkp-main{min-width:0}
+
+/* Date row */
+.np-weeks-stepper-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px 16px 16px 12px;border-left:1px solid var(--bd);min-width:80px}
+.np-weeks-stepper-lbl{font-size:10px;letter-spacing:.08em;color:var(--txt2);text-transform:uppercase}
+.np-weeks-stepper{display:flex;flex-direction:column;align-items:center;gap:6px}
+.np-weeks-val{font-size:22px;font-weight:600;color:var(--txt);min-width:40px;text-align:center;line-height:1}
+.np-weeks-btn{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s3);color:var(--txt);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.np-weeks-btn:hover{background:var(--s4)}
 
 /* Date row */
 .np-date-row{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -251,10 +260,6 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .np-date-inp{background:transparent;border:none;outline:none;font-size:13px;font-weight:500;color:var(--txt);font-family:inherit;width:100%;cursor:pointer}
 .np-date-inp::placeholder{color:var(--txt3);font-weight:400}
 .np-arrow{color:var(--txt3);font-size:16px;padding-bottom:8px;flex-shrink:0}
-.np-weeks-wrap{display:flex;align-items:flex-end;gap:5px;margin-left:4px}
-.np-weeks-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--txt2);padding-bottom:8px;white-space:nowrap}
-.np-weeks-inp{width:52px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r);padding:7px 8px;color:var(--txt);font-size:13px;text-align:center;outline:none;font-family:inherit;min-height:36px;transition:border-color .15s}
-.np-weeks-inp:focus{border-color:var(--gold)}
 
 /* Calendar nav */
 .np-cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px}

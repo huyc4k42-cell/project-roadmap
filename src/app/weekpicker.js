@@ -444,36 +444,57 @@ export function buildNpDualCalendar() {
   }
 
   return `<div class="np-wkp-wrap">
-    <div class="np-date-row">
-      <div class="np-date-f${startActive}" id="np-f-start">
-        <span class="np-date-lbl">${t('weekpicker.start')}</span>
-        <input class="np-date-inp" id="np-inp-start" placeholder="DD/MM/YYYY" value="${startVal}" autocomplete="off">
+    <div class="np-wkp-main">
+      <div class="np-date-row">
+        <div class="np-date-f${startActive}" id="np-f-start">
+          <span class="np-date-lbl">${t('weekpicker.start')}</span>
+          <input class="np-date-inp" id="np-inp-start" placeholder="DD/MM/YYYY" value="${startVal}" autocomplete="off">
+        </div>
+        <div class="np-arrow">→</div>
+        <div class="np-date-f${endActive}" id="np-f-end">
+          <span class="np-date-lbl">${t('weekpicker.end')}</span>
+          <input class="np-date-inp" id="np-inp-end" placeholder="DD/MM/YYYY" value="${endVal}" autocomplete="off">
+        </div>
       </div>
-      <div class="np-arrow">→</div>
-      <div class="np-date-f${endActive}" id="np-f-end">
-        <span class="np-date-lbl">${t('weekpicker.end')}</span>
-        <input class="np-date-inp" id="np-inp-end" placeholder="DD/MM/YYYY" value="${endVal}" autocomplete="off">
+      <div class="np-cal-nav">
+        <button class="np-nav-btn" id="np-prev" aria-label="Tháng trước">‹</button>
+        <div class="np-cal-heads">
+          <span class="np-cal-head">${head1}</span>
+          <span class="np-cal-head">${head2}</span>
+        </div>
+        <button class="np-nav-btn" id="np-next" aria-label="Tháng sau">›</button>
       </div>
-      <div class="np-weeks-wrap">
-        <input class="np-weeks-inp" id="np-weeks-inp" type="number" min="1" max="260"
-          aria-label="Số tuần" value="${weeksVal}" placeholder="—">
-        <span class="np-weeks-lbl">TUẦN</span>
+      <div class="np-dual-cal">
+        <div role="grid" aria-label="Calendar tháng bắt đầu">${_buildNpMonth(yr, mo, startTs, endTs)}</div>
+        <div role="grid" aria-label="Calendar tháng kết thúc">${_buildNpMonth(yr2, mo2, startTs, endTs)}</div>
+      </div>
+      <div class="np-cal-hint">${hintHtml}</div>
+    </div>
+    <div class="np-weeks-stepper-col">
+      <span class="np-weeks-stepper-lbl">TUẦN</span>
+      <div class="np-weeks-stepper">
+        <button class="np-weeks-btn" id="np-weeks-inc" aria-label="Tăng số tuần">+</button>
+        <span class="np-weeks-val" id="np-weeks-val">${weeksVal || '—'}</span>
+        <button class="np-weeks-btn" id="np-weeks-dec" aria-label="Giảm số tuần">−</button>
       </div>
     </div>
-    <div class="np-cal-nav">
-      <button class="np-nav-btn" id="np-prev" aria-label="Tháng trước">‹</button>
-      <div class="np-cal-heads">
-        <span class="np-cal-head">${head1}</span>
-        <span class="np-cal-head">${head2}</span>
-      </div>
-      <button class="np-nav-btn" id="np-next" aria-label="Tháng sau">›</button>
-    </div>
-    <div class="np-dual-cal">
-      <div role="grid" aria-label="Calendar tháng bắt đầu">${_buildNpMonth(yr, mo, startTs, endTs)}</div>
-      <div role="grid" aria-label="Calendar tháng kết thúc">${_buildNpMonth(yr2, mo2, startTs, endTs)}</div>
-    </div>
-    <div class="np-cal-hint">${hintHtml}</div>
   </div>`;
+}
+
+export function npRefresh() {
+  if (!document.querySelector('.np-wkp-wrap')) return;
+  const wrap = document.querySelector('.np-wkp-wrap');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = buildNpDualCalendar();
+  const newWrap = tmp.firstElementChild;
+  wrap.replaceWith(newWrap);
+  bindNpCalendarEvents();
+  // sync preset active state
+  document.querySelectorAll('.np-preset-btn').forEach(b => {
+    const isActive = b.dataset.npPreset === wkp.npPreset;
+    b.classList.toggle('active', isActive);
+    b.setAttribute('aria-pressed', String(isActive));
+  });
 }
 
 export function wkpNpDayClick(wmonStr) {
@@ -491,7 +512,7 @@ export function wkpNpDayClick(wmonStr) {
     wkp.step = 'start';
   }
   wkp.npPreset = 'custom';
-  _renderModal?.();
+  npRefresh();
 }
 
 export function applyNpPreset(key) {
@@ -513,17 +534,17 @@ export function applyNpPreset(key) {
     wkp.endMon = wkpMonday(e);
   }
   wkp.npPreset = key;
-  _renderModal?.();
+  npRefresh();
 }
 
 export function bindNpCalendarEvents() {
   q('#np-prev')?.addEventListener('click', () => {
     wkp.mo--; if (wkp.mo < 0) { wkp.mo = 11; wkp.yr--; }
-    _renderModal?.();
+    npRefresh();
   });
   q('#np-next')?.addEventListener('click', () => {
     wkp.mo++; if (wkp.mo > 11) { wkp.mo = 0; wkp.yr++; }
-    _renderModal?.();
+    npRefresh();
   });
 
   qAll('.np-cal-row').forEach(row => {
@@ -565,21 +586,32 @@ export function bindNpCalendarEvents() {
       else                  { wkp.endMon   = mon; wkp.step = 'start'; }
       wkp.npPreset = 'custom';
       if (fromEnter) e.preventDefault();
-      _renderModal?.();
+      npRefresh();
     };
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') _commit(true, e); });
     inp.addEventListener('blur',    ()  => _commit(false));
   });
 
-  q('#np-weeks-inp')?.addEventListener('change', e => {
-    const n = parseInt(e.target.value);
-    if (isNaN(n) || n < 1) return;
-    if (!wkp.startMon) {
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      wkp.startMon = wkpMonday(today);
-    }
-    wkp.endMon   = new Date(wkp.startMon.getTime() + n * 7 * 86400000);
+  const weeksDecBtn = q('#np-weeks-dec');
+  const weeksIncBtn = q('#np-weeks-inc');
+  if (weeksDecBtn) weeksDecBtn.addEventListener('click', () => {
+    const startTs = wkp.startMon ? wkp.startMon.getTime() : null;
+    const endTs = wkp.endMon ? wkp.endMon.getTime() : null;
+    let n = (startTs && endTs) ? Math.round((endTs - startTs) / (7 * 86400000)) : 1;
+    n = Math.max(1, n - 1);
+    if (!wkp.startMon) wkp.startMon = wkpMonday(new Date());
+    wkp.endMon = new Date(wkp.startMon.getTime() + n * 7 * 86400000);
     wkp.npPreset = 'custom';
-    _renderModal?.();
+    npRefresh();
+  });
+  if (weeksIncBtn) weeksIncBtn.addEventListener('click', () => {
+    const startTs = wkp.startMon ? wkp.startMon.getTime() : null;
+    const endTs = wkp.endMon ? wkp.endMon.getTime() : null;
+    let n = (startTs && endTs) ? Math.round((endTs - startTs) / (7 * 86400000)) : 0;
+    n = Math.min(260, n + 1);
+    if (!wkp.startMon) wkp.startMon = wkpMonday(new Date());
+    wkp.endMon = new Date(wkp.startMon.getTime() + n * 7 * 86400000);
+    wkp.npPreset = 'custom';
+    npRefresh();
   });
 }
