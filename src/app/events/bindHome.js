@@ -8,7 +8,7 @@ import {
   setHomeCtxId, setHomeUserMenuOpen,
 } from '../render/home.js';
 import { bindImportModal }   from '../import/csv.js';
-import { wkp, bindWkPickerEvents, setRenderModal } from '../weekpicker.js';
+import { wkp, bindWkPickerEvents, setRenderModal, applyNpPreset, bindNpCalendarEvents } from '../weekpicker.js';
 import { wkpMonday, dateStrYMD }                   from '../date.js';
 import { t }                                        from '../i18n.js';
 
@@ -199,6 +199,7 @@ export function bindHome() {
     wkp.showMonthSel = false;
     wkp.phaseMode    = false;
     wkp.cfgStart     = null;
+    wkp.npPreset     = null;
     S.ui.modal = { type: 'new-project', data: {} };
     _renderHome?.();
   };
@@ -287,10 +288,23 @@ export function bindHome() {
   });
   q('#m-cancel')?.addEventListener('click', () => { S.ui.modal = null; _renderHome?.(); });
 
-  /* Weekpicker for new-project modal */
+  /* New-project modal: dual calendar + presets */
   if (S.ui.modal?.type === 'new-project') {
     setRenderModal(() => _renderHome?.());
-    bindWkPickerEvents();
+    bindNpCalendarEvents();
+
+    qAll('.np-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.npPreset;
+        if (key === 'custom') {
+          /* Custom = just mark active, don't change dates */
+          wkp.npPreset = 'custom';
+          _renderHome?.();
+        } else {
+          applyNpPreset(key);
+        }
+      });
+    });
   }
 
   /* Accent swatches */

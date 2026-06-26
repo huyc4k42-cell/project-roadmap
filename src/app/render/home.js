@@ -5,7 +5,7 @@ import { currentUser }             from '../firebase.js';
 import { PROJ_ACCENTS }            from '../constants.js';
 import { logoUrl }                 from '../icons.js';
 import { buildImportModal }        from './modals.js';
-import { buildWkPicker }          from '../weekpicker.js';
+import { buildWkPicker, buildNpDualCalendar, wkp } from '../weekpicker.js';
 import { t }                      from '../i18n.js';
 import { parseDate, totalWeeks, fmtInput, todayWeekFrac } from '../date.js';
 
@@ -277,26 +277,82 @@ export function buildHomeModal(accentSwatches) {
   const isRename = hm.type === 'rename-project';
   const d        = hm.data || {};
 
+  if (!isRename) return _buildNewProjectModal(accentSwatches);
+
+  /* rename-project — compact modal unchanged */
   return `<div class="mbg" id="modal-bg" role="presentation">
-    <div class="mdl" role="dialog" aria-modal="true" aria-label="${isRename ? t('modal.project.titleRename') : t('modal.project.titleNew')}">
-      <h3>${isRename
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${t('modal.project.titleRename')}`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>${t('modal.project.titleNew')}`}</h3>
+    <div class="mdl" role="dialog" aria-modal="true" aria-label="${t('modal.project.titleRename')}">
+      <h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>${t('modal.project.titleRename')}</h3>
       <div class="fg"><label for="hm-name">${t('modal.project.nameLabel')}</label>
         <input class="fi" id="hm-name" value="${esc(d.name || '')}" placeholder="${t('modal.project.namePlaceholder')}" autocomplete="off"/></div>
       <div class="fg"><label for="hm-sub">${t('modal.project.subtitleLabel')}</label>
         <input class="fi" id="hm-sub" value="${esc(d.subtitle || '')}" placeholder="${t('modal.project.subtitlePlaceholder')}" autocomplete="off"/></div>
       <div class="fg"><label>${t('modal.project.accentLabel')}</label>
-        <div class="proj-accent-grid" id="hm-accent-grid">${
-          isRename
-            ? PROJ_ACCENTS.map((c) => `<span class="proj-accent-swatch${c === (d.accent || '#D0A052') ? ' sel' : ''}" data-acc="${c}" style="background:${c}"></span>`).join('')
-            : (accentSwatches || '')
-        }</div>
+        <div class="proj-accent-grid" id="hm-accent-grid">
+          ${PROJ_ACCENTS.map(c => `<span class="proj-accent-swatch${c === (d.accent || '#D0A052') ? ' sel' : ''}" data-acc="${c}" style="background:${c}"></span>`).join('')}
+        </div>
       </div>
-      ${!isRename ? `<div class="fg"><label>${t('modal.project.timelineLabel')}</label>${buildWkPicker()}</div>` : ''}
       <div class="mdl-btns">
         <button class="bsm b-sec" id="m-cancel">${t('common.cancel')}</button>
-        <button class="bsm b-primary" id="m-save">${isRename ? t('common.save') : t('modal.project.createBtn')}</button>
+        <button class="bsm b-primary" id="m-save">${t('common.save')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+const NP_PRESETS = [
+  { key: '4w',     label: '4 Tuần' },
+  { key: '1m',     label: '1 Tháng' },
+  { key: '3m',     label: '3 Tháng' },
+  { key: '6m',     label: '6 Tháng' },
+  { key: 'custom', label: 'Tùy chỉnh' },
+];
+
+function _buildNewProjectModal(accentSwatches) {
+  const activePreset = wkp.npPreset;
+
+  const presetBtns = NP_PRESETS.map(p =>
+    `<button class="np-preset-btn${p.key === activePreset ? ' active' : ''}"
+      data-np-preset="${p.key}"
+      aria-label="Đặt timeline ${p.label}"
+      aria-pressed="${p.key === activePreset}">${p.label}</button>`
+  ).join('');
+
+  const swatches = accentSwatches || PROJ_ACCENTS.map((c, i) =>
+    `<span class="proj-accent-swatch${i === 0 ? ' sel' : ''}" data-acc="${c}" style="background:${c}"></span>`
+  ).join('');
+
+  return `<div class="mbg" id="modal-bg" role="presentation">
+    <div class="mdl new-project-modal" role="dialog" aria-modal="true" aria-label="${t('modal.project.titleNew')}">
+
+      <div class="np-form-zone">
+        <h3 style="margin-bottom:14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>${t('modal.project.titleNew')}</h3>
+        <div class="np-fields-row">
+          <div class="fg" style="margin-bottom:0"><label for="hm-name">${t('modal.project.nameLabel')}</label>
+            <input class="fi" id="hm-name" value="" placeholder="${t('modal.project.namePlaceholder')}" autocomplete="off"/></div>
+          <div class="fg" style="margin-bottom:0"><label for="hm-sub">${t('modal.project.subtitleLabel')}</label>
+            <input class="fi" id="hm-sub" value="" placeholder="${t('modal.project.subtitlePlaceholder')}" autocomplete="off"/></div>
+        </div>
+      </div>
+
+      <div class="np-accent-row">
+        <div class="np-accent-lbl">${t('modal.project.accentLabel')}</div>
+        <div class="proj-accent-grid" id="hm-accent-grid">${swatches}</div>
+      </div>
+
+      <div class="np-timeline-section">
+        <div class="np-preset-sidebar">
+          <div class="np-sidebar-lbl">GỢI Ý NHANH</div>
+          <div class="np-preset-col" role="group" aria-label="Gợi ý thời lượng">${presetBtns}</div>
+        </div>
+        <div class="np-calendar-panel">
+          ${buildNpDualCalendar()}
+        </div>
+      </div>
+
+      <div class="mdl-btns np-footer">
+        <button class="bsm b-sec" id="m-cancel">${t('common.cancel')}</button>
+        <button class="bsm b-primary" id="m-save">${t('modal.project.createBtn')}</button>
       </div>
     </div>
   </div>`;

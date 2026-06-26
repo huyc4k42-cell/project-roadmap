@@ -14,6 +14,7 @@ export let wkp = {
   popOpen: false,
   popAnchor: null,
   inputErr: { start: null, end: null },
+  npPreset: null,  // null | '4w' | '1m' | '3m' | '6m' | 'custom'
 };
 
 export function wkpNav(dir) {
@@ -367,4 +368,218 @@ function _bindWkpPopoverEvents() {
 export function bindWkPickerEvents() {
   _bindWkpCompactEvents();
   if (wkp.popOpen) _bindWkpPopoverEvents();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   NEW-PROJECT DUAL CALENDAR (inline, not popover)
+══════════════════════════════════════════════════════════════════ */
+
+const NP_DOW = ['T2','T3','T4','T5','T6','T7','CN'];
+
+function _buildNpMonth(year, month, startTs, endTs) {
+  const header = `<div class="np-dow-row" aria-hidden="true">
+    <span></span>
+    ${NP_DOW.map((d, i) => `<span class="np-dow${i === 0 ? ' np-dow-mon' : ''}">${d}</span>`).join('')}
+  </div>`;
+
+  let cursor = wkpMonday(new Date(year, month, 1));
+  const lastDay = new Date(year, month + 1, 0);
+  const todayTs = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+  const rows = [];
+
+  while (cursor <= lastDay) {
+    const weekMon = new Date(cursor);
+    const monTs   = weekMon.getTime();
+    let rowCls = 'np-cal-row';
+    if (startTs && monTs === startTs) rowCls += ' np-row-start';
+    if (endTs   && monTs === endTs)   rowCls += ' np-row-end';
+    if (startTs && endTs && monTs > startTs && monTs < endTs) rowCls += ' np-row-range';
+
+    const wn = isoWeek(weekMon);
+    const cells = [];
+    for (let i = 0; i < 7; i++) {
+      const d    = new Date(cursor);
+      const outM = d.getMonth() !== month;
+      const isT  = d.getTime() === todayTs;
+      cells.push(`<span class="np-day${outM ? ' np-out' : ''}${isT ? ' np-today' : ''}">${d.getDate()}</span>`);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    rows.push(`<div class="${rowCls}" data-np-wmon="${dateStrYMD(weekMon)}" role="row" tabindex="-1">
+      <span class="np-wn" aria-hidden="true">W${wn}</span>
+      ${cells.join('')}
+    </div>`);
+  }
+
+  return header + `<div class="np-cal-rows" role="rowgroup">${rows.join('')}</div>`;
+}
+
+export function buildNpDualCalendar() {
+  const { yr, mo, startMon, endMon, step, npPreset } = wkp;
+  const startTs = startMon ? startMon.getTime() : null;
+  const endTs   = endMon   ? endMon.getTime()   : null;
+
+  let yr2 = yr, mo2 = mo + 1;
+  if (mo2 > 11) { mo2 = 0; yr2++; }
+
+  const months = t('weekpicker.monthsFull');
+  const head1  = months[mo]  + ' ' + yr;
+  const head2  = months[mo2] + ' ' + yr2;
+
+  const startVal = startMon ? fmtInput(startMon) : '';
+  const endVal   = endMon   ? fmtInput(new Date(endTs + 6 * 86400000)) : '';
+  const weeksVal = (startMon && endMon) ? Math.round((endTs - startTs) / (7 * 86400000)) : '';
+
+  const startActive = step === 'start' ? ' np-f-active' : '';
+  const endActive   = step === 'end'   ? ' np-f-active' : '';
+
+  let hintHtml;
+  if (!startMon) {
+    hintHtml = t('weekpicker.stepStart');
+  } else if (!endMon) {
+    hintHtml = t('weekpicker.stepEnd');
+  } else {
+    const wks = Math.round((endTs - startTs) / (7 * 86400000));
+    hintHtml = `<span class="np-range-summary">W${isoWeek(startMon)} → W${isoWeek(endMon)} · <b>${wks} tuần</b> / ${fmtInput(startMon)} – ${fmtInput(endMon)}</span>`;
+  }
+
+  return `<div class="np-wkp-wrap">
+    <div class="np-date-row">
+      <div class="np-date-f${startActive}" id="np-f-start">
+        <span class="np-date-lbl">${t('weekpicker.start')}</span>
+        <input class="np-date-inp" id="np-inp-start" placeholder="DD/MM/YYYY" value="${startVal}" autocomplete="off">
+      </div>
+      <div class="np-arrow">→</div>
+      <div class="np-date-f${endActive}" id="np-f-end">
+        <span class="np-date-lbl">${t('weekpicker.end')}</span>
+        <input class="np-date-inp" id="np-inp-end" placeholder="DD/MM/YYYY" value="${endVal}" autocomplete="off">
+      </div>
+      <div class="np-weeks-wrap">
+        <input class="np-weeks-inp" id="np-weeks-inp" type="number" min="1" max="260"
+          aria-label="Số tuần" value="${weeksVal}" placeholder="—">
+        <span class="np-weeks-lbl">TUẦN</span>
+      </div>
+    </div>
+    <div class="np-cal-nav">
+      <button class="np-nav-btn" id="np-prev" aria-label="Tháng trước">‹</button>
+      <div class="np-cal-heads">
+        <span class="np-cal-head">${head1}</span>
+        <span class="np-cal-head">${head2}</span>
+      </div>
+      <button class="np-nav-btn" id="np-next" aria-label="Tháng sau">›</button>
+    </div>
+    <div class="np-dual-cal">
+      <div role="grid" aria-label="Calendar tháng bắt đầu">${_buildNpMonth(yr, mo, startTs, endTs)}</div>
+      <div role="grid" aria-label="Calendar tháng kết thúc">${_buildNpMonth(yr2, mo2, startTs, endTs)}</div>
+    </div>
+    <div class="np-cal-hint">${hintHtml}</div>
+  </div>`;
+}
+
+export function wkpNpDayClick(wmonStr) {
+  const mon = parseDate(wmonStr);
+  if (wkp.step === 'start' || !wkp.startMon) {
+    wkp.startMon = mon;
+    if (!wkp.endMon || mon.getTime() >= wkp.endMon.getTime()) wkp.endMon = null;
+    wkp.step = 'end';
+  } else {
+    if (mon.getTime() < wkp.startMon.getTime()) {
+      wkp.endMon = new Date(wkp.startMon); wkp.startMon = mon;
+    } else {
+      wkp.endMon = mon;
+    }
+    wkp.step = 'start';
+  }
+  wkp.npPreset = 'custom';
+  _renderModal?.();
+}
+
+export function applyNpPreset(key) {
+  if (!wkp.startMon) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    wkp.startMon = wkpMonday(today);
+  }
+  const s = wkp.startMon;
+  if (key === '4w') {
+    wkp.endMon = new Date(s.getTime() + 4 * 7 * 86400000);
+  } else if (key === '1m') {
+    const e = new Date(s); e.setMonth(e.getMonth() + 1);
+    wkp.endMon = wkpMonday(e);
+  } else if (key === '3m') {
+    const e = new Date(s); e.setMonth(e.getMonth() + 3);
+    wkp.endMon = wkpMonday(e);
+  } else if (key === '6m') {
+    const e = new Date(s); e.setMonth(e.getMonth() + 6);
+    wkp.endMon = wkpMonday(e);
+  }
+  wkp.npPreset = key;
+  _renderModal?.();
+}
+
+export function bindNpCalendarEvents() {
+  q('#np-prev')?.addEventListener('click', () => {
+    wkp.mo--; if (wkp.mo < 0) { wkp.mo = 11; wkp.yr--; }
+    _renderModal?.();
+  });
+  q('#np-next')?.addEventListener('click', () => {
+    wkp.mo++; if (wkp.mo > 11) { wkp.mo = 0; wkp.yr++; }
+    _renderModal?.();
+  });
+
+  qAll('.np-cal-row').forEach(row => {
+    row.addEventListener('click', () => wkpNpDayClick(row.dataset.npWmon));
+    row.addEventListener('mouseenter', () => {
+      if (wkp.step !== 'end' || !wkp.startMon) return;
+      const hovTs   = parseDate(row.dataset.npWmon).getTime();
+      const startTs = wkp.startMon.getTime();
+      qAll('.np-cal-row').forEach(r => {
+        const rTs = parseDate(r.dataset.npWmon).getTime();
+        r.classList.toggle('np-row-hov-range', rTs > startTs && rTs < hovTs);
+        r.classList.toggle('np-row-hov-end',   rTs === hovTs);
+      });
+    });
+    row.addEventListener('mouseleave', () => {
+      qAll('.np-cal-row').forEach(r => r.classList.remove('np-row-hov-range', 'np-row-hov-end'));
+    });
+  });
+
+  ['start', 'end'].forEach(side => {
+    const inp = q(`#np-inp-${side}`);
+    if (!inp) return;
+    inp.addEventListener('input', () => {
+      let v = inp.value.replace(/\D/g, '');
+      if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+      if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5, 9);
+      inp.value = v;
+    });
+    const _commit = (fromEnter, e) => {
+      const parts = inp.value.trim().split('/');
+      if (parts.length !== 3) return;
+      const [d, m, y] = parts.map(Number);
+      if (!d || !m || !y || y < 2000 || y > 2099) return;
+      const date = new Date(y, m - 1, d);
+      if (isNaN(date.getTime())) return;
+      const mon = wkpMonday(date);
+      wkp.yr = mon.getFullYear(); wkp.mo = mon.getMonth();
+      if (side === 'start') { wkp.startMon = mon; wkp.step = 'end'; }
+      else                  { wkp.endMon   = mon; wkp.step = 'start'; }
+      wkp.npPreset = 'custom';
+      if (fromEnter) e.preventDefault();
+      _renderModal?.();
+    };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') _commit(true, e); });
+    inp.addEventListener('blur',    ()  => _commit(false));
+  });
+
+  q('#np-weeks-inp')?.addEventListener('change', e => {
+    const n = parseInt(e.target.value);
+    if (isNaN(n) || n < 1) return;
+    if (!wkp.startMon) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      wkp.startMon = wkpMonday(today);
+    }
+    wkp.endMon   = new Date(wkp.startMon.getTime() + n * 7 * 86400000);
+    wkp.npPreset = 'custom';
+    _renderModal?.();
+  });
 }
