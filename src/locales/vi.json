@@ -248,7 +248,10 @@
     "start": "Bắt đầu",
     "end": "Kết thúc",
     "range": "W{sw} → W{ew} · {n} tuần",
-    "rangeIso": "W{sw} → W{ew} · {n} tuần"
+    "rangeIso": "W{sw} → W{ew} · {n} tuần",
+    "stepStart": "Chọn ngày bắt đầu",
+    "stepEnd": "Chọn ngày kết thúc",
+    "invalidDate": "Ngày không hợp lệ"
   },
   "onboarding": {
     "step1Title": "Chào mừng đến Aroadmap!",

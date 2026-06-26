@@ -64,13 +64,15 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .share-copy.copied{background:var(--grn);color:#fff}
 
 /* Week picker */
-.wkp{user-select:none;margin-top:4px}
+.wkp{user-select:none;margin-top:4px;position:relative}
 .wkp-date-row{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:end;margin-bottom:14px}
 .wkp-date-field{padding:9px 11px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--s2);cursor:pointer;transition:all .15s}
 .wkp-date-field:hover{border-color:var(--bd3)}
 .wkp-date-field.active{border-color:var(--gold);background:var(--goldB)}
+.wkp-date-field.wkp-field-active .wkp-date-box{border-color:var(--gold);box-shadow:0 0 0 2px rgba(208,160,82,.15)}
+.wkp-date-field.wkp-field-active{border-color:var(--gold);background:var(--goldB)}
 .wkp-date-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--txt3);display:block;margin-bottom:5px}
-.wkp-date-field.active .wkp-date-lbl{color:var(--gold)}
+.wkp-date-field.active .wkp-date-lbl,.wkp-date-field.wkp-field-active .wkp-date-lbl{color:var(--gold)}
 .wkp-date-inp{background:transparent;border:none;outline:none;font-size:14px;font-weight:500;color:var(--txt);font-family:inherit;width:100%;cursor:pointer}
 .wkp-date-inp::placeholder{color:var(--txt3);font-weight:400;font-size:13px}
 .wkp-date-arrow{color:var(--txt3);font-size:18px;display:flex;align-items:center;padding-bottom:10px}
@@ -85,12 +87,12 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .wkp-mo-cell.cur{background:var(--goldD);color:var(--gold);border-color:var(--gold)}
 .wkp-yr-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .wkp-yr-lbl{font-size:15px;font-weight:700;color:var(--txt)}
-.wkp-head{display:grid;grid-template-columns:32px repeat(7,1fr);margin-bottom:2px}
+.wkp-head{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
 .wkp-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);text-align:center;padding:2px 0}
-.wkp-row{display:grid;grid-template-columns:32px repeat(7,1fr);border-radius:5px;cursor:pointer;transition:background .1s;margin:1px 0}
+.wkp-row{display:grid;grid-template-columns:repeat(7,1fr);border-radius:5px;cursor:pointer;transition:background .1s;margin:1px 0}
 .wkp-row:hover{background:var(--s3)}
 .wkp-wn{font-size:10px;font-weight:600;color:var(--txt3);display:flex;align-items:center;padding-left:2px;transition:color .1s}
-.wkp-day{font-size:13px;color:var(--txt2);text-align:center;padding:7px 0;line-height:1;transition:all .1s}
+.wkp-day{font-size:13px;color:var(--txt2);text-align:center;padding:7px 0;min-height:44px;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .1s}
 .wkp-day.out{opacity:.3}
 .wkp-day.today{color:var(--gold);font-weight:700}
 .wkp-row.w-start,.wkp-row.w-end{background:var(--goldD)}
@@ -99,11 +101,21 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .wkp-row.w-start{border-left:3px solid var(--gold)}
 .wkp-row.w-end{border-right:3px solid var(--gold)}
 .wkp-row.in-range{background:var(--goldB)}
+.wkp-row.hov-row{background:var(--s3)}
 .wkp-row.hov-range{background:rgba(208,160,82,.05)}
 .wkp-row.hov-end{background:var(--goldB);border-right:2px dashed var(--gold)}
 .wkp-footer{margin-top:12px;padding:10px 12px;background:var(--s2);border:1px solid var(--bd2);border-radius:var(--r)}
 .wkp-f1{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:3px}
 .wkp-f2{font-size:12px;color:var(--txt2)}
+/* Step instruction */
+.wkp-step-instr{font-size:11px;color:var(--txt2);margin-bottom:10px;text-align:center;letter-spacing:.03em}
+/* Popover */
+.wkp-popover{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:60;background:var(--s1);border:1px solid var(--bd2);border-radius:var(--r2);padding:14px;box-shadow:0 10px 28px rgba(0,0,0,.7);animation:sup .15s ease}
+/* Summary bar */
+.wkp-summary{font-size:12px;color:var(--txt2);background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 12px;margin-top:8px;text-align:center}
+/* Inline error */
+.wkp-date-err{font-size:11px;color:var(--red);margin-top:3px}
+.wkp-inp-err{border-color:var(--red)!important}
 
 /* Auth / Sign-in screen */
 .auth-screen{position:fixed;inset:0;background:#080808;display:flex;align-items:center;justify-content:center;z-index:50;overflow:hidden}
