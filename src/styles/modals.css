@@ -239,19 +239,15 @@ textarea.fi{resize:vertical;min-height:64px;line-height:1.5}
 .np-preset-btn[data-np-preset="custom"].active{border-style:solid;font-style:normal}
 
 .np-calendar-panel{padding:16px}
-.np-wkp-wrap{display:grid;grid-template-columns:1fr auto;gap:0;align-items:start}
-.np-wkp-main{min-width:0}
+.np-wkp-wrap{display:block}
 
 /* Date row */
-.np-weeks-stepper-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px 16px 16px 12px;border-left:1px solid var(--bd);min-width:80px}
-.np-weeks-stepper-lbl{font-size:10px;letter-spacing:.08em;color:var(--txt2);text-transform:uppercase}
-.np-weeks-stepper{display:flex;flex-direction:column;align-items:center;gap:6px}
-.np-weeks-val{font-size:22px;font-weight:600;color:var(--txt);min-width:40px;text-align:center;line-height:1}
-.np-weeks-btn{width:36px;height:36px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s3);color:var(--txt);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.np-date-row{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px}
+.np-weeks-stepper{display:flex;align-items:center;gap:6px;margin-left:auto}
+.np-weeks-val{font-size:15px;font-weight:600;color:var(--txt);min-width:24px;text-align:center}
+.np-weeks-unit{font-size:12px;color:var(--txt2)}
+.np-weeks-btn{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--bd);background:var(--s3);color:var(--txt);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
 .np-weeks-btn:hover{background:var(--s4)}
-
-/* Date row */
-.np-date-row{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .np-date-f{padding:8px 10px;border-radius:var(--r);border:1px solid var(--bd2);background:var(--s2);cursor:pointer;transition:all .15s;min-width:90px}
 .np-date-f:hover{border-color:var(--bd3)}
 .np-date-f.np-f-active{border-color:var(--gold);background:var(--goldB)}
