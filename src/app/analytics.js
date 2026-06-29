@@ -178,7 +178,7 @@ export function setProjectContext(ctx) {
    TRACK
 ───────────────────────────────────────────── */
 export function track(eventName, props = {}) {
-  if (_isInternal) return;
+  if (_isInternal && !window.__trackingDebug) return;
 
   const payload = { ...props };
 
