@@ -25,7 +25,7 @@ export function bindChecklist(deps) {
       if (dirty) {
         const ph = phaseById(+el.dataset.scopeId);
         if (ph) trackEditPhaseScope(ph, S);
-        deps.render?.();
+        setTimeout(() => deps.render?.(), 0);
       }
     });
   });
