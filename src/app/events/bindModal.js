@@ -7,6 +7,24 @@ import { parseDate, dateStrYMD, wkpMonday, weekDate, fmtInput, totalWeeks } from
 import { setTheme }                                     from '../theme.js';
 import { renderModal }                                  from '../render/modals.js';
 import { t }                                           from '../i18n.js';
+import {
+  trackViewSettingsPopup, trackSaveSettings, trackCancelSettings,
+} from '../tracking/project.js';
+import { trackViewSharePopup, trackClickCopyLink, trackCancelSharePopup } from '../tracking/share.js';
+import { currentProjId } from '../persistence.js';
+import { trackAddTag, trackTagDelete } from '../tracking/sidebar.js';
+import {
+  trackAddPhaseCompleted, trackCancelAddPhase, trackPhaseEdited, trackPhaseDeleted,
+  trackOpenPhaseDetail,
+} from '../tracking/phase.js';
+import {
+  trackAddTaskCompleted, trackCancelAddTask, trackTaskEdited, trackTaskDeleted,
+  trackOpenTaskDetail,
+} from '../tracking/task.js';
+import {
+  trackAddTeamCompleted, trackCancelAddTeam, trackTeamEdited, trackTeamDeleted,
+  trackViewTeamPopup,
+} from '../tracking/team.js';
 
 
 /* Injected render callbacks */
@@ -40,8 +58,28 @@ export function bindModal() {
     else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
   });
 
-  bg.addEventListener('click', e => { if (e.target === bg) _closeModal?.(_render); });
-  q('#m-cancel')?.addEventListener('click', () => _closeModal?.(_render));
+  const _cfgHasChanges = () =>
+    (q('#m-cfg-title')?.value.trim() || '') !== S.cfg.title ||
+    (q('#m-cfg-sub')?.value.trim()   || '') !== (S.cfg.subtitle || '');
+
+  const _fireCancel = (cancelMethod) => {
+    if (type === 'cfg')       trackCancelSettings(cancelMethod, _cfgHasChanges());
+    if (type === 'add-phase') trackCancelAddPhase(cancelMethod);
+    if (type === 'add-task')  trackCancelAddTask(cancelMethod);
+    if (type === 'add-team')  trackCancelAddTeam(cancelMethod);
+    if (type === 'share')     trackCancelSharePopup(cancelMethod);
+  };
+
+  bg.addEventListener('click', e => {
+    if (e.target === bg) { _fireCancel('backdrop'); _closeModal?.(_render); }
+  });
+  q('#m-cancel')?.addEventListener('click', () => { _fireCancel('button'); _closeModal?.(_render); });
+
+  if (type === 'cfg')       trackViewSettingsPopup();
+  if (type === 'edit-task')  trackOpenTaskDetail(S.ui.modal.data, S, 'modal');
+  if (type === 'edit-phase') trackOpenPhaseDetail('modal', S.ui.modal.data, S);
+  if (type === 'edit-team')  trackViewTeamPopup(S.ui.modal.data, S);
+  if (type === 'share')      trackViewSharePopup(S, currentProjId);
 
   q('#m-save')?.addEventListener('click', () => {
     if (type === 'cfg')                              saveCfg();
@@ -76,6 +114,7 @@ export function bindModal() {
   if (copyBtn && urlInp) {
     urlInp.addEventListener('click', () => urlInp.select());
     copyBtn.addEventListener('click', () => {
+      trackClickCopyLink(S, currentProjId);
       navigator.clipboard.writeText(urlInp.value).then(() => {
         copyBtn.textContent = t('modal.share.copied');
         copyBtn.classList.add('copied');
@@ -340,6 +379,10 @@ function shakeErr(el, msg) {
 }
 
 function saveCfg() {
+  const origTitle    = S.cfg.title;
+  const origSubtitle = S.cfg.subtitle || '';
+  const origStart    = S.cfg.start;
+  const origEnd      = S.cfg.end;
   S.cfg.title    = q('#m-cfg-title')?.value.trim() || S.cfg.title;
   S.cfg.subtitle = q('#m-cfg-sub')?.value.trim() || '';
   if (wkp.startMon && wkp.endMon) {
@@ -347,6 +390,12 @@ function saveCfg() {
     const endSun = new Date(wkp.endMon); endSun.setDate(endSun.getDate() + 6);
     S.cfg.end = dateStrYMD(endSun);
   }
+  trackSaveSettings({
+    changedName:        S.cfg.title    !== origTitle,
+    changedStartDate:   S.cfg.start    !== origStart,
+    changedEndDate:     S.cfg.end      !== origEnd,
+    changedDescription: S.cfg.subtitle !== origSubtitle,
+  });
   _closeModal?.(_render);
 }
 
@@ -361,11 +410,19 @@ function saveTask() {
 
   if (S.ui.modal.type === 'edit-task') {
     const tk = taskById(S.ui.modal.data.id);
+    const orig = { name: tk.name, teamId: tk.teamId, phaseId: tk.phaseId, desc: tk.desc, tags: [...tk.tags] };
     Object.assign(tk, { name, teamId, dur, tags, desc });
+    trackTaskEdited(tk, S, {
+      changedName: name !== orig.name, changedTeam: teamId !== orig.teamId,
+      changedPhase: false, changedDescription: desc !== orig.desc,
+      changedTags: JSON.stringify(tags.sort()) !== JSON.stringify(orig.tags.sort()),
+    });
   } else {
     const prefill = S.ui._prefillTask || {};
     S.ui._prefillTask = null;
-    S.tasks.push({ id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: prefill.startWeek ?? null });
+    const newTask = { id: nextId(), name, teamId, dur, phaseId: null, tags, desc, startWeek: prefill.startWeek ?? null };
+    S.tasks.push(newTask);
+    trackAddTaskCompleted(newTask, S);
   }
   _closeModal?.(_render);
 }
@@ -380,8 +437,11 @@ function saveTeam() {
   if (S.ui.modal.type === 'edit-team') {
     const tm = S.teams.find(t => t.id === S.ui.modal.data.id);
     Object.assign(tm, { name, icon, color });
+    trackTeamEdited(tm, S);
   } else {
-    S.teams.push({ id: nextId(), name, icon, color });
+    const newTeam = { id: nextId(), name, icon, color };
+    S.teams.push(newTeam);
+    trackAddTeamCompleted(newTeam, S);
   }
   _closeModal?.(_render);
 }
@@ -399,17 +459,31 @@ function savePhase() {
 
   if (S.ui.modal.type === 'edit-phase') {
     const ph = phaseById(S.ui.modal.data.id);
-    if (ph) Object.assign(ph, { name, startWeek: sw, endWeek: ew, color });
+    if (ph) {
+      const origName = ph.name, origDur = ph.endWeek - ph.startWeek + 1;
+      Object.assign(ph, { name, startWeek: sw, endWeek: ew, color });
+      trackPhaseEdited(ph, S, {
+        changedName:     name !== origName,
+        changedDuration: (ew - sw + 1) !== origDur,
+      });
+    }
   } else {
-    S.phases.push({ id: nextId(), name, startWeek: sw, endWeek: ew, color, scope: '', outputs: [] });
+    const newPhase = { id: nextId(), name, startWeek: sw, endWeek: ew, color, scope: '', outputs: [] };
+    S.phases.push(newPhase);
+    trackAddPhaseCompleted(newPhase, S);
   }
   S.ui._phaseGrid = null;
   _closeModal?.(_render);
 }
 
-export function delTask(id)  { pushHistory(); S.tasks  = S.tasks.filter(t => t.id !== id); }
-export function delTeam(id)  { pushHistory(); S.teams  = S.teams.filter(t => t.id !== id); }
+export function delTask(id)  {
+  const tk = S.tasks.find(t => t.id === id);
+  if (tk) trackTaskDeleted(tk, S);
+  pushHistory(); S.tasks = S.tasks.filter(t => t.id !== id);
+}
+export function delTeam(id)  { trackTeamDeleted(); pushHistory(); S.teams  = S.teams.filter(t => t.id !== id); }
 export function delPhase(id) {
+  trackPhaseDeleted();
   pushHistory();
   S.phases = S.phases.filter(p => p.id !== id);
   S.tasks.forEach(t => { if (t.phaseId === id) t.phaseId = null; });
@@ -419,15 +493,18 @@ export function addTag(name) {
   const clean = name.trim().toLowerCase().replace(/\s+/g, '-');
   if (clean && !S.tags.includes(clean)) {
     S.tags.push(clean);
+    trackAddTag(clean);
     _render?.();
     setTimeout(() => { const inp = q('#tf-add-inp'); if (inp) inp.value = ''; }, 0);
   }
 }
 
 export function delTag(name) {
+  const tagTaskCount = S.tasks.filter(tk => tk.tags.includes(name)).length;
   S.tags = S.tags.filter(t => t !== name);
   S.tasks.forEach(t => { t.tags = t.tags.filter(g => g !== name); });
   if (S.ui.filter.tag === name) S.ui.filter.tag = '';
+  trackTagDelete(name, tagTaskCount);
   _render?.();
 }
 

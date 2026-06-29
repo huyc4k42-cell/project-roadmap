@@ -2,6 +2,7 @@
 import { S } from './state.js';
 import { q } from './utils.js';
 import { t } from './i18n.js';
+import { trackViewOnboarding, trackSkipOnboarding, trackCompleteOnboarding } from './tracking/onboarding.js';
 
 const ONB_KEY = 'aroadmap_onboarded';
 
@@ -23,6 +24,7 @@ export function startOnboarding() {
   if (S.phases.length || S.teams.length || S.tasks.length) return;
   onbStep   = 0;
   onbActive = true;
+  trackViewOnboarding(getSteps().length);
   showStep();
 }
 
@@ -92,10 +94,16 @@ function showStep() {
 
   q('#onb-next')?.addEventListener('click', () => {
     onbStep++;
-    if (onbStep >= steps.length) stopOnboarding(); else showStep();
+    if (onbStep >= steps.length) { trackCompleteOnboarding(steps.length); stopOnboarding(); } else showStep();
   });
-  q('#onb-skip')?.addEventListener('click', stopOnboarding);
+  q('#onb-skip')?.addEventListener('click', () => {
+    trackSkipOnboarding(onbStep, steps.length, 'skip_button');
+    stopOnboarding();
+  });
   q('#onb-overlay')?.addEventListener('click', e => {
-    if (!e.target.closest('.onb-tip')) stopOnboarding();
+    if (!e.target.closest('.onb-tip')) {
+      trackSkipOnboarding(onbStep, steps.length, 'backdrop');
+      stopOnboarding();
+    }
   });
 }

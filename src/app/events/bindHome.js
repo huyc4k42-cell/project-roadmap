@@ -11,6 +11,16 @@ import { bindImportModal }   from '../import/csv.js';
 import { wkp, bindWkPickerEvents, setRenderModal, applyNpPreset, bindNpCalendarEvents, npRefresh } from '../weekpicker.js';
 import { wkpMonday, dateStrYMD }                   from '../date.js';
 import { t }                                        from '../i18n.js';
+import { trackSignIn }                              from '../tracking/auth.js';
+import {
+  trackOpenProject, trackDuplicateProject, trackDeleteProject,
+  trackOpenSampleProject, trackChangeMode, trackSignOut, trackImportProject,
+} from '../tracking/home.js';
+import {
+  trackViewCreateProjectPopup, trackInputNameProject, trackInputDescriptionProject,
+  trackSelectColorProject, trackCancelCreateProjectButton, trackClickCreateProjectButton,
+} from '../tracking/create-project.js';
+import { trackCancelCsvImport } from '../tracking/import.js';
 
 /* Injected callbacks */
 let _renderHome     = null;
@@ -153,6 +163,11 @@ function _onProjCtxOutsideClick() {
 /* ── Home keydown handler (module-level so it can be removed/re-added) ── */
 function _onHomeKey(e) {
   if (e.key === 'Escape') {
+    if (S.ui.modal?.type === 'new-project') {
+      trackCancelCreateProjectButton('escape', !!(q('#hm-name')?.value.trim()));
+    } else if (S.ui.modal?.type === 'import') {
+      trackCancelCsvImport('escape', S.ui.modal.step);
+    }
     S.ui.modal = null;
     setHomeCtxId(null);
     setHomeUserMenuOpen(false);
@@ -172,8 +187,8 @@ export function bindHome() {
   _initHomeEmptyCanvas?.();
 
   /* Auth */
-  q('#home-signin-btn')?.addEventListener('click', () => _fbSignIn?.());
-  q('#home-signout-btn')?.addEventListener('click', () => _fbSignOut?.());
+  q('#home-signin-btn')?.addEventListener('click', () => { trackSignIn(); _fbSignIn?.(); });
+  q('#home-signout-btn')?.addEventListener('click', () => { trackSignOut(); _fbSignOut?.(); });
 
   /* Avatar dropdown */
   q('#home-avatar-btn')?.addEventListener('click', e => {
@@ -187,7 +202,7 @@ export function bindHome() {
   }
 
   /* New project */
-  const openNew = () => {
+  const openNew = (source = 'home') => {
     const today    = new Date(); today.setHours(0, 0, 0, 0);
     const startMon = wkpMonday(today);
     const endMon   = new Date(startMon.getTime() + 12 * 7 * 86400000);
@@ -200,23 +215,28 @@ export function bindHome() {
     wkp.phaseMode    = false;
     wkp.cfgStart     = null;
     wkp.npPreset     = null;
+    trackViewCreateProjectPopup(source);
     S.ui.modal = { type: 'new-project', data: {} };
     _renderHome?.();
   };
-  q('#home-new-btn')?.addEventListener('click', openNew);
-  q('#home-new-hdr-btn')?.addEventListener('click', openNew);
+  q('#home-new-btn')?.addEventListener('click', () =>
+    openNew(_loadIndex?.()?.length === 0 ? 'empty_state' : 'grid'));
+  q('#home-new-hdr-btn')?.addEventListener('click', () => openNew('header'));
 
   /* View sample */
-  q('#home-view-sample-btn')?.addEventListener('click', loadSampleProject);
+  q('#home-view-sample-btn')?.addEventListener('click', () => { trackOpenSampleProject(); loadSampleProject(); });
 
   /* Import CSV */
-  q('#home-import-btn')?.addEventListener('click', () => _openImport?.(null));
+  q('#home-import-btn')?.addEventListener('click', () => { trackImportProject(); _openImport?.(null); });
 
   /* Project card click → open */
   qAll('.proj-card[data-proj-id]').forEach(card => {
     card.addEventListener('click', e => {
       if (e.target.closest('[data-proj-menu],[data-proj-open],[data-proj-rename],[data-proj-dup],[data-proj-del],.proj-ctx')) return;
-      location.hash = '#project-' + card.dataset.projId;
+      const projId = card.dataset.projId;
+      const proj   = _loadIndex?.()?.find(p => p.id === projId);
+      trackOpenProject(projId, proj?.name || '');
+      location.hash = '#project-' + projId;
     });
   });
 
@@ -242,7 +262,11 @@ export function bindHome() {
 
   /* Context menu actions */
   qAll('[data-proj-open]').forEach(b => b.addEventListener('click', e => {
-    e.stopPropagation(); location.hash = '#project-' + b.dataset.projOpen;
+    e.stopPropagation();
+    const projId = b.dataset.projOpen;
+    const proj   = _loadIndex?.()?.find(p => p.id === projId);
+    trackOpenProject(projId, proj?.name || '');
+    location.hash = '#project-' + projId;
   }));
   qAll('[data-proj-rename]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
@@ -254,14 +278,20 @@ export function bindHome() {
   }));
   qAll('[data-proj-dup]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
+    const projId = b.dataset.projDup;
+    const proj   = _loadIndex?.()?.find(p => p.id === projId);
     setHomeCtxId(null);
-    _duplicateProject?.(b.dataset.projDup, _renderHome);
+    trackDuplicateProject(projId, proj?.name || '');
+    _duplicateProject?.(projId, _renderHome);
   }));
   qAll('[data-proj-del]').forEach(b => b.addEventListener('click', e => {
     e.stopPropagation();
+    const projId = b.dataset.projDel;
+    const proj   = _loadIndex?.()?.find(p => p.id === projId);
     setHomeCtxId(null);
     if (confirm(t('home.deleteConfirm'))) {
-      _deleteProject?.(b.dataset.projDel, _renderHome);
+      trackDeleteProject(projId, proj?.name || '');
+      _deleteProject?.(projId, _renderHome);
     } else {
       _renderHome?.();
     }
@@ -275,8 +305,10 @@ export function bindHome() {
 
   /* Theme toggle */
   q('#home-theme-btn')?.addEventListener('click', () => {
-    const cur = getCurrentThemePref();
-    setTheme(cur === 'dark' ? 'light' : cur === 'light' ? 'system' : 'dark');
+    const cur  = getCurrentThemePref();
+    const next = cur === 'dark' ? 'light' : cur === 'light' ? 'system' : 'dark';
+    trackChangeMode(cur, next, 'Home');
+    setTheme(next);
     _renderHome?.();
   });
 
@@ -284,14 +316,26 @@ export function bindHome() {
   const bg = q('#modal-bg');
   if (!bg) return;
   bg.addEventListener('click', e => {
-    if (e.target === bg) { S.ui.modal = null; _renderHome?.(); }
+    if (e.target === bg) {
+      if (S.ui.modal?.type === 'new-project') {
+        trackCancelCreateProjectButton('backdrop', !!(q('#hm-name')?.value.trim()));
+      }
+      S.ui.modal = null; _renderHome?.();
+    }
   });
-  q('#m-cancel')?.addEventListener('click', () => { S.ui.modal = null; _renderHome?.(); });
+  q('#m-cancel')?.addEventListener('click', () => {
+    if (S.ui.modal?.type === 'new-project') {
+      trackCancelCreateProjectButton('button', !!(q('#hm-name')?.value.trim()));
+    }
+    S.ui.modal = null; _renderHome?.();
+  });
 
   /* New-project modal: dual calendar + presets */
   if (S.ui.modal?.type === 'new-project') {
     setRenderModal(() => npRefresh());
     bindNpCalendarEvents();
+    q('#hm-name')?.addEventListener('input', () => trackInputNameProject(), { once: true });
+    q('#hm-sub')?.addEventListener('input', () => trackInputDescriptionProject(), { once: true });
 
     qAll('.np-preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -312,6 +356,7 @@ export function bindHome() {
     sw.addEventListener('click', () => {
       qAll('.proj-accent-swatch').forEach(s => s.classList.remove('sel'));
       sw.classList.add('sel');
+      if (S.ui.modal?.type === 'new-project') trackSelectColorProject(sw.dataset.acc);
     });
   });
 
@@ -329,6 +374,15 @@ export function bindHome() {
       const startDate = wkp.startMon ? dateStrYMD(wkp.startMon) : null;
       const endSun    = wkp.endMon ? new Date(wkp.endMon.getTime() + 6 * 86400000) : null;
       const endDate   = endSun ? dateStrYMD(endSun) : null;
+      const durationWeeks = (wkp.startMon && wkp.endMon)
+        ? Math.round((wkp.endMon.getTime() - wkp.startMon.getTime()) / (7 * 86400000))
+        : null;
+      trackClickCreateProjectButton({
+        accentColor:          accent,
+        hasDescription:       !!sub,
+        projectDurationWeeks: durationWeeks,
+        usedDatePreset:       wkp.npPreset !== null && wkp.npPreset !== 'custom',
+      });
       S.ui.modal = null;
       _createProject?.(name, sub, accent, hash => { location.hash = hash; }, startDate, endDate);
     } else if (type === 'rename-project') {

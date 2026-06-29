@@ -4,6 +4,13 @@ import { q, qAll, showToast }           from '../utils.js';
 import { parseDate, startMonday, dateStrYMD } from '../date.js';
 import { PHASE_COLORS, PROJ_ACCENTS }   from '../constants.js';
 import { t }                            from '../i18n.js';
+import {
+  trackViewImportProjectPopup, trackInputNameProjectImport,
+  trackSelectImportTarget, trackSelectImportMode,
+  trackUploadCsvFile, trackDownloadCsvTemplate, trackOpenSheetsTemplate,
+  trackPreviewCsvImport, trackClickBackCsvImport, trackClickImport,
+  trackCsvImportCompleted, trackCsvImportFailed, trackCancelCsvImport,
+} from '../tracking/import.js';
 
 /* Injected from router/persistence (B8) */
 let _loadIndex       = null;
@@ -60,6 +67,7 @@ export function handleCSVFile(file) {
     } else {
       mi.structError = null; mi.filename = file.name; mi.parsedData = result;
       if (!mi.newProjName) mi.newProjName = file.name.replace(/\.csv$/i, '').replace(/[-_]/g, ' ');
+      trackUploadCsvFile(result.rows.length, mi.targetId || 'new');
     }
     _rerenderFn?.();
   };
@@ -129,6 +137,7 @@ export function executeCSVImport() {
   const { targetId, mode, newProjName, validatedRows, checkedRows, cfgStart, cfgEnd } = mi;
   const rowsToImport = validatedRows.filter((_, i) => checkedRows.has(i) && !validatedRows[i]._errors.length);
   if (!rowsToImport.length) return;
+  const importStartMs = Date.now();
 
   let projId, projData;
   if (targetId === 'new') {
@@ -137,7 +146,10 @@ export function executeCSVImport() {
   } else {
     projId = targetId;
     try { const raw = localStorage.getItem(_projKey(projId)); projData = raw ? JSON.parse(raw) : null; } catch(e) {}
-    if (!projData) { showToast(t('modal.import.noProject')); return; }
+    if (!projData) {
+      trackCsvImportFailed({ importTarget: targetId, importMode: mode, importRowCount: rowsToImport.length, errorType: 'no_project' });
+      showToast(t('modal.import.noProject')); return;
+    }
     if (mode === 'replace') { projData.phases = []; projData.teams = []; projData.tasks = []; projData._nextId = 1; }
   }
 
@@ -185,7 +197,10 @@ export function executeCSVImport() {
   projData._nextId = nid;
 
   try { localStorage.setItem(_projKey(projId), JSON.stringify(projData)); }
-  catch(e) { showToast(t('modal.import.saveError')); return; }
+  catch(e) {
+    trackCsvImportFailed({ importTarget: targetId, importMode: mode, importRowCount: rowsToImport.length, errorType: 'save_error' });
+    showToast(t('modal.import.saveError')); return;
+  }
   if (_saveToFirestore) {
     _saveToFirestore(projId, projData, mi.newProjAccent || '#D0A052').catch(console.error);
   }
@@ -197,6 +212,7 @@ export function executeCSVImport() {
   else idx.push({ id: projId, name: projData.cfg.title, subtitle: '', accent: mi.newProjAccent || '#D0A052', updatedAt: Date.now(), stats: statsObj });
   _saveIndex?.(idx);
 
+  trackCsvImportCompleted({ importTarget: targetId, importMode: mode, importRowCount: rowsToImport.length, importDurationMs: Date.now() - importStartMs });
   S.ui.modal = null;
   const cnt = rowsToImport.length;
   showToast(t('modal.import.successToast', { n: cnt, phases: projData.phases.length }));
@@ -205,6 +221,7 @@ export function executeCSVImport() {
 
 /* ── Download Template ── */
 export function downloadCSVTemplate() {
+  trackDownloadCsvTemplate();
   const now  = new Date();
   const fmt  = d => dateStrYMD(d);
   const addW = w => { const d = new Date(now); d.setDate(d.getDate() + w * 7); return fmt(d); };
@@ -232,20 +249,29 @@ export function bindImportModal() {
   const mi = S.ui.modal;
   if (!mi || mi.type !== 'import') return;
 
-  const close = () => { S.ui.modal = null; _rerenderFn?.(); };
-  q('#m-cancel')?.addEventListener('click', close);
-  q('#modal-bg')?.addEventListener('click', e => { if (e.target.id === 'modal-bg') close(); });
+  const close = (cancelMethod = 'button') => {
+    trackCancelCsvImport(cancelMethod, mi.step);
+    S.ui.modal = null; _rerenderFn?.();
+  };
+  q('#m-cancel')?.addEventListener('click', () => close('button'));
+  q('#modal-bg')?.addEventListener('click', e => { if (e.target.id === 'modal-bg') close('backdrop'); });
 
   if (mi.step === 1) {
     q('#imp-target')?.addEventListener('change', e => {
       mi.targetId = e.target.value;
       if (!mi.mode) mi.mode = 'merge';
+      trackSelectImportTarget(e.target.value);
       _rerenderFn?.();
     });
+    q('#imp-newname')?.addEventListener('input', e => {
+      mi.newProjName = e.target.value;
+      trackInputNameProjectImport();
+    }, { once: true });
     q('#imp-newname')?.addEventListener('input', e => { mi.newProjName = e.target.value; });
-    q('#imp-mode-merge')?.addEventListener('click', () => { mi.mode = 'merge'; _rerenderFn?.(); });
-    q('#imp-mode-replace')?.addEventListener('click', () => { mi.mode = 'replace'; _rerenderFn?.(); });
+    q('#imp-mode-merge')?.addEventListener('click', () => { mi.mode = 'merge'; trackSelectImportMode('merge', mi.targetId); _rerenderFn?.(); });
+    q('#imp-mode-replace')?.addEventListener('click', () => { mi.mode = 'replace'; trackSelectImportMode('replace', mi.targetId); _rerenderFn?.(); });
     q('#imp-dl-tpl')?.addEventListener('click', downloadCSVTemplate);
+    q('.imp-tpl-sheets')?.addEventListener('click', () => trackOpenSheetsTemplate());
     q('#imp-file-clear')?.addEventListener('click', () => {
       mi.filename = ''; mi.structError = null; mi.parsedData = null; _rerenderFn?.();
     });
@@ -283,13 +309,14 @@ export function bindImportModal() {
       mi.cfgStart       = cfgStart; mi.cfgEnd = cfgEnd;
       mi.validatedRows  = validateCSVRows(mi.parsedData.rows, cfgStart, cfgEnd);
       mi.checkedRows    = new Set(mi.validatedRows.map((_, i) => i).filter(i => !mi.validatedRows[i]._errors.length));
+      trackPreviewCsvImport({ importRowCount: mi.validatedRows.length, importTarget: mi.targetId, importMode: mi.mode });
       mi.step = 2;
       _rerenderFn?.();
     });
 
   } else {
     /* Step 2 */
-    q('#imp-back')?.addEventListener('click', () => { mi.step = 1; _rerenderFn?.(); });
+    q('#imp-back')?.addEventListener('click', () => { trackClickBackCsvImport(2); mi.step = 1; _rerenderFn?.(); });
 
     qAll('.imp-cb').forEach(cb => {
       cb.addEventListener('change', () => {
@@ -306,12 +333,17 @@ export function bindImportModal() {
       });
       refreshImportPreview();
     });
-    q('#imp-confirm')?.addEventListener('click', executeCSVImport);
+    q('#imp-confirm')?.addEventListener('click', () => {
+      const okCount = [...mi.checkedRows].filter(i => !mi.validatedRows[i]?._errors.length).length;
+      trackClickImport({ importTarget: mi.targetId, importMode: mi.mode, importRowCount: okCount });
+      executeCSVImport();
+    });
   }
 }
 
 /* ── openImportModal ── */
 export function openImportModal(fromProjId) {
+  trackViewImportProjectPopup(fromProjId ? 'project' : 'home');
   S.ui.modal = {
     type: 'import', step: 1,
     fromProject: fromProjId,

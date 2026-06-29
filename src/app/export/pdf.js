@@ -2,6 +2,7 @@
 import { S }        from '../state.js';
 import { logoUrl }  from '../icons.js';
 import { t, getLang } from '../i18n.js';
+import { trackExportPdfCompleted, trackExportPdfFailed } from '../tracking/project.js';
 
 /* html2canvas and jsPDF are loaded via CDN <script> tags at runtime.
    Access via window.html2canvas and window.jspdf. */
@@ -9,6 +10,7 @@ import { t, getLang } from '../i18n.js';
 export async function exportPDF() {
   const el = document.getElementById('tl-inner');
   if (!el) return;
+  const _exportStartMs = Date.now();
 
   /* Loading overlay */
   const ov = document.createElement('div');
@@ -123,8 +125,10 @@ export async function exportPDF() {
     pdf.text(t('pdf.exportedAt', { date }), 30, H * scale + 85);
 
     pdf.save(`roadmap-${S.cfg.title.replace(/\s+/g, '-')}.pdf`);
+    trackExportPdfCompleted(Date.now() - _exportStartMs);
   } catch(err) {
     console.error(err);
+    trackExportPdfFailed(err.name || 'unknown', err.message);
     alert(t('pdf.exportFailed') + err.message);
   } finally {
     document.body.removeChild(ov);

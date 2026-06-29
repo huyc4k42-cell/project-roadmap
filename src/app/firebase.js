@@ -5,8 +5,10 @@ import { getAuth, GoogleAuthProvider, signInWithPopup,
          onAuthStateChanged, browserLocalPersistence,
          setPersistence }                                      from 'firebase/auth';
 import { getFirestore }                                        from 'firebase/firestore';
-import { showToast } from './utils.js';
-import { t }         from './i18n.js';
+import { showToast }            from './utils.js';
+import { t }                   from './i18n.js';
+import { identify, reset }     from './analytics.js';
+import { trackSignInSuccessful, trackSignInFailed } from './tracking/auth.js';
 
 const FIREBASE_CONFIG = {
   apiKey:            'AIzaSyBvJRmMGM94Gl4qxHcxAuHGIQdMjvdRm-4',
@@ -21,9 +23,11 @@ export let db          = null;
 export let auth        = null;
 export let currentUser = null;
 
-let _gProvider = null;
+let _gProvider    = null;
+let _justSignedIn = false; // true khi user vừa click sign-in button (popup hoặc redirect)
 
 export async function fbSignIn() {
+  _justSignedIn = true;
   await setPersistence(auth, browserLocalPersistence);
   try {
     await signInWithPopup(auth, _gProvider);
@@ -35,15 +39,25 @@ export async function fbSignIn() {
     ];
     if (fallback.includes(e.code) || e.message?.includes('missing initial state') || e.message?.includes('storage-partitioned')) {
       try { await signInWithRedirect(auth, _gProvider); }
-      catch(e2) { showToast(t('toast.signInFailed', { msg: e2.message }), 4000); }
+      catch(e2) {
+        _justSignedIn = false;
+        showToast(t('toast.signInFailed', { msg: e2.message }), 4000);
+        trackSignInFailed();
+      }
     } else if (e.code !== 'auth/popup-closed-by-user') {
+      _justSignedIn = false;
       showToast(t('toast.signInFailed', { msg: e.message }), 4000);
+      trackSignInFailed();
+    } else {
+      // user tự đóng popup — không fire sign_in_failed
+      _justSignedIn = false;
     }
   }
 }
 
 export async function fbSignOut(onSignedOut) {
   try { localStorage.removeItem('aroadmap_authed'); } catch(e) {}
+  reset();
   await signOut(auth);
   currentUser = null;
   onSignedOut?.();
@@ -59,10 +73,15 @@ export async function initFirebase(onAuthChange) {
 
     try { await setPersistence(auth, browserLocalPersistence); } catch(e) { /* ignore, fallback to default */ }
 
-    try { await getRedirectResult(auth); }
+    try {
+      const redirectResult = await getRedirectResult(auth);
+      if (redirectResult?.user) _justSignedIn = true;
+    }
     catch(e) {
-      if (e?.code && e.code !== 'auth/cancelled-popup-request')
+      if (e?.code && e.code !== 'auth/cancelled-popup-request') {
         showToast(t('toast.signInFailed', { msg: e.message }), 4000);
+        trackSignInFailed();
+      }
     }
 
     // Đợi Firebase đọc xong IndexedDB session trước khi register listener
@@ -75,6 +94,13 @@ export async function initFirebase(onAuthChange) {
         if (user) localStorage.setItem('aroadmap_authed', '1');
         else      localStorage.removeItem('aroadmap_authed');
       } catch(e) {}
+      if (user) {
+        identify(user);
+        if (_justSignedIn) {
+          _justSignedIn = false;
+          trackSignInSuccessful();
+        }
+      }
       await onAuthChange(user);
     });
   } catch(e) {

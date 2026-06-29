@@ -55,6 +55,9 @@ import { initResizeListeners, setResizeDeps }          from './events/resize.js'
 /* Canvas */
 import { initSignInCanvas, initHomeEmptyCanvas }       from './canvas.js';
 
+/* Analytics */
+import { init as initAnalytics }                       from './analytics.js';
+
 /* Router */
 import { router, setRouterDeps }                       from './router.js';
 
@@ -186,6 +189,9 @@ setRouterDeps({ render, renderHome });
 /* ══════════════════════════════════════════════
    BOOT SEQUENCE
 ══════════════════════════════════════════════ */
+/* Analytics — init before Firebase so SDK is ready */
+initAnalytics();
+
 /* Detect language before first render */
 initLang();
 migrateOldData();

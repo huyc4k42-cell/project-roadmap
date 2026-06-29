@@ -1,6 +1,8 @@
 /* ── EVENTS / RESIZE — global mousemove/mouseup for task & phase resize ── */
 import { S, taskById, phaseById } from '../state.js';
-import { pushPhasesAfter }                      from '../state.js';
+import { pushPhasesAfter } from '../state.js';
+import { trackResizeTaskDuration } from '../tracking/task.js';
+import { trackResizePhaseDuration } from '../tracking/phase.js';
 
 /* WW (week-width px) is injected by render/index.js after each render */
 let _WW = 64;
@@ -65,6 +67,25 @@ function onMouseMove(e) {
 }
 
 function onMouseUp() {
-  if (S.ui.resizeData)  { S.ui.resizeData  = null; _render?.(); }
-  if (S.ui.phaseResize) { S.ui.phaseResize = null; _render?.(); }
+  if (S.ui.resizeData) {
+    const { taskId, origDur } = S.ui.resizeData;
+    const tk = taskById(taskId);
+    if (tk) {
+      const delta = tk.dur - origDur;
+      trackResizeTaskDuration(tk, S, delta);
+    }
+    S.ui.resizeData = null;
+    _render?.();
+  }
+  if (S.ui.phaseResize) {
+    const { phaseId, origStart, origEnd } = S.ui.phaseResize;
+    const ph = phaseById(phaseId);
+    if (ph) {
+      const durationFrom = origEnd - origStart;
+      const durationTo   = ph.endWeek - ph.startWeek;
+      trackResizePhaseDuration(durationFrom, durationTo, ph, S);
+    }
+    S.ui.phaseResize = null;
+    _render?.();
+  }
 }

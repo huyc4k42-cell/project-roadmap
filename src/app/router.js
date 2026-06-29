@@ -2,9 +2,12 @@
 import { S, resetHistory }                                 from './state.js';
 import { SHARE_PREFIX }                                    from './constants.js';
 import { currentUser }                                     from './firebase.js';
-import { loadProject, unsubscribeProject, setCurrentProjId } from './persistence.js';
+import { loadProject, unsubscribeProject, setCurrentProjId, loadIndex } from './persistence.js';
 import { loadFromHash }                                    from './share.js';
 import { setHomeCtxId, setHomeUserMenuOpen }               from './render/home.js';
+import { trackViewHome, trackViewEmptyState }              from './tracking/home.js';
+import { trackViewRoadmap }                                from './tracking/project.js';
+import { trackShareLinkViewed }                            from './tracking/share.js';
 
 /* Injected render callbacks */
 let _render     = null;
@@ -40,7 +43,7 @@ export async function router() {
     resetHistory();
     resetUiTransient();
     S.ui.readonly = false; // will be set true by loadFromHash if valid
-    if (loadFromHash()) { _render?.(); }
+    if (loadFromHash()) { trackShareLinkViewed(S, null); _render?.(); }
     return;
   }
 
@@ -53,6 +56,7 @@ export async function router() {
     S.ui.readonly = false;
     await loadProject(id, _render);
     _render?.();
+    trackViewRoadmap(S, id);
     return;
   }
 
@@ -63,6 +67,10 @@ export async function router() {
   resetUiTransient();
   S.ui.readonly = false;
   _renderHome?.();
+  if (currentUser) {
+    trackViewHome();
+    if (loadIndex().length === 0) trackViewEmptyState();
+  }
 }
 
 /* Register hashchange listener */
