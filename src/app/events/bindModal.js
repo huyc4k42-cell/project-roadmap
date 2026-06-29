@@ -76,8 +76,6 @@ export function bindModal() {
   q('#m-cancel')?.addEventListener('click', () => { _fireCancel('button'); _closeModal?.(_render); });
 
   if (type === 'cfg')       trackViewSettingsPopup();
-  if (type === 'edit-task')  trackOpenTaskDetail(S.ui.modal.data, S, 'modal');
-  if (type === 'edit-phase') trackOpenPhaseDetail('modal', S.ui.modal.data, S);
   if (type === 'edit-team')  trackViewTeamPopup(S.ui.modal.data, S);
   if (type === 'share')      trackViewSharePopup(S, currentProjId);
 

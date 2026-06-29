@@ -3,6 +3,7 @@ import { S, pushHistory, taskById } from '../../state.js';
 import { qAll } from '../../utils.js';
 import { t } from '../../i18n.js';
 import { trackDragTagToTask } from '../../tracking/sidebar.js';
+import { trackOpenTaskDetail } from '../../tracking/task.js';
 
 export function bindTaskCards(deps) {
   qAll('.tc[data-task-id]').forEach(el => {
@@ -11,7 +12,7 @@ export function bindTaskCards(deps) {
     el.addEventListener('click', e => {
       if (e.target.closest('[data-del-tag-from-card]')) return;
       const tk = taskById(taskId);
-      if (tk) deps.openModal?.('edit-task', tk);
+      if (tk) { trackOpenTaskDetail(tk, S, 'sidebar_card'); deps.openModal?.('edit-task', tk); }
     });
 
     el.addEventListener('dragstart', e => {

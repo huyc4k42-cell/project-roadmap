@@ -2,10 +2,9 @@
 import { S, pushHistory, taskById, phaseById, reorderTeam, swapPhases } from '../state.js';
 import { q } from '../utils.js';
 import { trackCancelSettings } from '../tracking/project.js';
-import { trackCancelAddPhase } from '../tracking/phase.js';
-import { trackCancelAddTask }  from '../tracking/task.js';
-import { trackCancelAddTeam }  from '../tracking/team.js';
-import { trackUndoAction }     from '../tracking/task.js';
+import { trackCancelAddPhase, trackOpenPhaseDetail } from '../tracking/phase.js';
+import { trackCancelAddTask, trackOpenTaskDetail, trackUndoAction } from '../tracking/task.js';
+import { trackCancelAddTeam } from '../tracking/team.js';
 import { setResizeWW } from './resize.js';
 import { delTask, delTeam, delPhase } from './bindModal.js';
 
@@ -43,13 +42,13 @@ export function handleAction(action) {
   deps.closeCtx?.();
   const [cmd, id] = action.split(':');
   const nid = +id;
-  if (cmd === 'edit-task')    deps.openModal?.('edit-task',  taskById(nid));
+  if (cmd === 'edit-task')  { const tk = taskById(nid); if (tk) { trackOpenTaskDetail(tk, S, 'context_menu'); deps.openModal?.('edit-task', tk); } }
   if (cmd === 'del-task')   { delTask(nid);  deps.render?.(); }
   if (cmd === 'toggle-done') { const tk = taskById(nid); if (tk) { pushHistory(); tk.done = !tk.done; deps.render?.(); } }
   if (cmd === 'unschedule')  { const tk = taskById(nid); if (tk) { pushHistory(); tk.startWeek = null; deps.render?.(); } }
   if (cmd === 'edit-team')   deps.openModal?.('edit-team',  S.teams.find(tm => tm.id === nid));
   if (cmd === 'del-team')  { delTeam(nid);  deps.render?.(); }
-  if (cmd === 'edit-phase')  deps.openModal?.('edit-phase', phaseById(nid));
+  if (cmd === 'edit-phase') { const ph = phaseById(nid); if (ph) { trackOpenPhaseDetail('context_menu', ph, S); deps.openModal?.('edit-phase', ph); } }
   if (cmd === 'del-phase') { delPhase(nid); deps.render?.(); }
 }
 
